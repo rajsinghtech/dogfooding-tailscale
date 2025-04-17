@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster1-aws-eks-vpccni
+    path: clusters/cluster1-aws-eks-vpccni/argocd
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
     syncOptions:
