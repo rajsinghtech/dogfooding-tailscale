@@ -9,9 +9,6 @@ helmCharts:
     releaseName: tailscale-operator
     includeCRDs: true
     valuesInLine:
-      oauth:
-        clientId: "$TAILSCALE_OAUTH_CLIENT_ID"
-        clientSecret: "$TAILSCALE_OAUTH_CLIENT_SECRET"
       apiServerProxyConfig:
         mode: "true"
       operatorConfig:
