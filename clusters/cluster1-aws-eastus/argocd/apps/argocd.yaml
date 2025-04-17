@@ -2,6 +2,27 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
+  name: argo-cd-apps
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: clusters/cluster1-aws-eastus/argocd/apps
+    repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
   name: argo-cd
 spec:
   destination:
@@ -14,7 +35,7 @@ spec:
     targetRevision: HEAD
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: false
     syncOptions:
       - CreateNamespace=true
@@ -24,4 +45,3 @@ spec:
         duration: 5s
         maxDuration: 3m0s
         factor: 2
----
