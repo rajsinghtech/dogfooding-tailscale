@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/templates/tailscale
+    path: clusters/cluster1-aws-eastus/tailscale
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
   syncPolicy:

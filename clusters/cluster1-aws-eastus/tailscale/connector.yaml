@@ -1,7 +1,7 @@
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
-  name: example-connector
+  name: cluster1-aws-eastus
 spec:
   proxyClass: prod 
   tags:
