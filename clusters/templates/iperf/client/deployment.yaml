@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iperf-client
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iperf-client
+  template:
+    metadata:
+      labels:
+        app: iperf-client
+    spec:
+      containers:
+      - name: iperf-client
+        image: networkstatic/iperf3
+        # The container will stay alive and not run iperf immediately
+        # so we can exec into it and run tests manually
+        command: 
+        - "sleep"
+        - "infinity" 

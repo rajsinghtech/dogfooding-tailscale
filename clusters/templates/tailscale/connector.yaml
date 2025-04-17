@@ -1,0 +1,14 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: example-connector
+spec:
+  proxyClass: prod 
+  tags:
+    - tag:k8s
+  subnetRouter:
+    advertiseRoutes:
+      # - 10.0.0.0/16
+      # - 10.1.0.0/16
+      - fd7a:115c:a1e0:b1a:0:2:a00:0/112
+  exitNode: true

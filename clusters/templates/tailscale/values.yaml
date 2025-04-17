@@ -1,0 +1,6 @@
+apiServerProxyConfig:
+  mode: "true"
+operatorConfig:
+  defaultTags:
+    - "tag:k8s-operator"
+    # - "tag:k8s-prod"

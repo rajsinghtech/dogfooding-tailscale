@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iperf-server-egress
+  namespace: default
+  annotations:
+    tailscale.com/tailnet-fqdn: "default-iperf-server.tail8eff9.ts.net"
+spec:
+  type: ExternalName
+  externalName: unused  
+  ports:
+  - port: 5201
+    targetPort: 5201
+    protocol: TCP
+    name: iperf 
