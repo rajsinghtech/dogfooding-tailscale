@@ -85,8 +85,11 @@ metadata:
   namespace: default
   labels:
     app: goldpinger
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # NLB instead of default ELB
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"  # Internal scheme
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 8080
       name: http
