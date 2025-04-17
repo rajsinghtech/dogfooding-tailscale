@@ -15,7 +15,7 @@ spec:
   syncPolicy:
     automated:
       prune: true
-      selfHeal: false
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
 ---
@@ -35,8 +35,8 @@ spec:
     targetRevision: HEAD
   syncPolicy:
     automated:
-      prune: false
-      selfHeal: false
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
     retry:
