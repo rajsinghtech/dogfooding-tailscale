@@ -125,19 +125,6 @@ grafana:
         gnetId: 21356
         revision: 3
         datasource: prometheus
-  route:
-    main:
-      enabled: true
-      apiVersion: gateway.networking.k8s.io/v1
-      kind: HTTPRoute
-      hostnames:
-        - grafana.lukehouge.com
-        - grafana.rajsingh.info
-      parentRefs:
-        - group: gateway.networking.k8s.io
-          kind: Gateway
-          name: private
-          namespace: envoy-gateway-system
 prometheusOperator:
   admissionWebhooks:
     enabled: false
@@ -159,19 +146,6 @@ prometheus:
           resources:
             requests:
               storage: 100Gi
-  route:
-    main:
-      enabled: true
-      apiVersion: gateway.networking.k8s.io/v1
-      kind: HTTPRoute
-      hostnames:
-        - prometheus.lukehouge.com
-        - prometheus.rajsingh.info
-      parentRefs:
-        - group: gateway.networking.k8s.io
-          kind: Gateway
-          name: private
-          namespace: envoy-gateway-system
   server:
     additionalScrapeConfigs:
       - job_name: opencost
