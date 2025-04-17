@@ -9,7 +9,7 @@ grafana:
   persistence:
     enabled: false
   admin:
-    existingSecret: "grafana-credentials"
+    # existingSecret: "grafana-credentials"
     userKey: admin-user
     passwordKey: admin-password
   serviceMonitor:
