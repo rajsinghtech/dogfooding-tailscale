@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: goldpinger
+  name: default
   namespace: argocd
 spec:
   destination:
-    namespace: goldpinger
+    namespace: default
 
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster1-aws-eastus/goldpinger
+    path: clusters/cluster1-aws-eastus/default
 
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
