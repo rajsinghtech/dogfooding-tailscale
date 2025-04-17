@@ -1,4 +1,3 @@
----
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -9,12 +8,11 @@ helmCharts:
     namespace: tailscale
     releaseName: tailscale-operator
     includeCRDs: true
-    valuesFile: values.yaml
-
-resources:
- - secret.yaml
- - namespace.yaml
- - proxy-class.yaml
- - connector.yaml
- - egress.yaml
- - dnsconfig.yaml
+    valuesInLine:
+      oauth:
+        clientId: "$TAILSCALE_OAUTH_CLIENT_ID"
+        clientSecret: "$TAILSCALE_OAUTH_CLIENT_SECRET"
+      apiServerProxyConfig:
+        mode: "true"
+      operatorConfig:
+        hostname: "cluster1-aws-eastus-operator"
