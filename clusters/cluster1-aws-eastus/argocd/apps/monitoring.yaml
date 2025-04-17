@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     path: clusters/cluster1-aws-eastus/monitoring
-    repoURL: https://github.com/rajsinghtech/dogfooding-monitoring
+    repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
   syncPolicy:
     automated:
