@@ -89,7 +89,6 @@ spec:
   type: ClusterIP
   ports:
     - port: 8080
-      nodePort: 30080
       name: http
   selector:
     app: goldpinger
