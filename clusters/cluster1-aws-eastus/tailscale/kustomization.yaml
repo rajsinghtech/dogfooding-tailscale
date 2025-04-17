@@ -17,6 +17,6 @@ helmCharts:
 
 resources:
 # - ./../../templates/tailscale-operator 
-# - connector.yaml
+- connector.yaml
 - proxy-class.yaml
 - debug.yaml
