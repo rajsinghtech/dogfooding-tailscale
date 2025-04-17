@@ -19,3 +19,4 @@ resources:
 # - ./../../templates/tailscale-operator 
 - connector.yaml
 - proxy-class.yaml
+- debug.yaml
