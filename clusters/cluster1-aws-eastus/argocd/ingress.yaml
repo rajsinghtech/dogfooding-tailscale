@@ -8,8 +8,8 @@ spec:
     service:
       name: argo-cd-argocd-server
       port:
-        number: 8080
+        number: 80
   ingressClassName: tailscale
   tls:
     - hosts:
-        - argocd
+        - argocd-cluster1-aws-eastus

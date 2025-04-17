@@ -11,4 +11,4 @@ spec:
   ingressClassName: tailscale
   tls:
     - hosts:
-        - goldpinger
+        - goldpinger-cluster1-aws-eastus
