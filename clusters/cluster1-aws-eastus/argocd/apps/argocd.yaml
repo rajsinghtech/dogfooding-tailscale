@@ -1,8 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  namespace: argocd
   name: argo-cd-apps
+  namespace: argocd
 spec:
   destination:
     namespace: argocd
@@ -22,8 +22,8 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  namespace: argocd
   name: argo-cd
+  namespace: argocd
 spec:
   destination:
     namespace: argocd
