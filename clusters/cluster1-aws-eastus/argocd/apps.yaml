@@ -9,14 +9,12 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster1-aws-eks-vpccni/argocd
+    path: clusters/cluster1-aws-eastus/argocd
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
-    retry:
-      limit: 3
-      backoff:
-        duration: 5s
-        maxDuration: 3m0s
-        factor: 2

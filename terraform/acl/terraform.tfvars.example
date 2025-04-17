@@ -1,0 +1,7 @@
+################################################################################
+# Tailscale Reqd. Vars                                                         #
+################################################################################
+oauth_client_id = "<my-oauth-client-id>"
+oauth_client_secret = "tskey-client-<my-oauth-client-secret>"
+acl_file = "acl-files/myacl.hujson"
+acl_format = "hujson"
