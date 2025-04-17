@@ -6,4 +6,3 @@ resources:
 - goldpinger.yaml
 - ingress.yaml
 - debug.yaml
-- argocd-ingress.yaml
