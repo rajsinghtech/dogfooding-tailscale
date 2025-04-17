@@ -125,9 +125,9 @@ grafana:
         gnetId: 21356
         revision: 3
         datasource: prometheus
-prometheusOperator:
-  admissionWebhooks:
-    enabled: false
+# prometheusOperator:
+#   admissionWebhooks:
+#     enabled: false
 prometheus:
   prometheusSpec:
     serviceMonitorSelector: {}
