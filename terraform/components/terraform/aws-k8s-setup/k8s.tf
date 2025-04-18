@@ -53,7 +53,23 @@ resource "helm_release" "tailscale_operator" {
         hostname = "tailscale-operator-${local.environment}-${local.stage}"
       }
     })
-  ] 
+  ]
+}
+
+######################################################################
+# Install ArgoCD via Helm                                            #
+######################################################################
+
+resource "helm_release" "argocd" {
+  name             = "argo-cd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "7.8.26"
+  namespace        = "argocd"
+  create_namespace = true
+  atomic           = true
+  cleanup_on_fail  = true
+  values           = [file("${path.module}/../files/argocd-values.yaml")]
 }
 
 ######################################################################
