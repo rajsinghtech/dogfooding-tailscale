@@ -5,19 +5,18 @@ vars:
   stage: test
 
 import:
-  - catalog/ts-aws-infra
-  - catalog/ts-k8s-docker
+  - catalog/aws-eks
 
 components:
   terraform:
-    ts-aws-infra:
+    aws-eks:
       vars:
-        name: "my-demo-1"
-        hostname: "my-ubuntu-sr-1"
+        name: "my-aws-ue1-test-1"
+        sr_instance_hostname: "my-aws-ue1-test-sr"
         vpc_cidr: "10.0.0.0/16"
         cluster_service_ipv4_cidr: "10.40.0.0/16"
-    ts-k8s-docker:
+    aws-k8s-setup:
       settings:
         depends_on:
           1:
-            component: "ts-aws-infra"
+            component: "aws-eks"
