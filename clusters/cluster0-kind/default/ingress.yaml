@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: goldpinger
+spec:
+  defaultBackend:
+    service:
+      name: goldpinger
+      port:
+        number: 8080
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - goldpinger-cluster0
