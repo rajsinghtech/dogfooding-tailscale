@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-system
+  namespace: argocd
+spec:
+  destination:
+    namespace: kube-system
+
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: clusters/cluster0-kind/kube-system
+
+    repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
