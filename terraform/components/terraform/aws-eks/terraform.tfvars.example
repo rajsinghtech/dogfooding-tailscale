@@ -13,7 +13,7 @@ oauth_client_secret = "blahhalb123"
 ################################################################################
 # Client EC2 Instance Reqd. Vars                                               #
 ################################################################################
-hostname = "my-ubuntu-client" 
+sr_instance_hostname = "my-ubuntu-client" 
 
 ################################################################################
 # Common User Vars reqd. for all Cluster Instances and client EC2 Instance     #

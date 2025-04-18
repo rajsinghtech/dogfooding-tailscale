@@ -1,23 +1,12 @@
-# Initialize the tailscale provider 
-provider "tailscale" {
-  oauth_client_id     = local.oauth_client_id
-  oauth_client_secret = local.oauth_client_secret
-}
-
 # Use the module to add the EC2 instance into our tailnet
 module "ubuntu-tailscale-client" {
-  source           = "./modules/cloudinit-ts"
-  hostname         = var.hostname
-  accept_routes    = true
+  count         = local.enable_sr ? 1 : 0
+  source        = "../modules/cloudinit-ts"
+  hostname      = local.sr_instance_hostname
+  accept_routes = true
+  enable_ssh    = true
   advertise_routes = local.advertise_routes
   primary_tag      = "subnet-router"
-  additional_parts = [
-    {
-      filename     = "install_docker.sh"
-      content_type = "text/x-shellscript"
-      content      = file("${path.module}/files/install_docker.sh")
-    }
-  ]
 }
 
 # Pick the latest Ubuntu 22.04 AMI in the region for our EC2 instance
@@ -39,6 +28,7 @@ data "aws_ami" "ubuntu" {
 
 # Allow SSH access via public IP because we're not exploring Tailscale SSH yet (TBD in the future)
 resource "aws_security_group" "main" {
+  count       = local.enable_sr ? 1 : 0
   vpc_id      = module.vpc.vpc_id
   description = "Required access traffic"
     
@@ -69,15 +59,16 @@ resource "aws_security_group" "main" {
 
 # Provision the EC2 instance,pass in templatized base64-encoded cloudinit data from the module that sets up Tailscale client and Docker
 resource "aws_instance" "client" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
-  subnet_id              = module.vpc.public_subnets[0]
-  vpc_security_group_ids = [aws_security_group.main.id]
-  source_dest_check      = false
-  key_name               = local.key_name 
-  ebs_optimized          = true
+  count                   = local.enable_sr ? 1 : 0
+  ami                     = data.aws_ami.ubuntu.id
+  instance_type           = local.sr_ec2_instance_type
+  subnet_id               = module.vpc.public_subnets[0]
+  vpc_security_group_ids  = [aws_security_group.main[count.index].id]
+  source_dest_check       = false
+  key_name                = local.key_name
+  ebs_optimized           = true
 
-  user_data_base64       = module.ubuntu-tailscale-client.rendered
+  user_data_base64        = module.ubuntu-tailscale-client[count.index].rendered
 
   associate_public_ip_address = true
 
@@ -89,25 +80,7 @@ resource "aws_instance" "client" {
   tags = merge(
     local.tags,
     {
-      "Name" = var.hostname
+      "Name" = local.sr_instance_hostname
     }
   )
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /home/ubuntu/nginx_docker"  # Ensure the directory is created
-    ]
-  }
-  
-  provisioner "file" {
-    source      = "${path.module}/files/nginx.conf"  # Local file path
-    destination = "/home/ubuntu/nginx_docker/nginx.conf"  # Target path
-  }
-
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("~/.ssh/${local.key_name}")
-    host        = self.public_ip
-  }
 }

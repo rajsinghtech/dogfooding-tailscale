@@ -1,6 +1,7 @@
 .terraform*
 terraform.tfstate*
 terraform.tfvars
+*.tfvars.json
 tf/**/alpo-*.yaml
 tf/**/kubeconfig_*
 tfplan
@@ -33,3 +34,10 @@ override.tf.json
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
 *.planfile
+# Include Atmos-specific YAMLs but not examples until we figure something else out
+terraform/stacks/deploy/*.yaml
+terraform/stacks/catalog/*.yaml
+terraform/stacks/workflows/*.yaml
+!terraform/stacks/deploy/*.yaml.example
+!terraform/stacks/catalog/*.yaml.example
+!terraform/stacks/workflows/*.yaml.example

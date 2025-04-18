@@ -1,0 +1,22 @@
+vars:
+  region: us-east-1
+  tenant: my
+  environment: aws-ue1  
+  stage: test
+
+import:
+  - catalog/aws-eks
+
+components:
+  terraform:
+    aws-eks:
+      vars:
+        name: "my-aws-ue1-test-1"
+        sr_instance_hostname: "my-aws-ue1-test-sr"
+        vpc_cidr: "10.0.0.0/16"
+        cluster_service_ipv4_cidr: "10.40.0.0/16"
+    aws-k8s-setup:
+      settings:
+        depends_on:
+          1:
+            component: "aws-eks"

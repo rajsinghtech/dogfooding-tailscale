@@ -1,0 +1,20 @@
+components:
+  terraform:
+    aws-eks:
+      vars:
+        ssh_keyname: "id_ed25519_me"
+        oauth_client_id: "redacted"
+        oauth_client_secret: "redacted"
+        cluster_version: "1.32"
+        cluster_endpoint_public_access: false
+        cluster_endpoint_private_access: true
+        cluster_worker_instance_type: "t3.large"
+        min_cluster_worker_count: "1"
+        desired_cluster_worker_count: "2"
+        max_cluster_worker_count: "3"
+        cluster_worker_boot_disk_size: "100"
+        sr_ec2_instance_type: "t3.medium"
+        tags:
+          "Owner": "Me"
+          "Team" : "Myself"
+          "ManagedBy": "Atmos"

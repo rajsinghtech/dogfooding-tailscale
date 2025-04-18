@@ -1,0 +1,81 @@
+name: Workflows for Tailscale-EKS
+description: Atmos workflows for managing Tailscale-EKS
+
+workflows:
+  validate-phase1:
+    description: |
+      Run 'terraform validate' on aws-eks component in all stacks
+    steps:
+      - command: terraform validate aws-eks -s tenant-aws-environment1-stage
+      - command: terraform validate aws-eks -s tenant-aws-environment2-stage
+
+  plan-phase1:
+    description: |
+      Run 'terraform plan' on aws-eks component in all stacks
+    steps:
+      - command: terraform plan aws-eks -s tenant-aws-environment1-stage
+      - command: terraform plan aws-eks -s tenant-aws-environment2-stage
+
+  apply-phase1:
+    description: |
+      Run 'terraform apply -auto-approve' on aws-eks component in all stacks
+    steps:
+      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment2-stage
+
+  validate-phase2:
+    description: |
+      Run 'terraform validate' on aws-k8s-setup component in all stacks
+    steps:
+      - command: terraform validate aws-k8s-setup -s tenant-aws-environment1-stage
+      - command: terraform validate aws-k8s-setup -s tenant-aws-environment2-stage
+
+  plan-phase2:
+    description: |
+      Run 'terraform plan' on aws-k8s-setup component in all stacks
+    steps:
+      - command: terraform plan aws-k8s-setup -s tenant-aws-environment1-stage
+      - command: terraform plan aws-k8s-setup -s tenant-aws-environment2-stage
+
+  apply-phase2:
+    description: |
+      Run 'terraform apply -auto-approve' on aws-k8s-setup component in all stacks
+    steps:
+      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+
+  plan-all:
+    description: |
+      Run 'terraform plan' on all components in all stacks
+    steps:
+      - command: terraform plan aws-eks -s tenant-aws-environment1-stage
+      - command: terraform plan aws-k8s-setup -s tenant-aws-environment1-stage 
+      - command: terraform plan aws-eks -s tenant-aws-environment2-stage
+      - command: terraform plan aws-k8s-setup -s tenant-aws-environment2-stage
+
+  apply-all:
+    description: |
+      Run 'terraform apply -auto-approve' on all components in all stacks
+    steps:
+      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage 
+      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+
+  destroy-all:
+    description: |
+      Run 'terraform destroy' on all components in all stacks
+    steps:
+      - command: terraform destroy aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform destroy aws-eks -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform destroy aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform destroy aws-eks -auto-approve -s tenant-aws-environment2-stage
+
+  clean-all:
+    description: |
+      Run 'terraform clean' on all components in all stacks
+    steps:
+      - command: terraform clean aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform clean aws-eks -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform clean aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform clean aws-eks -auto-approve -s tenant-aws-environment2-stage

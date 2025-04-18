@@ -7,6 +7,12 @@ provider "aws" {
   region = local.region
 }
 
+# Initialize the tailscale provider 
+provider "tailscale" {
+  oauth_client_id     = local.oauth_client_id
+  oauth_client_secret = local.oauth_client_secret
+}
+
 # Get list of available AZs in our region
 data "aws_availability_zones" "available" {}
 
@@ -25,9 +31,9 @@ module "eks" {
 
   cluster_name                    = local.name
   cluster_version                 = local.cluster_version
-  cluster_endpoint_public_access  = false
-  cluster_endpoint_private_access = true
-
+  cluster_endpoint_public_access  = local.cluster_endpoint_public_access
+  cluster_endpoint_private_access = local.cluster_endpoint_private_access
+  
   enable_cluster_creator_admin_permissions = true
   
   cluster_addons = {
@@ -45,15 +51,15 @@ module "eks" {
   cluster_service_ipv4_cidr = local.cluster_service_ipv4_cidr
 
   eks_managed_node_groups = {
-    worker-node = {
-      instance_types = ["t3.2xlarge"]
-      node_group_name_prefix = "${local.name}-worker-"
+    "${local.name}-worker-node" = {
+      instance_types = [local.cluster_worker_instance_type]
+      node_group_name_prefix = "${local.name}-worker-node"
 
-      min_size     = 0
-      max_size     = 3
-      desired_size = local.desired_size
+      min_size     = local.min_cluster_worker_count
+      max_size     = local.max_cluster_worker_count
+      desired_size = local.desired_cluster_worker_count
       
-      disk_size = 100
+      disk_size = local.cluster_worker_boot_disk_size
 
       key_name = local.key_name
 
@@ -106,11 +112,12 @@ module "eks" {
 #########################################################################################
 
 resource "aws_security_group_rule" "eks_control_plane_ingress" {
+  count                    = local.enable_sr ? 1 : 0
   type                     = "ingress"
   from_port                = 443
   to_port                  = 443
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.main.id
+  source_security_group_id = aws_security_group.main[0].id
   security_group_id        = module.eks.cluster_primary_security_group_id
   description              = "Allow traffic from EC2 SR instance SG to EKS control plane on port 443"
 }
@@ -120,7 +127,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 #########################################################################################
 
 resource "tailscale_dns_split_nameservers" "aws_route53_resolver" {
-  domain      = "eks.amazonaws.com"
+  domain      = "${local.region}.eks.amazonaws.com"
   nameservers = [local.vpc_plus_2_ip]
 }
 
