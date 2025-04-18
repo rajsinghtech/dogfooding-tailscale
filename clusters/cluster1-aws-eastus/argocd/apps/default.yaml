@@ -1,15 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring
+  name: default
   namespace: argocd
 spec:
   destination:
-    namespace: monitoring
+    namespace: default
+
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster1-aws-eastus/monitoring
+    path: clusters/cluster1-aws-eastus/default
+
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
   syncPolicy:
@@ -18,4 +20,3 @@ spec:
       selfHeal: false
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true

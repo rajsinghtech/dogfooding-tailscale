@@ -15,7 +15,7 @@ spec:
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      selfHeal: false
     syncOptions:
       - CreateNamespace=true
 ---
@@ -30,13 +30,13 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/templates/argo-cd
+    path: clusters/cluster1-aws-eastus/argocd
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      selfHeal: false
     syncOptions:
       - CreateNamespace=true
     retry:
