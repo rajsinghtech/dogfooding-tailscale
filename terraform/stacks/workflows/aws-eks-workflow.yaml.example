@@ -66,10 +66,10 @@ workflows:
     description: |
       Run 'terraform destroy' on all components in all stacks
     steps:
-      - command: terraform destroy aws-k8s-setup -s tenant-aws-environment1-stage
-      - command: terraform destroy aws-eks -s tenant-aws-environment1-stage
-      - command: terraform destroy aws-k8s-setup -s tenant-aws-environment2-stage
-      - command: terraform destroy aws-eks -s tenant-aws-environment2-stage
+      - command: terraform destroy aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform destroy aws-eks -auto-approve -s tenant-aws-environment1-stage
+      - command: terraform destroy aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform destroy aws-eks -auto-approve -s tenant-aws-environment2-stage
 
   clean-all:
     description: |
