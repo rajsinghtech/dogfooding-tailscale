@@ -81,12 +81,20 @@ module "eks" {
       source_cluster_security_group = true
     }
     ingress_self_all = {
-      description = "Node to node all ports/protocols"
-      protocol    = "-1"
+      description = "Allow all traffic within the worker-node security group"
       from_port   = 0
       to_port     = 0
       type        = "ingress"
+      protocol    = "-1"
       self        = true
+    }
+    ingress_vpc_all = {
+      description = "Allow all traffic within VPC"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      protocol    = "-1"
+      cidr_blocks = [local.vpc_cidr]
     }
   }
 
