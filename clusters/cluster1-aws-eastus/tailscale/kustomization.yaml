@@ -13,7 +13,7 @@ helmCharts:
       apiServerProxyConfig:
         mode: "true"
       operatorConfig:
-        hostname: "cluster1-aws-eastus-operator"
+        hostname: "cluster1-operator"
 
 resources:
 # - ./../../templates/tailscale-operator 

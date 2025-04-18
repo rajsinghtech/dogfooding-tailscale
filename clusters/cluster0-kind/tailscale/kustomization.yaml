@@ -13,7 +13,7 @@ helmCharts:
       apiServerProxyConfig:
         mode: "true"
       operatorConfig:
-        hostname: "cluster0-kind-operator"
+        hostname: "cluster0-operator"
 
 resources:
 - connector.yaml
