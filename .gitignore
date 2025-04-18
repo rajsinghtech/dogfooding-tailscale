@@ -1,6 +1,7 @@
 .terraform*
 terraform.tfstate*
 terraform.tfvars
+*.tfvars.json
 tf/**/alpo-*.yaml
 tf/**/kubeconfig_*
 tfplan
