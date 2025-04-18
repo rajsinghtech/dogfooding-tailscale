@@ -1,3 +1,18 @@
+variable "tenant" {
+  description = "Name of the user/tenant for the Atmos Stack"
+  type        = string
+}
+
+variable "environment" {
+  description = "Short-form name of the region for the Atmos Stack"
+  type        = string
+}
+
+variable "stage" {
+  description = "Name of stage"
+  type        = string
+}
+
 variable "name" {
   description = "Name of cluster"
   type        = string
@@ -22,31 +37,62 @@ variable "tags" {
 variable "vpc_cidr" {
   description = "AWS VPC CIDR"
   type        = string
-  default     = "10.0.0.0/16"
 }
 
 variable "cluster_service_ipv4_cidr" {
   description = "Kubernetes Service CIDR"
   type        = string
-  default     = "10.40.0.0/16"
-}
-
-variable "cluster_pod_ipv4_cidr" {
-  description = "The CIDR block to use for pod IP addresses."
-  type        = string
-  default     = "10.100.0.0/18"
 }
 
 variable "cluster_version" {
   description = "Kubernetes version for this cluster"
   type        = string
-  default     = "1.31"
 }
 
-variable "desired_size" {
-  description = "Number of cluster nodes"
+variable "sr_ec2_instance_type" {
+  description = "EC2 SR instance type"
   type        = string
-  default     = "2"
+}
+
+variable "cluster_worker_instance_type" {
+  description = "EKS cluster worker nodes instance type"
+  type        = string
+}
+
+variable "min_cluster_worker_count" {
+  description = "Minimum number of cluster worker nodes"
+  type        = string
+}
+
+variable "max_cluster_worker_count" {
+  description = "Maximum number of cluster worker nodes"
+  type        = string
+}
+
+variable "desired_cluster_worker_count" {
+  description = "Desired number of cluster worker nodes"
+  type        = string
+}
+
+variable "cluster_worker_boot_disk_size" {
+  description = "EKS cluster worker nodes boot disk size"
+  type        = string
+}
+
+variable "cluster_endpoint_public_access" {
+  description = <<-EOF
+  EKS cluster APIserver public endpoint access. 
+  Don't set cluster_endpoint_private_access to true if you set this to true
+  EOF
+  type        = bool
+}
+
+variable "cluster_endpoint_private_access" {
+  description = <<-EOF
+  EKS cluster APIserver private endpoint access. 
+  Don't set cluster_endpoint_public_access to true if you set this to true
+  EOF
+  type        = bool
 }
 
 variable "oauth_client_id" {
@@ -69,7 +115,7 @@ variable "oauth_client_secret" {
   EOF
 }
 
-variable "hostname" {
+variable "sr_instance_hostname" {
   description = "Tailscale Machine hostname of the EC2 instance"
   type        = string
 }

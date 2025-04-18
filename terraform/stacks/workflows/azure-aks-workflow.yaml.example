@@ -1,0 +1,90 @@
+name: Workflows for Tailscale-AKS
+description: Atmos workflows for managing Tailscale-AKS
+
+workflows:
+  validate-phase1:
+    description: |
+      Run 'terraform validate' on azure-aks component in all stacks
+    steps:
+      - command: terraform validate azure-aks -s tenant-az-environment1-stage
+      - command: terraform validate azure-aks -s tenant-az-environment2-stage
+
+  plan-phase1:
+    description: |
+      Run 'terraform plan' on azure-aks component in all stacks
+    steps:
+      - command: terraform plan azure-aks -s tenant-az-environment1-stage
+      - command: terraform plan azure-aks -s tenant-az-environment2-stage
+
+  apply-phase1:
+    description: |
+      Run 'terraform apply -auto-approve' on azure-aks component in all stacks
+    steps:
+      - command: terraform apply azure-aks -auto-approve -s tenant-az-environment1-stage
+      - command: terraform apply azure-aks -auto-approve -s tenant-az-environment2-stage
+
+  validate-phase2:
+    description: |
+      Run 'terraform validate' on azure-aks component in all stacks
+    steps:
+      - command: terraform validate azure-aks -s tenant-az-environment1-stage
+      - command: terraform validate azure-aks -s tenant-az-environment2-stage
+
+  plan-phase2:
+    description: |
+      Run 'terraform plan' on azure-aks component in all stacks
+    steps:
+      - command: terraform plan azure-aks -s tenant-az-environment1-stage
+      - command: terraform plan azure-aks -s tenant-az-environment2-stage
+
+  apply-phase2:
+    description: |
+      Run 'terraform apply -auto-approve' on azure-aks component in all stacks
+    steps:
+      - command: terraform apply azure-aks -auto-approve -s tenant-az-environment1-stage
+      - command: terraform apply azure-aks -auto-approve -s tenant-az-environment2-stage
+
+  validate-all:
+    description: |
+      Run 'terraform validate' on all components in all stacks
+    steps:
+      - command: terraform validate azure-aks -s tenant-az-environment1-stage
+      - command: terraform validate ts-k8s-docker-azure -s tenant-az-environment1-stage
+      - command: terraform validate azure-aks -s tenant-az-environment2-stage
+      - command: terraform validate ts-k8s-docker-azure -s tenant-az-environment2-stage
+
+  plan-all:
+    description: |
+      Run 'terraform plan' on all components in all stacks
+    steps:
+      - command: terraform plan azure-aks -s tenant-az-environment1-stage
+      - command: terraform plan ts-k8s-docker-azure -s tenant-az-environment1-stage
+      - command: terraform plan azure-aks -s tenant-az-environment2-stage
+      - command: terraform plan ts-k8s-docker-azure -s tenant-az-environment2-stage
+
+  apply-all:
+    description: |
+      Run 'terraform apply -auto-approve' on all components in all stacks
+    steps:
+      - command: terraform apply azure-aks -auto-approve -s tenant-az-environment1-stage
+      - command: terraform apply ts-k8s-docker-azure -auto-approve -s tenant-az-environment1-stage 
+      - command: terraform apply azure-aks -auto-approve -s tenant-az-environment2-stage
+      - command: terraform apply ts-k8s-docker-azure -auto-approve -s tenant-az-environment2-stage
+
+  destroy-all:
+    description: |
+      Run 'terraform destroy' on all components in all stacks
+    steps:
+      - command: terraform destroy azure-aks -s tenant-az-environment1-stage
+      - command: terraform destroy ts-k8s-docker-azure -s tenant-az-environment1-stage
+      - command: terraform destroy azure-aks -s tenant-az-environment2-stage
+      - command: terraform destroy ts-k8s-docker-azure -s tenant-az-environment2-stage
+
+  clean-all:
+    description: |
+      Run 'terraform clean' on all components in all stacks
+    steps:
+      - command: terraform clean azure-aks -auto-approve -s tenant-az-environment1-stage
+      - command: terraform clean ts-k8s-docker-azure -auto-approve -s tenant-az-environment1-stage
+      - command: terraform clean azure-aks -auto-approve -s tenant-az-environment2-stage
+      - command: terraform clean ts-k8s-docker-azure -auto-approve -s tenant-az-environment2-stage

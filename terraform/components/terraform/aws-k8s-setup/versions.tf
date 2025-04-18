@@ -6,10 +6,6 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 5.1.0"
     }
-    docker = {
-      source = "kreuzwerker/docker"
-      version = ">= 3.0.2"
-    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">= 2.18"

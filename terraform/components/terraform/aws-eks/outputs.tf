@@ -3,8 +3,14 @@ output "name" {
   sensitive = true
 }
 
-output "hostname" {
-  value     = var.hostname
+output "enable_sr" {
+  value     = local.enable_sr
+  sensitive = true
+}
+
+
+output "sr_instance_hostname" {
+  value     = local.sr_instance_hostname
   sensitive = true
 }
 
@@ -23,8 +29,8 @@ output "ssh_keyname" {
   sensitive = true
 }
 
-output "client_public_ip" {
-  value = aws_instance.client.public_ip
+output "aws_instance_client_public_ip" {
+  value = local.enable_sr ? aws_instance.client[0].public_ip : null
   sensitive = true
 }
 
@@ -65,8 +71,8 @@ Next Steps:
 1. Configure your kubeconfig for kubectl by running:
    aws eks --region ${local.region} update-kubeconfig --name ${module.eks.cluster_name} --alias ${module.eks.cluster_name}
 
-2. Test SSH to the EC2 instance's public IP:
-   ssh -i ~/.ssh/${local.key_name} ubuntu@${aws_instance.client.public_ip}
+2. Test SSH to the EC2 instance's public IP (Only available if private APIServer endpoint is enabled):
+   ssh -i ~/.ssh/${local.key_name} ubuntu@${local.enable_sr ? aws_instance.client[0].public_ip : "N/A"}
 
 Happy deploying <3
 EOT

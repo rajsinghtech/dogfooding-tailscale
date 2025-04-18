@@ -33,7 +33,7 @@ data "aws_eks_cluster_auth" "this" {
 # Tailscale Kubernetes Operator Setup
 ################################################################################
 resource "helm_release" "tailscale_operator" {
-  name             = "tailscale-operator"
+  name             = "tailscale-operator-${local.environment}-${local.stage}"
   chart            = "tailscale-operator"
   repository       = "https://pkgs.tailscale.com/helmcharts"
   namespace        = "tailscale"
@@ -49,6 +49,9 @@ resource "helm_release" "tailscale_operator" {
       apiServerProxyConfig = {
         mode = "true"
       }
+      operatorConfig = {
+        hostname = "tailscale-operator-${local.environment}-${local.stage}"
+      }
     })
   ] 
 }
@@ -57,7 +60,7 @@ resource "helm_release" "tailscale_operator" {
 # Apply manifests and CRs                                            #
 ######################################################################
 data "kubectl_path_documents" "docs" {
-  pattern = "../manifests/*.yaml"
+  pattern = "manifests/*.yaml"
 }
 
 # Deploy all manifests into the cluster 
@@ -66,7 +69,30 @@ resource "kubectl_manifest" "app_manifests" {
   yaml_body = each.value
 }
 
-# Create the Connector CR for subnet router
+# Create a ProxyClass to standardize configs applied to operator resources
+resource "kubectl_manifest" "proxyclass" {
+    wait      = true
+    yaml_body = <<YAML
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: ${local.stage}
+spec:
+  statefulSet:
+    pod:
+      labels:
+        tenant: ${local.tenant}
+        environment: ${local.environment}
+        stage: ${local.stage}
+      nodeSelector:
+        beta.kubernetes.io/os: "linux"
+YAML
+    depends_on = [
+    helm_release.tailscale_operator
+    ]
+}
+
+# Create the Connector CR for subnet router w/the proxy class
 resource "kubectl_manifest" "connector" {
     wait      = true
     yaml_body = <<YAML
@@ -75,6 +101,7 @@ kind: Connector
 metadata:
   name: ${local.name}-cluster-cidrs
 spec:
+  proxyClass: ${local.stage}
   hostname: ${local.name}-cluster-cidrs
   subnetRouter:
     advertiseRoutes:
@@ -88,35 +115,40 @@ YAML
     ]
 }
 
-# Grab the client EC2 instance's Tailscale device details
-data "tailscale_device" "client_device" {
-  hostname = local.hostname
-  wait_for = "60s"
-}
-
-# Create the Egress Service in the cluster to the nginx server running on the client EC2 instance
-# Boldly assuming the first address from the Tailscale device is the IPv4 one for our annotation
-resource "kubectl_manifest" "egress-svc" {
+# Rewrite the domain for unique ones for split-DNS across clusters
+resource "kubectl_manifest" "coredns" {
     wait      = true
     yaml_body = <<YAML
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  annotations:
-    tailscale.com/tailnet-ip: ${data.tailscale_device.client_device.addresses[0]} 
-  name: ${local.hostname}-egress-svc
-spec:
-  externalName: placeholder
-  type: ExternalName
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+            lameduck 5s
+          }
+        ready
+        rewrite name substring ${local.environment}.svc.cluster.local svc.cluster.local answer auto
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
 YAML
-    depends_on = [
-    helm_release.tailscale_operator
-    ]
 }
-
-########################################################################
-# TS Split-DNS setup for K8s service FQDN resolution from EC2 instance #
-########################################################################
+###################################################################
+# TS Split-DNS setup for K8s service FQDN resolution from tailnet #
+###################################################################
 
 data "kubernetes_service" "kubedns" {
   metadata {
@@ -126,6 +158,6 @@ data "kubernetes_service" "kubedns" {
 }
 
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
-  domain      = "svc.cluster.local"
+  domain      = "${local.environment}.svc.cluster.local"
   nameservers = [data.kubernetes_service.kubedns.spec[0].cluster_ip]
 }
