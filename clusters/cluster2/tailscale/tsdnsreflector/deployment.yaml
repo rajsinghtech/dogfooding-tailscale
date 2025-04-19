@@ -18,13 +18,6 @@ spec:
       - name: tsdnsreflector
         image: quay.io/rajsinghcpre/tsdnsreflector:latest
         imagePullPolicy: Always
-        ports:
-        - containerPort: 53
-          protocol: UDP
-          name: dns-udp
-        - containerPort: 53
-          protocol: TCP
-          name: dns-tcp
         env:
         - name: SITE_ID
           valueFrom:
@@ -49,6 +42,12 @@ spec:
             configMapKeyRef:
               name: tsdnsreflector-config
               key: dns_resolver
+              optional: true
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tsdnsreflector-config
+              key: port
               optional: true
         resources:
           limits:
