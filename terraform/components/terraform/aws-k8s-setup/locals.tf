@@ -15,6 +15,9 @@ locals {
   environment                   = var.environment
   stage                         = var.stage
   region                        = var.region
+  connector_cidr                = var.connector_cidr
+  argo_repo_url                 = var.argo_repo_url
+  argo_config_path               = var.argo_config_path
   name                          = data.terraform_remote_state.aws_tfstate.outputs.name
   enable_sr                     = data.terraform_remote_state.aws_tfstate.outputs.enable_sr
   sr_instance_hostname          = data.terraform_remote_state.aws_tfstate.outputs.sr_instance_hostname
