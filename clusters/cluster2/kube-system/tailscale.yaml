@@ -48,7 +48,7 @@ spec:
         - name: TS_USERSPACE
           value: "true"
         - name: TS_EXTRA_ARGS
-          value: "--accept-routes --netfilter-mode=off --reset"
+          value: "--accept-routes --reset"
         - name: TS_STATE_DIR
           value: /tsstate
         - name: TS_AUTHKEY
