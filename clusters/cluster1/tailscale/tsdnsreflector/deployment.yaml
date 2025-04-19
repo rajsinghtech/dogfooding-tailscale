@@ -18,14 +18,11 @@ spec:
       - name: tsdnsreflector
         image: quay.io/rajsinghcpre/tsdnsreflector:latest
         imagePullPolicy: Always
-        securityContext:
-          capabilities:
-            add: ["NET_BIND_SERVICE"]
         ports:
-        - containerPort: 53
+        - containerPort: 5353
           protocol: UDP
           name: dns-udp
-        - containerPort: 53
+        - containerPort: 5353
           protocol: TCP
           name: dns-tcp
         env:
