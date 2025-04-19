@@ -11,11 +11,15 @@ components:
   terraform:
     aws-eks:
       vars:
-        name: "my-aws-ue1-test-1"
-        sr_instance_hostname: "my-aws-ue1-test-sr"
+        name: "cluster1-aws-ue1"
+        sr_instance_hostname: "cluster1-aws-ue1-sr"
         vpc_cidr: "10.0.0.0/16"
         cluster_service_ipv4_cidr: "10.40.0.0/16"
     aws-k8s-setup:
+      vars:
+        connector_cidr: "fd7a:115c:a1e0:b1a:0:1::/96"
+        argo_config_path: "clusters/cluster1/argocd/apps"
+        argo_repo_url: "https://github.com/rajsinghtech/dogfooding-tailscale"
       settings:
         depends_on:
           1:
