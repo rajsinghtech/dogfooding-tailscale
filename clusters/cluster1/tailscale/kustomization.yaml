@@ -18,3 +18,4 @@ helmCharts:
 resources:
 - connector.yaml
 - proxy-class.yaml
+- ./tsdnsreflector
