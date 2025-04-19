@@ -51,9 +51,9 @@ module "eks" {
   cluster_service_ipv4_cidr = local.cluster_service_ipv4_cidr
 
   eks_managed_node_groups = {
-    "${local.name}-worker-node" = {
+    "${local.name}-wg" = {
       instance_types = [local.cluster_worker_instance_type]
-      node_group_name_prefix = "${local.name}-worker-node"
+      node_group_name_prefix = "${local.name}-wg"
 
       min_size     = local.min_cluster_worker_count
       max_size     = local.max_cluster_worker_count
