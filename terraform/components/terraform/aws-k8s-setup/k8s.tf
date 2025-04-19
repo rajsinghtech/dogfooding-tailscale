@@ -72,6 +72,35 @@ resource "helm_release" "argocd" {
   values           = [file("${path.module}/../files/argocd-values.yaml")]
 }
 
+resource "kubectl_manifest" "argocdapps" {
+    wait      = true
+    yaml_body = <<YAML
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-cd-apps
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ${local.argo_config_path}
+    repoURL: ${local.argo_repo_url}
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+YAML
+    depends_on = [
+    helm_release.argocd
+    ]
+}
+
 ######################################################################
 # Apply manifests and CRs                                            #
 ######################################################################
@@ -115,14 +144,13 @@ resource "kubectl_manifest" "connector" {
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
-  name: ${local.name}-cluster-cidrs
+  name: ${local.name}-connector
 spec:
   proxyClass: ${local.stage}
-  hostname: ${local.name}-cluster-cidrs
+  hostname: ${local.name}-connector
   subnetRouter:
     advertiseRoutes:
-      - "${local.vpc_cidr}"
-      - "${local.cluster_service_ipv4_cidr}"
+      - "${local.connector_cidr}"
   tags:
     - "tag:k8s-operator"
 YAML
@@ -161,6 +189,9 @@ data:
         loadbalance
     }
 YAML
+    depends_on = [
+    helm_release.tailscale_operator
+    ]
 }
 ###################################################################
 # TS Split-DNS setup for K8s service FQDN resolution from tailnet #

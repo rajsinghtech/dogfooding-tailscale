@@ -17,3 +17,19 @@ variable "region" {
   description = "AWS Region of cluster"
   type        = string
 }
+
+variable "connector_cidr" {
+  description = "Connector CIDR"
+  type        = string
+}
+
+variable "argo_repo_url" {
+  description = "Argo repo URL"
+  type        = string
+}
+
+variable "argo_config_path" {
+  description = "Connector CIDR"
+  type        = string
+}
+
