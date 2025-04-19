@@ -20,9 +20,9 @@ server:
     - --insecure
     - --repo-server-timeout-seconds=300
   resources:
-    requests:
-      cpu: 500m
-      memory: 256Mi
+    # requests:
+    #   cpu: 500m
+    #   memory: 256Mi
     limits:
       memory: 256Mi
 
@@ -49,10 +49,10 @@ repoServer:
     enabled: true
     serviceMonitor:
       enabled: true
-  resources:
-    requests:
-      cpu: 1
-      memory: 1Gi
+  # resources:
+  #   requests:
+  #     cpu: 1
+  #     memory: 1Gi
     limits:
       memory: 1Gi
 
