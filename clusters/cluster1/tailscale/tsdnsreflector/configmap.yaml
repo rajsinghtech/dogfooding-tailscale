@@ -7,5 +7,6 @@ data:
   site_id: "1"
   ipv6_domain: "cluster1.local"
   ipv4_domain: "cluster.local"
+  port: "5353"
   # Optional: custom DNS resolver in the format "host:port"
   # dns_resolver: "8.8.8.8:53" 
