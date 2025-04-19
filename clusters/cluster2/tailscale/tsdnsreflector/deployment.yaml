@@ -58,11 +58,11 @@ spec:
             memory: "64Mi"
         livenessProbe:
           tcpSocket:
-            port: dns-tcp
+            port: 5353
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           tcpSocket:
-            port: dns-tcp
+            port: 5353
           initialDelaySeconds: 5
           periodSeconds: 10
