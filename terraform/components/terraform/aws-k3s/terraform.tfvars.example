@@ -1,0 +1,25 @@
+# Basic Information
+tenant      = "myuser"
+environment = "dev"
+stage       = "test"
+name        = "tailscale-k3s"
+region      = "us-west-2"
+
+# AWS configuration
+vpc_cidr         = "10.0.0.0/16"
+ssh_keyname      = "my-aws-key"
+instance_type    = "t3.medium"
+root_volume_size = 20
+
+# Tailscale configuration
+instance_hostname     = "k3s-demo"
+oauth_client_id       = "your-oauth-client-id"
+oauth_client_secret   = "your-oauth-client-secret"
+advertise_routes      = ["10.0.0.0/16"]
+
+# Tags
+tags = {
+  Owner       = "DevOps"
+  Environment = "Development"
+  Project     = "K3s-Demo"
+} 

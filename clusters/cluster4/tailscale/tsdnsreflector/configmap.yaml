@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tsdnsreflector-config
+data:
+  site_id: "3"
+  ipv6_domain: "cluster3.local"
+  ipv4_domain: "cluster.local"
+  port: "5353"
+  # Optional: custom DNS resolver in the format "host:port"
+  # dns_resolver: "8.8.8.8:53" 
