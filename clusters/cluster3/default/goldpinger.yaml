@@ -52,7 +52,7 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             - name: HTTP_TARGETS
-              value: http://goldpinger-cluster1:8080
+              value: http://goldpinger-cluster1.default.svc.cluster1.local:8080 http://goldpinger-cluster2.default.svc.cluster2.local:8080 http://goldpinger-cluster3.default.svc.cluster3.local:8080
           image: "docker.io/bloomberg/goldpinger:latest"
           imagePullPolicy: Always
           securityContext:
