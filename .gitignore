@@ -41,3 +41,5 @@ terraform/stacks/workflows/*.yaml
 !terraform/stacks/deploy/*.yaml.example
 !terraform/stacks/catalog/*.yaml.example
 !terraform/stacks/workflows/*.yaml.example
+.kuberlr/darwin-arm64/kubectl1.32.3
+clusters/cluster4/.kuberlr/darwin-arm64/kubectl1.32.3
