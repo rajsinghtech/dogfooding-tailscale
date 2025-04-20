@@ -48,7 +48,7 @@ spec:
         - name: TS_USERSPACE
           value: "false"
         - name: TS_EXTRA_ARGS
-          value: "--accept-routes --netfilter-mode=off --reset"
+          value: "--accept-routes --reset"
         - name: TS_STATE_DIR
           value: /tsstate
         - name: TS_AUTHKEY
@@ -65,12 +65,12 @@ spec:
         volumeMounts:
         - name: tailscale-state
           mountPath: /tsstate
-        # - name: resolv
-        #   mountPath: /etc/resolv.conf
+        - name: resolv
+          mountPath: /etc/resolv.conf
       volumes:
       - name: tailscale-state
         emptyDir: {}
-      # - name: resolv
-      #   hostPath:
-      #     path: /etc/resolv.conf
-      #     type: File
+      - name: resolv
+        hostPath:
+          path: /etc/resolv.conf
+          type: File

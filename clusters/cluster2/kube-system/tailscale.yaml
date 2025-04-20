@@ -46,7 +46,7 @@ spec:
         - name: TS_KUBE_SECRET
           value: ""
         - name: TS_USERSPACE
-          value: "true"
+          value: "false"
         - name: TS_EXTRA_ARGS
           value: "--accept-routes --reset"
         - name: TS_STATE_DIR
@@ -65,12 +65,12 @@ spec:
         volumeMounts:
         - name: tailscale-state
           mountPath: /tsstate
-        # - name: resolv
-        #   mountPath: /etc/resolv.conf
+        - name: resolv
+          mountPath: /etc/resolv.conf
       volumes:
       - name: tailscale-state
         emptyDir: {}
-      # - name: resolv
-      #   hostPath:
-      #     path: /etc/resolv.conf
-      #     type: File
+      - name: resolv
+        hostPath:
+          path: /etc/resolv.conf
+          type: File
