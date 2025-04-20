@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster3/argocd/apps
+    path: clusters/cluster4/argocd/apps
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
   syncPolicy:
@@ -30,7 +30,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster3/argocd
+    path: clusters/cluster4/argocd
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
   syncPolicy:

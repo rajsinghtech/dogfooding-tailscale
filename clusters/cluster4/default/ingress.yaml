@@ -5,10 +5,10 @@ metadata:
 spec:
   defaultBackend:
     service:
-      name: goldpinger-cluster3
+      name: goldpinger-cluster4
       port:
         number: 8080
   ingressClassName: tailscale
   tls:
     - hosts:
-        - goldpinger-cluster3
+        - goldpinger-cluster4

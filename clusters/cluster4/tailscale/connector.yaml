@@ -1,12 +1,12 @@
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
-  name: cluster3-connector
+  name: cluster4-connector
 spec:
   proxyClass: prod 
   tags:
     - tag:k8s
   subnetRouter:
     advertiseRoutes:
-      - fd7a:115c:a1e0:b1a:0:3::/96
+      - fd7a:115c:a1e0:b1a:0:4::/96
   exitNode: true

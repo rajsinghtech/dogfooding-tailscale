@@ -4,8 +4,8 @@ kind: ConfigMap
 metadata:
   name: tsdnsreflector-config
 data:
-  site_id: "3"
-  ipv6_domain: "cluster3.local"
+  site_id: "4"
+  ipv6_domain: "cluster4.local"
   ipv4_domain: "cluster.local"
   port: "5353"
   # Optional: custom DNS resolver in the format "host:port"

@@ -10,7 +10,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: clusters/cluster3/default
+    path: clusters/cluster4/default
 
     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
     targetRevision: HEAD
