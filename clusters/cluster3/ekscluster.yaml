@@ -15,7 +15,7 @@ addons:
   - name: coredns
 
 managedNodeGroups:
-  - name: ng-1
+  - name: ng-cluster3
     instanceType: t3.medium
     desiredCapacity: 2
     minSize: 1
