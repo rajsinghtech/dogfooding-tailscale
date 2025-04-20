@@ -6,4 +6,4 @@ resources:
 - goldpinger.yaml
 - ingress.yaml
 - debug.yaml
-# - egress.yamlverlays/stable/?ref=release-1.42
+# - egress.yaml
