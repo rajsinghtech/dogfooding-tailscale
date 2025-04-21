@@ -15,6 +15,7 @@ components:
         sr_instance_hostname: "cluster1-aws-ue1-sr"
         vpc_cidr: "10.0.0.0/16"
         cluster_service_ipv4_cidr: "10.40.0.0/16"
+        advertise_routes: ["fd7a:115c:a1e0:b1a:0:1:a00:0/112"]
     aws-k8s-setup:
       vars:
         connector_cidr: "fd7a:115c:a1e0:b1a:0:1::/96"

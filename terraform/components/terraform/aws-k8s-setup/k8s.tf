@@ -56,6 +56,64 @@ resource "helm_release" "tailscale_operator" {
   ]
 }
 
+################################################################################
+# AWS EBS CSI Driver Setup
+################################################################################
+resource "helm_release" "ebs_csi_driver" {
+
+  name       = "aws-ebs-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+  chart      = "aws-ebs-csi-driver"
+  namespace  = "kube-system"
+  version    = "2.30.0"
+
+  set {
+    name  = "controller.serviceAccount.create"
+    value = "true"
+  }
+  set {
+    name  = "controller.serviceAccount.name"
+    value = "ebs-csi-controller-sa"
+  }
+  set {
+    name  = "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = local.eks_ebs_csi_iam_role_arn
+  }
+}
+
+################################################################################
+# AWS Load Balancer Controller Setup
+################################################################################
+resource "helm_release" "aws_lb_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "1.7.1"
+  create_namespace = false
+
+  set {
+    name  = "clusterName"
+    value = local.cluster_name
+  }
+  set {
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = local.aws_lb_controller_iam_role_arn
+  }
+  set {
+    name  = "region"
+    value = local.region
+  }
+}
+
 ######################################################################
 # Install ArgoCD via Helm                                            #
 ######################################################################
@@ -193,6 +251,8 @@ YAML
     helm_release.tailscale_operator
     ]
 }
+
+
 ###################################################################
 # TS Split-DNS setup for K8s service FQDN resolution from tailnet #
 ###################################################################

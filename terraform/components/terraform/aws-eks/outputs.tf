@@ -3,6 +3,16 @@ output "name" {
   sensitive = true
 }
 
+output "ebs_csi_iam_role_arn" {
+  description = "IAM Role ARN for EBS CSI driver (for IRSA)"
+  value       = aws_iam_role.ebs_csi.arn
+}
+
+output "aws_lb_controller_iam_role_arn" {
+  description = "IAM Role ARN for AWS Load Balancer Controller (for IRSA)"
+  value       = aws_iam_role.aws_lb_controller.arn
+}
+
 output "enable_sr" {
   value     = local.enable_sr
   sensitive = true

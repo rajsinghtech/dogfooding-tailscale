@@ -31,4 +31,6 @@ locals {
   eks_cluster_auth_token        = data.aws_eks_cluster_auth.this.token
   oauth_client_id               = data.terraform_remote_state.aws_tfstate.outputs.oauth_client_id
   oauth_client_secret           = data.terraform_remote_state.aws_tfstate.outputs.oauth_client_secret
+  eks_ebs_csi_iam_role_arn      = data.terraform_remote_state.aws_tfstate.outputs.ebs_csi_iam_role_arn
+  aws_lb_controller_iam_role_arn = data.terraform_remote_state.aws_tfstate.outputs.aws_lb_controller_iam_role_arn
 }
