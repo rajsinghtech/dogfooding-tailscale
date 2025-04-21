@@ -30,6 +30,6 @@ We're using [Atmos](https://atmos.tools/faq/) to spin up multiple Terraform stac
 
 ## TODO
 
-- Add CSI provisioners and load-balancer controllers for AWS  
+- Add CSI provisioners and load-balancer controllers for AWS - **Done**
 - Add CSI provisioner for Azure  
 - Azure not tested yet! Run at your own risk. AWS code has been tested and works atm  
