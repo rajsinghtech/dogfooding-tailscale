@@ -16,23 +16,12 @@ spec:
         app: tailscale
     spec:
       initContainers:
-      - command:
-        - sh
+      - args:
+        - sysctl -w net.ipv4.ip_forward=1 && if sysctl net.ipv6.conf.all.forwarding; then
+          sysctl -w net.ipv6.conf.all.forwarding=1; fi
+        command:
+        - /bin/sh
         - -c
-        - |
-          sysctl -w net.ipv4.ip_forward=1
-          if sysctl net.ipv6.conf.all.forwarding; then
-            sysctl -w net.ipv6.conf.all.forwarding=1
-          fi
-
-          ip rule add to 100.64.0.0/10 lookup 52 pref 1100
-          ip rule add fwmark 0x40000/0xff0000 lookup 52
-          ip route add 100.64.0.0/10 dev tailscale0 table 52
-
-          iptables -t mangle -A PREROUTING -d 100.64.0.0/10 -j MARK --set-mark 0x40000
-          iptables -t mangle -A OUTPUT -d 100.64.0.0/10 -j MARK --set-mark 0x40000
-          iptables -A FORWARD -s 192.168.0.0/16 -d 100.64.0.0/10 -o tailscale0 -j ACCEPT
-          iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -d 100.64.0.0/10 -j MASQUERADE
         image: tailscale/tailscale:v1.82.0
         imagePullPolicy: IfNotPresent
         name: sysctler
@@ -69,6 +58,25 @@ spec:
               key: TS_AUTHKEY
         - name: TS_ACCEPT_DNS
           value: "true"
+      - command:
+        - sh
+        - -c
+        - |
+          sleep 10
+          ip rule add to 100.64.0.0/10 lookup 52 pref 1100
+          ip rule add fwmark 0x40000/0xff0000 lookup 52
+          ip route add 100.64.0.0/10 dev tailscale0 table 52
+
+          iptables -t mangle -A PREROUTING -d 100.64.0.0/10 -j MARK --set-mark 0x40000
+          iptables -t mangle -A OUTPUT -d 100.64.0.0/10 -j MARK --set-mark 0x40000
+          iptables -A FORWARD -s 192.168.0.0/16 -d 100.64.0.0/10 -o tailscale0 -j ACCEPT
+          iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -d 100.64.0.0/10 -j MASQUERADE
+        image: tailscale/tailscale:v1.82.0
+        imagePullPolicy: IfNotPresent
+        name: table-setup
+        resources: {}
+        securityContext:
+          privileged: true
         securityContext:
           capabilities:
             add:
