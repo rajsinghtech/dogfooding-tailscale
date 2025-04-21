@@ -20,8 +20,13 @@ addons:
   - name: vpc-cni
 
 managedNodeGroups:
-  - name: ng-cluster1
+  - name: ng-cluster
     instanceType: t3.medium
     desiredCapacity: 2
     minSize: 1
     maxSize: 3
+    ssh:
+      allow: true # Use default key from AWS account
+      publicKeyPath: ~/.ssh/kartik_id_rsa.pub
+    updateConfig:
+      maxUnavailable: 2
