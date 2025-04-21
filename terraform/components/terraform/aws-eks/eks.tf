@@ -26,6 +26,7 @@ data "aws_eks_cluster_auth" "this" {
 ################################################################################
 
 module "eks" {
+  enable_irsa = true
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
@@ -107,6 +108,81 @@ module "eks" {
   tags = local.tags
 }
 
+################################################################################
+# IAM Role and Policy for AWS Load Balancer Controller (IRSA)
+################################################################################
+
+# IAM Policy for AWS Load Balancer Controller
+resource "aws_iam_policy" "aws_lb_controller" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  description = "Policy for AWS Load Balancer Controller"
+  policy      = file("${path.module}/../files/aws-iam/aws_lb_controller_iam_policy.json")
+}
+
+# IAM Role for AWS Load Balancer Controller
+resource "aws_iam_role" "aws_lb_controller" {
+  name = "${module.eks.cluster_name}-aws-lb-controller"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = module.eks.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(module.eks.oidc_provider, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        }
+      }
+    }]
+  })
+}
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "aws_lb_controller" {
+  role       = aws_iam_role.aws_lb_controller.name
+  policy_arn = aws_iam_policy.aws_lb_controller.arn
+}
+
+
+
+################################################################################
+# IAM Role and Policy for EBS CSI Driver (IRSA)
+################################################################################
+data "aws_iam_policy_document" "ebs_csi_assume_role" {
+  statement {
+    effect = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [module.eks.oidc_provider_arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(module.eks.oidc_provider, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ebs_csi" {
+  name               = "${module.eks.cluster_name}-ebs-csi"
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role.json
+}
+
+resource "aws_iam_policy" "ebs_csi" {
+  name        = "${module.eks.cluster_name}-ebs-csi-policy"
+  description = "EBS CSI driver policy"
+  policy      = file("${path.module}/../files/aws-iam/ebs_csi_iam_policy.json")
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi" {
+  role       = aws_iam_role.ebs_csi.name
+  policy_arn = aws_iam_policy.ebs_csi.arn
+}
+
+
 #########################################################################################
 # EC2 to EKS control plane security group access to private kubeapiserver               #
 #########################################################################################
@@ -126,14 +202,19 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 # TS Split-DNS setup for EKS private-only kube-apiserver FQDN resolution in the tailnet #
 #########################################################################################
 
-resource "tailscale_dns_split_nameservers" "aws_route53_resolver" {
+resource "tailscale_dns_split_nameservers" "eks_route53_resolver" {
   domain      = "${local.region}.eks.amazonaws.com"
+  nameservers = [local.vpc_plus_2_ip]
+}
+
+resource "tailscale_dns_split_nameservers" "elb_route53_resolver" {
+  domain      = "elb.${local.region}.amazonaws.com"
   nameservers = [local.vpc_plus_2_ip]
 }
 
 resource "tailscale_dns_search_paths" "eks_search_paths" {
   search_paths = [
-    "eks.amazonaws.com",
+    "amazonaws.com",
     "svc.cluster.local"
   ]
 }

@@ -30,7 +30,8 @@ locals {
   # AWS Route 53 Resolver VPC+2 IP 
   vpc_plus_2_ip                   = "${join(".", slice(split(".", var.vpc_cidr), 0, 3))}.2"
   # Merge EKS private subnets CIDRs, AWS Route 53 Resolver IP, and any user-defined routes and advertise them from the subnet router
-  advertise_routes                = distinct(concat(local.private_subnets, coalesce(var.advertise_routes, []), ["${local.vpc_plus_2_ip}/32"]))
+  # advertise_routes                = distinct(concat(local.private_subnets, coalesce(var.advertise_routes, []), ["${local.vpc_plus_2_ip}/32"]))
+  advertise_routes                = var.advertise_routes
 
   # Enable SR if cluster endpoint is private and not public 
   enable_sr = local.cluster_endpoint_private_access && !local.cluster_endpoint_public_access
