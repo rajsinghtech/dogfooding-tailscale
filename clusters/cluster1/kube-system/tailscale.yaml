@@ -66,7 +66,6 @@ spec:
           - -c
           - |
             sleep 10
-            sleep 10
             # Only add ip rules if they don't exist
             ip rule list | grep -q "to 100.64.0.0/10 lookup 52" || ip rule add to 100.64.0.0/10 lookup 52 pref 1100
             ip rule list | grep -q "fwmark 0x40000/0xff0000 lookup 52" || ip rule add fwmark 0x40000/0xff0000 lookup 52
