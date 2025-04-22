@@ -74,6 +74,7 @@ spec:
             iptables -t mangle -A OUTPUT -d 100.64.0.0/10 -j MARK --set-mark 0x40000
             iptables -A FORWARD -s 192.168.0.0/16 -d 100.64.0.0/10 -o tailscale0 -j ACCEPT
             iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -d 100.64.0.0/10 -j MASQUERADE
+            sleep infinity
         resources: {}
         securityContext:
           privileged: true
