@@ -2,12 +2,14 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: cluster3-raj
+  name: raj-c3
   region: us-east-1
   version: "1.29"
 
-# kubernetesNetworkConfig:  
-#   ipFamily: IPv6
+kubernetesNetworkConfig:
+  serviceIPv4CIDR: "10.0.0.0/16"
+vpc:
+  cidr: "10.1.0.0/16" 
 
 iam:
   withOIDC: true
