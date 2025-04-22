@@ -17,58 +17,47 @@ spec:
       containers:
       - name: tsdnsreflector
         image: quay.io/rajsinghcpre/tsdnsreflector:latest
-        imagePullPolicy: Always
-        env:
-        - name: SITE_ID
-          valueFrom:
-            configMapKeyRef:
-              name: tsdnsreflector-config
-              key: site_id
-              optional: false
-        - name: REFLECTED_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              name: tsdnsreflector-config
-              key: reflected_domain
-              optional: false
-        - name: ORIGINAL_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              name: tsdnsreflector-config
-              key: original_domain
-              optional: false
-        - name: DNS_RESOLVER
-          valueFrom:
-            configMapKeyRef:
-              name: tsdnsreflector-config
-              key: dns_resolver
-              optional: true
-        - name: PORT
-          valueFrom:
-            configMapKeyRef:
-              name: tsdnsreflector-config
-              key: port
-              optional: true
-        - name: FORCE_4VIA6
-          valueFrom:
-            configMapKeyRef:
-              name: tsdnsreflector-config
-              key: force_4via6
-              optional: true
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: dns-udp
+          containerPort: 5353
+          protocol: UDP
+        - name: dns-tcp
+          containerPort: 5353
+          protocol: TCP
         resources:
           limits:
-            cpu: "0.5"
+            cpu: "500m"
             memory: "128Mi"
           requests:
-            cpu: "0.1"
+            cpu: "100m"
             memory: "64Mi"
+        envFrom:
+        - configMapRef:
+            name: tsdnsreflector-config
         livenessProbe:
           tcpSocket:
-            port: 5353
+            port: 53
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           tcpSocket:
-            port: 5353
+            port: 53
           initialDelaySeconds: 5
           periodSeconds: 10
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - tsdnsreflector
+              topologyKey: "kubernetes.io/hostname"
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000

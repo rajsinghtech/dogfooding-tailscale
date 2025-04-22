@@ -8,12 +8,12 @@ spec:
   selector:
     app: tsdnsreflector
   ports:
-  - port: 53  # External port exposed by service
-    targetPort: 5353  # Port inside the pod (matching the PORT env var)
+  - name: dns-udp
+    port: 53
     protocol: UDP
-    name: dns-udp
-  - port: 53  # External port exposed by service
-    targetPort: 5353  # Port inside the pod (matching the PORT env var)
+    targetPort: dns-udp
+  - name: dns-tcp
+    port: 53
     protocol: TCP
-    name: dns-tcp
+    targetPort: dns-tcp
   type: ClusterIP 

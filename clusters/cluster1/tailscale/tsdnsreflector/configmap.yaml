@@ -4,11 +4,9 @@ kind: ConfigMap
 metadata:
   name: tsdnsreflector-config
 data:
-  site_id: "1"
-  reflected_domain: "cluster1.local"
-  original_domain: "cluster.local"
-  port: "5353"
-  # Optional: custom DNS resolver in the format "host:port"
-  # dns_resolver: "8.8.8.8:53" 
-  # Optional: force 4via6 mode
-  force_4via6: "false"
+  SITEID: "1"
+  REFLECTED_DOMAIN: "cluster1.local"
+  ORIGINAL_DOMAIN: "cluster.local"
+  DNS_RESOLVER: "none"
+  FORCE_4VIA6: "true"
+  LISTEN_ADDR: ":5353"
