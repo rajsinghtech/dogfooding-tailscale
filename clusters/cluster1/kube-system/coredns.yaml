@@ -20,15 +20,15 @@ data:
     }
 
     cluster1.local:53 {
-        forward . 100.100.100.100
+        forward . fd7a:115c:a1e0::53
     }
 
     cluster2.local:53 {
-        forward . 100.100.100.100
+        forward . fd7a:115c:a1e0::53
     }
 
     cluster3.local:53 {
-        forward . 100.100.100.100
+        forward . fd7a:115c:a1e0::53
     }
 kind: ConfigMap
 metadata:

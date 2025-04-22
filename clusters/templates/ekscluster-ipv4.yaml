@@ -4,7 +4,7 @@ kind: ClusterConfig
 metadata:
   name: raj-c3
   region: us-east-1
-  version: "1.29"
+  version: "1.32"
 
 kubernetesNetworkConfig:
   serviceIPv4CIDR: "10.0.0.0/16"

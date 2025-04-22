@@ -4,7 +4,7 @@ kind: ClusterConfig
 metadata:
   name: raj-c2
   region: us-east-1
-  version: "1.29"
+  version: "1.32"
 
 kubernetesNetworkConfig:
   ipFamily: IPv6
