@@ -35,16 +35,7 @@ spec:
         envFrom:
         - configMapRef:
             name: tsdnsreflector-config
-        livenessProbe:
-          tcpSocket:
-            port: 5353
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        readinessProbe:
-          tcpSocket:
-            port: 5353
-          initialDelaySeconds: 5
-          periodSeconds: 10
+
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
