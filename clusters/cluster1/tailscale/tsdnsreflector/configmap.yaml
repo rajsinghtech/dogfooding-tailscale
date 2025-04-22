@@ -8,5 +8,5 @@ data:
   REFLECTED_DOMAIN: "cluster1.local"
   ORIGINAL_DOMAIN: "cluster.local"
   DNS_RESOLVER: "none"
-  FORCE_4VIA6: "true"
+  FORCE_4VIA6: "false"
   LISTEN_ADDR: ":5353"
