@@ -67,6 +67,31 @@ spec:
           mountPath: /tsstate
         # - name: resolv
         #   mountPath: /etc/resolv.conf
+      - name: net-rules
+        image: busybox:1.36.1
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Waiting for tailscale0 to be ready..."
+            while ! ip link show tailscale0 >/dev/null 2>&1; do
+              sleep 1
+            done
+            echo "tailscale0 found, applying network rules..."
+
+            ip rule list | grep -q "to 100.64.0.0/10 lookup 52" || ip rule add to 100.64.0.0/10 lookup 52 pref 1100
+            ip rule list | grep -q "fwmark 0x40000/0xff0000 lookup 52" || ip rule add fwmark 0x40000/0xff0000 lookup 52
+            ip route show table 52 | grep -q "100.64.0.0/10 dev tailscale0" || ip route add 100.64.0.0/10 dev tailscale0 table 52
+            iptables -t mangle -C PREROUTING -d 100.64.0.0/10 -j MARK --set-mark 0x40000 2>/dev/null || iptables -t mangle -A PREROUTING -d 100.64.0.0/10 -j MARK --set-mark 0x40000
+            iptables -t mangle -C OUTPUT -d 100.64.0.0/10 -j MARK --set-mark 0x40000 2>/dev/null || iptables -t mangle -A OUTPUT -d 100.64.0.0/10 -j MARK --set-mark 0x40000
+            iptables -C FORWARD -s 192.168.0.0/16 -d 100.64.0.0/10 -o tailscale0 -j ACCEPT 2>/dev/null || iptables -A FORWARD -s 192.168.0.0/16 -d 100.64.0.0/10 -o tailscale0 -j ACCEPT
+            iptables -t nat -C POSTROUTING -s 192.168.0.0/16 -d 100.64.0.0/10 -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -d 100.64.0.0/10 -j MASQUERADE
+            
+            echo "Net rules applied. Sleeping to keep the sidecar running."
+            tail -f /dev/null
+        securityContext:
+          privileged: true
       volumes:
       - name: tailscale-state
         emptyDir: {}
