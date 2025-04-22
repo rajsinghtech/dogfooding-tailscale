@@ -10,6 +10,9 @@ locals {
   key_name                        = var.ssh_keyname
   sr_instance_hostname            = var.sr_instance_hostname
   sr_ec2_instance_type            = var.sr_ec2_instance_type
+  sr_ec2_asg_min_size             = var.sr_ec2_asg_min_size
+  sr_ec2_asg_max_size             = var.sr_ec2_asg_max_size
+  sr_ec2_asg_desired_size         = var.sr_ec2_asg_desired_size
   cluster_worker_instance_type    = var.cluster_worker_instance_type
   min_cluster_worker_count        = var.min_cluster_worker_count
   max_cluster_worker_count        = var.max_cluster_worker_count
