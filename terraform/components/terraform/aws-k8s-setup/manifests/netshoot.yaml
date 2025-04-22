@@ -20,6 +20,6 @@ spec:
         command:
           - sleep
           - infinity
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         name: netshoot
       restartPolicy: Always

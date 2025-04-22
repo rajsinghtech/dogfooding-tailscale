@@ -17,7 +17,7 @@ spec:
       containers:
       - name: tsdnsreflector
         image: quay.io/rajsinghcpre/tsdnsreflector:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - name: dns-udp
           containerPort: 5353
