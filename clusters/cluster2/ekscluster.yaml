@@ -8,7 +8,6 @@ metadata:
 
 kubernetesNetworkConfig:
   ipFamily: IPv6
-  serviceIPv6CIDR: "2001:db8:1234:1a00::/56"
 vpc:
   clusterEndpoints:
     publicAccess: true
