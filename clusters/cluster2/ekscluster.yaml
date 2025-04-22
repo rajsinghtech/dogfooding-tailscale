@@ -2,9 +2,16 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: cluster2-raj-eks
+  name: raj-c2
   region: us-east-1
   version: "1.29"
+
+kubernetesNetworkConfig:
+  ipFamily: IPv6
+  serviceIPv6CIDR: "2001:db8:1234:1a00::/56"
+vpc:
+  clusterEndpoints:
+    publicAccess: true
 
 iam:
   withOIDC: true
@@ -13,10 +20,17 @@ addonsConfig:
   disableDefaultAddons: true
 addons:
   - name: coredns
+  - name: kube-proxy
+  - name: vpc-cni
 
 managedNodeGroups:
-  - name: ng-cluster2
+  - name: ng-cluster
     instanceType: t3.medium
     desiredCapacity: 2
     minSize: 1
     maxSize: 3
+    ssh:
+      allow: true # Use default key from AWS account
+      publicKeyPath: ~/.ssh/kartik_id_rsa.pub
+    updateConfig:
+      maxUnavailable: 2

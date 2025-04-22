@@ -2,12 +2,23 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: cluster1-raj-eks
+  name: raj-c1
   region: us-east-1
   version: "1.29"
 
-# kubernetesNetworkConfig:  
-#   ipFamily: IPv6
+kubernetesNetworkConfig:
+  ipFamily: IPv6
+  serviceIPv6CIDR: "2001:db8:1234:1a00::/56"
+vpc:
+  id: "vpc-0481ad2c26eb6aad9"
+  subnets:
+    public:
+      IPV6-Pub-1a:
+        id: "subnet-026485eb8d6833393"
+        region: "us-east-1a"
+      IPV6-Pub-1b:
+        id: "subnet-0bdb9cefe7e4943a1"
+        region: "us-east-1b"
 
 iam:
   withOIDC: true

@@ -10,6 +10,8 @@ make apply:
 	kubectl create namespace argocd
 	kustomize build argocd --enable-helm | kubectl apply --server-side -f -
 	kubectl apply -f argocd/apps
+	kubectl apply -f /Users/rajsingh/Documents/GitHub/tailscale-clustermesh/kustomization/base/secret.yaml
+	make secrets
 
 make secrets:
 	@if [ -z "$$CLIENT_ID" ] || [ -z "$$CLIENT_SECRET" ]; then \
