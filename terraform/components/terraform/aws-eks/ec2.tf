@@ -1,10 +1,12 @@
 # Use the module to add the EC2 instance into our tailnet
 module "ubuntu-tailscale-client" {
-  count         = local.enable_sr ? 1 : 0
+  count         = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
   source        = "../modules/cloudinit-ts"
-  hostname      = local.sr_instance_hostname
+  hostname      = "${local.sr_instance_hostname}-${count.index + 1}"
   accept_routes = true
   enable_ssh    = true
+  ephemeral     = true
+  reusable      = true
   advertise_routes = local.advertise_routes
   primary_tag      = "subnet-router"
 }
@@ -58,29 +60,65 @@ resource "aws_security_group" "main" {
 }
 
 # Provision the EC2 instance,pass in templatized base64-encoded cloudinit data from the module that sets up Tailscale client and Docker
-resource "aws_instance" "client" {
-  count                   = local.enable_sr ? 1 : 0
-  ami                     = data.aws_ami.ubuntu.id
-  instance_type           = local.sr_ec2_instance_type
-  subnet_id               = module.vpc.public_subnets[0]
-  vpc_security_group_ids  = [aws_security_group.main[count.index].id]
-  source_dest_check       = false
-  key_name                = local.key_name
-  ebs_optimized           = true
+# EC2 instance for SR is now managed via an Auto Scaling Group.
 
-  user_data_base64        = module.ubuntu-tailscale-client[count.index].rendered
+resource "aws_launch_template" "sr_ec2" {
+  count         = local.enable_sr ? 1 : 0
+  name_prefix   = "${local.name}-sr-ec2-"
+  image_id      = data.aws_ami.ubuntu.id
+  instance_type = local.sr_ec2_instance_type
+  key_name      = local.key_name
 
-  associate_public_ip_address = true
+  # User data should be dynamic per instance via cloud-init logic in the module
+  user_data = base64encode(element(module.ubuntu-tailscale-client[*].rendered, 0))
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.main[0].id]
+    subnet_id                   = module.vpc.public_subnets[0]
+  }
 
   metadata_options {
     http_endpoint = "enabled"
     http_tokens   = "required"
   }
 
-  tags = merge(
-    local.tags,
-    {
-      "Name" = local.sr_instance_hostname
-    }
-  )
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(local.tags, { "Name" = local.sr_instance_hostname })
+  }
+}
+
+resource "aws_autoscaling_group" "sr_ec2" {
+  count         = local.enable_sr ? 1 : 0
+  name                      = "${local.name}-sr-ec2-asg"
+  launch_template {
+    id      = aws_launch_template.sr_ec2[0].id
+    version = "$Latest"
+  }
+  min_size                  = local.sr_ec2_asg_min_size
+  max_size                  = local.sr_ec2_asg_max_size
+  desired_capacity          = local.sr_ec2_asg_desired_size
+  vpc_zone_identifier       = module.vpc.public_subnets
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
+  force_delete              = true
+  tag {
+    key                 = "Name"
+    value               = local.sr_instance_hostname
+    propagate_at_launch = true
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# This data source will fetch all EC2 instances in the ASG by filtering on the Name tag
+# We will use this to output the public IPs for SSH
+
+data "aws_instances" "sr_ec2" {
+  filter {
+    name   = "tag:Name"
+    values = [local.sr_instance_hostname]
+  }
 }

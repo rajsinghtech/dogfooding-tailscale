@@ -39,11 +39,6 @@ output "ssh_keyname" {
   sensitive = true
 }
 
-output "aws_instance_client_public_ip" {
-  value = local.enable_sr ? aws_instance.client[0].public_ip : null
-  sensitive = true
-}
-
 output "eks_cluster_endpoint" {
   value     = module.eks.cluster_endpoint
   sensitive = true
@@ -74,16 +69,25 @@ output "oauth_client_secret" {
   sensitive = true
 }
 
+output "sr_ec2_public_ips" {
+  value       = data.aws_instances.sr_ec2.public_ips
+  description = "Public IPs of all SR EC2 instances"
+  sensitive   = true
+}
+
 output "Message" {
   description = "Instructions for configuring your environment after Terraform apply."
-  value = <<-EOT
-Next Steps:
-1. Configure your kubeconfig for kubectl by running:
-   aws eks --region ${local.region} update-kubeconfig --name ${module.eks.cluster_name} --alias ${module.eks.cluster_name}
-
-2. Test SSH to the EC2 instance's public IP (Only available if private APIServer endpoint is enabled):
-   ssh -i ~/.ssh/${local.key_name} ubuntu@${local.enable_sr ? aws_instance.client[0].public_ip : "N/A"}
-
-Happy deploying <3
-EOT
+  value = join("\n", compact([
+    "Next Steps:",
+    "1. Configure your kubeconfig for kubectl by running:",
+    "   aws eks --region ${local.region} update-kubeconfig --name ${module.eks.cluster_name} --alias ${module.eks.cluster_name}",
+    "",
+    "2. Test SSH to each EC2 instance's public IP (Only available if private APIServer endpoint is enabled):",
+    local.enable_sr && length(data.aws_instances.sr_ec2.public_ips) > 0 ? join("\n", [
+      for idx, ip in data.aws_instances.sr_ec2.public_ips :
+        "   ssh -i ~/.ssh/${local.key_name} ubuntu@${ip} # ${local.sr_instance_hostname}-${idx + 1}"
+    ]) : "   N/A",
+    "",
+    "Happy deploying <3"
+  ]))
 }

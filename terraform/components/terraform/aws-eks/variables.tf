@@ -54,6 +54,21 @@ variable "sr_ec2_instance_type" {
   type        = string
 }
 
+variable "sr_ec2_asg_min_size" {
+  description = "Minimum number of EC2 instances in the autoscaling group"
+  type        = number
+}
+
+variable "sr_ec2_asg_max_size" {
+  description = "Maximum number of EC2 instances in the autoscaling group"
+  type        = number
+}
+
+variable "sr_ec2_asg_desired_size" {
+  description = "Desired number of EC2 instances in the autoscaling group"
+  type        = number
+}
+
 variable "cluster_worker_instance_type" {
   description = "EKS cluster worker nodes instance type"
   type        = string
