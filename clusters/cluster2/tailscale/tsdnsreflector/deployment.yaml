@@ -37,12 +37,12 @@ spec:
             name: tsdnsreflector-config
         livenessProbe:
           tcpSocket:
-            port: 53
+            port: 5353
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           tcpSocket:
-            port: 53
+            port: 5353
           initialDelaySeconds: 5
           periodSeconds: 10
       affinity:
