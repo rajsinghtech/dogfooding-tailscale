@@ -42,7 +42,7 @@ if [ "$(printf '%s\n' "$current_version" "$required_version" | sort -V | tail -n
             echo "networkd-dispatcher is enabled. Writing persistent dispatcher script..."
 
             # Write dispatcher script
-            printf '#!/bin/sh\n\nethtool -K %%s rx-udp-gro-forwarding on rx-gro-list off\n' \
+            printf '#!/bin/sh\n\nethtool -K %s rx-udp-gro-forwarding on rx-gro-list off\n' \
               "$(ip -o route get 8.8.8.8 | cut -f 5 -d ' ')" | \
               sudo tee /etc/networkd-dispatcher/routable.d/50-tailscale > /dev/null
 
