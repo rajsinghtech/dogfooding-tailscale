@@ -49,6 +49,12 @@ spec:
               name: tsdnsreflector-config
               key: port
               optional: true
+        - name: FORCE_4VIA6
+          valueFrom:
+            configMapKeyRef:
+              name: tsdnsreflector-config
+              key: force_4via6
+              optional: true
         resources:
           limits:
             cpu: "0.5"

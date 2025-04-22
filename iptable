@@ -14,7 +14,7 @@ ip6tables -t mangle -A PREROUTING -d fd7a:115c:a1e0::/48 -j MARK --set-mark 0x40
 ip6tables -t mangle -A OUTPUT -d fd7a:115c:a1e0::/48 -j MARK --set-mark 0x40000
 
 # ip6tables FORWARD: Allow pod-to-Tailnet forwarding through tailscale0
-ip6tables -A FORWARD -s 2600:1f18:2abc:e500::/56 -d fd7a:115c:a1e0::/48 -o tailscale0 -j ACCEPT
+ip6tables -A FORWARD -s 2600:1f10:4cb9:e000::/56 -d fd7a:115c:a1e0::/48 -o tailscale0 -j ACCEPT
 
 # ip6tables NAT POSTROUTING: NAT pod IPs to host's Tailscale IP for Tailnet (requires NAT support)
-ip6tables -t nat -A POSTROUTING -s 2600:1f18:2abc:e500::/56 -d fd7a:115c:a1e0::/48 -j MASQUERADE
+ip6tables -t nat -A POSTROUTING -s 2600:1f10:4cb9:e000::/56 -d fd7a:115c:a1e0::/48 -j MASQUERADE

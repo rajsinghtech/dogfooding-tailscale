@@ -10,3 +10,5 @@ data:
   port: "5353"
   # Optional: custom DNS resolver in the format "host:port"
   # dns_resolver: "8.8.8.8:53" 
+  # Optional: force 4via6 mode
+  force_4via6: "false"
