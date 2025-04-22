@@ -42,3 +42,4 @@ terraform/stacks/workflows/*.yaml
 !terraform/stacks/catalog/*.yaml.example
 !terraform/stacks/workflows/*.yaml.example
 **/.kuberlr/darwin-arm64/*
+secret.yaml
