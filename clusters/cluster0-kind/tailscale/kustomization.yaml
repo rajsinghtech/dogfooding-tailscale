@@ -16,5 +16,5 @@ helmCharts:
         hostname: "cluster0-operator"
 
 resources:
-# - connector.yaml
+- connector.yaml
 - proxy-class.yaml

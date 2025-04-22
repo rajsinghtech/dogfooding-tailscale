@@ -3,7 +3,7 @@ kind: Connector
 metadata:
   name: cluster0-kind-connector
 spec:
-  proxyClass: prod 
+#   proxyClass: prod 
   tags:
     - tag:k8s
   subnetRouter:

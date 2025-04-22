@@ -42,8 +42,8 @@ spec:
         imagePullPolicy: Always
         image: "ghcr.io/tailscale/tailscale:latest"
         env:
-        - name: TS_ROUTES
-          value: "fdac:a172:3613::/108,2600:1f18:2abc:e500::/56"
+        # - name: TS_ROUTES
+        #   value: "fdac:a172:3613::/108,2600:1f18:2abc:e500::/56"
         - name: TS_KUBE_SECRET
           value: ""
         - name: TS_USERSPACE

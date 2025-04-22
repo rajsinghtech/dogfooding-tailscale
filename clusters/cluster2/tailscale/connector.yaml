@@ -3,10 +3,11 @@ kind: Connector
 metadata:
   name: cluster2-connector
 spec:
-  proxyClass: prod 
+#   proxyClass: prod 
   tags:
     - tag:k8s
   subnetRouter:
     advertiseRoutes:
-      - fd7a:115c:a1e0:b1a:0:2::/96
+      - fdbb:cbf8:2702::/108
+      - 2600:1f18:bfd:1200::/56
   exitNode: true

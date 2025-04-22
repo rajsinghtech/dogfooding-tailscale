@@ -16,6 +16,6 @@ helmCharts:
         hostname: "cluster1-operator"
 
 resources:
-# - connector.yaml
+- connector.yaml
 - proxy-class.yaml
 - ./tsdnsreflector
