@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: cluster3-raj-eks
+  name: cluster3-raj
   region: us-east-1
   version: "1.29"
 
