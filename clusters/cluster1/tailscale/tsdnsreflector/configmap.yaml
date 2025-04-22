@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: tsdnsreflector-config
 data:
-  SITEID: "1"
+  SITE_ID: "1"
   REFLECTED_DOMAIN: "cluster1.local"
   ORIGINAL_DOMAIN: "cluster.local"
   DNS_RESOLVER: "none"
