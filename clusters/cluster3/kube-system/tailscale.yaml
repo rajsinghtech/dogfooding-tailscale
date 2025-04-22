@@ -42,7 +42,8 @@ spec:
         imagePullPolicy: Always
         image: "ghcr.io/tailscale/tailscale:latest"
         env:
-        # Store the state in a k8s secret
+        - name: TS_ROUTES
+          value: "fd1a:18fe:9d57::/108,2600:1f10:4cb9:e000::/56"
         - name: TS_KUBE_SECRET
           value: ""
         - name: TS_USERSPACE
