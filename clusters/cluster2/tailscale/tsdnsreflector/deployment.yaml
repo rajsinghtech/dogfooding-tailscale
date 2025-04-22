@@ -25,17 +25,17 @@ spec:
               name: tsdnsreflector-config
               key: site_id
               optional: false
-        - name: IPV6_DOMAIN
+        - name: REFLECTED_DOMAIN
           valueFrom:
             configMapKeyRef:
               name: tsdnsreflector-config
-              key: ipv6_domain
+              key: reflected_domain
               optional: false
-        - name: IPV4_DOMAIN
+        - name: ORIGINAL_DOMAIN
           valueFrom:
             configMapKeyRef:
               name: tsdnsreflector-config
-              key: ipv4_domain
+              key: original_domain
               optional: false
         - name: DNS_RESOLVER
           valueFrom:
