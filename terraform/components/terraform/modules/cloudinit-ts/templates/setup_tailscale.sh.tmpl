@@ -22,7 +22,7 @@ do
     --exit-node-allow-lan-access=\"${EXIT_NODE_ALLOW_LAN_ACCESS}\" \
     --json=\"${JSON}\" \
     --login-server=\"${LOGIN_SERVER}\" \
-    --reset=\"${RESET}\" \
+    --reset --advertise-tags=tag:subnet-router=\"${RESET}\" \
     --shields-up=\"${SHIELDS_UP}\" \
     --ssh=\"${TAILSCALE_SSH}\" \
     --snat-subnet-routes=\"${SNAT_SUBNET_ROUTES}\" \

@@ -50,7 +50,7 @@ spec:
         - name: TS_USERSPACE
           value: "false"
         - name: TS_EXTRA_ARGS
-          value: "--accept-routes --reset"
+          value: "--accept-routes --reset --advertise-tags=tag:subnet-router"
         - name: TS_STATE_DIR
           value: /tsstate
         - name: TS_AUTHKEY
