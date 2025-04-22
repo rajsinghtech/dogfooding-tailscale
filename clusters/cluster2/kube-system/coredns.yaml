@@ -12,16 +12,25 @@ data:
             fallthrough in-addr.arpa ip6.arpa
         }
         prometheus :9153
-        forward . 100.100.100.100
+        forward . /etc/resolv.conf
         cache 30
         loop
         reload
         loadbalance
     }
+
+    cluster1.local:53 {
+        forward . 100.100.100.100
+    }
+
+    cluster2.local:53 {
+        forward . 100.100.100.100
+    }
+
+    cluster3.local:53 {
+        forward . 100.100.100.100
+    }
 kind: ConfigMap
 metadata:
-  labels:
-    eks.amazonaws.com/component: coredns
-    k8s-app: kube-dns
   name: coredns
   namespace: kube-system
