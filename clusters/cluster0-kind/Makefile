@@ -13,6 +13,14 @@ make apply:
 	kubectl apply -f /Users/rajsingh/Documents/GitHub/tailscale-clustermesh/kustomization/base/secret.yaml
 	make secrets
 
+make local:
+	kubectl create namespace monitoring || true
+	kustomize build kube-system --enable-helm | kubectl apply --server-side -f - || true
+	kustomize build tailscale --enable-helm | kubectl apply --server-side -f - || true
+	kustomize build default --enable-helm | kubectl apply --server-side -f - || true
+	kubectl apply -f ../../secret.yaml
+	make secrets
+
 make secrets:
 	@if [ -z "$$CLIENT_ID" ] || [ -z "$$CLIENT_SECRET" ]; then \
 		echo "Error: CLIENT_ID and CLIENT_SECRET environment variables must be set"; \
