@@ -8,6 +8,5 @@ spec:
     - tag:k8s
   subnetRouter:
     advertiseRoutes:
-      - fd3d:cd76:4993::/108
-      - 2600:1f10:4410:1c00::/56
+      - fd7a:115c:a1e0:b1a:0:3::/96
   exitNode: true
