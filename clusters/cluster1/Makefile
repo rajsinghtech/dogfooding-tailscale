@@ -7,7 +7,7 @@ make delete:
 make apply:
 	kubectl create namespace monitoring || true
 	kustomize build monitoring --enable-helm | kubectl apply --server-side -f - || true
-	kubectl create namespace argocd
+	kubectl create namespace argocd || true
 	kustomize build argocd --enable-helm | kubectl apply --server-side -f -
 	kubectl apply -f argocd/apps
 	kubectl apply -f ../../secret.yaml
