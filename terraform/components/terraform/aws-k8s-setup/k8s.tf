@@ -14,6 +14,7 @@ provider "kubectl" {
   host                   = local.eks_cluster_endpoint
   cluster_ca_certificate = local.eks_cluster_ca_certificate
   token                  = local.eks_cluster_auth_token
+  load_config_file = false
 }
 
 provider "helm" {

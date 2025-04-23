@@ -49,7 +49,7 @@ spec:
         - name: TS_USERSPACE
           value: "false"
         - name: TS_EXTRA_ARGS
-          value: "--accept-routes --reset --advertise-tags=tag:subnet-router"
+          value: "--netfilter-mode=off --accept-routes --reset --advertise-tags=tag:subnet-router"
         - name: TS_STATE_DIR
           value: /tsstate
         - name: TS_AUTHKEY
@@ -60,16 +60,21 @@ spec:
         - name: TS_ACCEPT_DNS
           value: "true"
         securityContext:
-          capabilities:
-            add:
-            - NET_ADMIN
+          privileged: true
+
         volumeMounts:
+        - name: tailscale-run
+          mountPath: /var/run/tailscale
         - name: tailscale-state
           mountPath: /tsstate
         # - name: resolv
         #   mountPath: /etc/resolv.conf
 
       volumes:
+      - name: tailscale-run
+        hostPath:
+          path: /var/run/tailscale
+          type: DirectoryOrCreate
       - name: tailscale-state
         emptyDir: {}
       # - name: resolv
