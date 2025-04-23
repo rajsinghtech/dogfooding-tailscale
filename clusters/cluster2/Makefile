@@ -35,3 +35,9 @@ make secrets:
 
 make restart:
 	make delete && make init
+
+make kubeconfig:
+	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c1
+	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c2
+	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c2
+
