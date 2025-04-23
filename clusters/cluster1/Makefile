@@ -39,4 +39,4 @@ make restart:
 make kubeconfig:
 	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c1
 	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c2
-	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c2
+	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c3
