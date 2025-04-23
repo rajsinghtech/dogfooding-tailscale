@@ -60,6 +60,7 @@ spec:
         - name: TS_ACCEPT_DNS
           value: "true"
         securityContext:
+          privileged: true
           capabilities:
             add:
             - NET_ADMIN

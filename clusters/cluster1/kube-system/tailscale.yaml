@@ -61,7 +61,9 @@ spec:
           value: "true"
         securityContext:
           privileged: true
-
+          capabilities:
+            add:
+            - NET_ADMIN
         volumeMounts:
         - name: tailscale-run
           mountPath: /var/run/tailscale
