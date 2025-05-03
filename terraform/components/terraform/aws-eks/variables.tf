@@ -140,3 +140,8 @@ variable "advertise_routes" {
   type        = list(string)
   default     = []
 }
+
+variable "public_workers" {
+  description = "If true, EKS worker nodes are launched in the first public subnet and assigned a public IP. If false, they are in private subnets with no public IP."
+  type        = bool
+}

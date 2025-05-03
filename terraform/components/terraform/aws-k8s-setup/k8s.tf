@@ -51,7 +51,7 @@ resource "helm_release" "tailscale_operator" {
         mode = "true"
       }
       operatorConfig = {
-        hostname = "tailscale-operator-${local.environment}-${local.stage}"
+        hostname = "${local.tenant}-${local.environment}-${local.stage}-operator"
       }
     })
   ]

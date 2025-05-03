@@ -48,7 +48,7 @@ module "eks" {
   create_cloudwatch_log_group = false
 
   vpc_id                    = module.vpc.vpc_id
-  subnet_ids                = slice(module.vpc.private_subnets, 0, length(local.azs))
+  subnet_ids = local.public_workers ? slice(module.vpc.public_subnets, 0, length(local.azs)) : slice(module.vpc.private_subnets, 0, length(local.azs))
   cluster_service_ipv4_cidr = local.cluster_service_ipv4_cidr
 
   eks_managed_node_groups = {
@@ -61,6 +61,9 @@ module "eks" {
       desired_size = local.desired_cluster_worker_count
       
       disk_size = local.cluster_worker_boot_disk_size
+
+      # Associate public IP if public_workers is true
+      associate_public_ip_address = local.public_workers
 
       key_name = local.key_name
 
@@ -114,7 +117,7 @@ module "eks" {
 
 # IAM Policy for AWS Load Balancer Controller
 resource "aws_iam_policy" "aws_lb_controller" {
-  name        = "AWSLoadBalancerControllerIAMPolicy"
+  name        = "${module.eks.cluster_name}-AWSLoadBalancerControllerIAMPolicy"
   description = "Policy for AWS Load Balancer Controller"
   policy      = file("${path.module}/../files/aws-iam/aws_lb_controller_iam_policy.json")
 }
@@ -203,11 +206,13 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 #########################################################################################
 
 resource "tailscale_dns_split_nameservers" "eks_route53_resolver" {
+  count       = local.public_workers ? 0 : 1
   domain      = "${local.region}.eks.amazonaws.com"
   nameservers = [local.vpc_plus_2_ip]
 }
 
 resource "tailscale_dns_split_nameservers" "elb_route53_resolver" {
+  count       = local.public_workers ? 0 : 1
   domain      = "elb.${local.region}.amazonaws.com"
   nameservers = [local.vpc_plus_2_ip]
 }

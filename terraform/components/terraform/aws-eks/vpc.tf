@@ -7,7 +7,8 @@ module "vpc" {
 
   azs  = local.azs
 
-  public_subnets    = local.public_subnets    
+  public_subnets    = local.public_subnets
+  map_public_ip_on_launch = true
   private_subnets   = local.private_subnets
 
 

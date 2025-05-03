@@ -23,6 +23,7 @@ locals {
   cluster_version                 = var.cluster_version
   oauth_client_id                 = var.oauth_client_id
   oauth_client_secret             = var.oauth_client_secret
+  public_workers                  = var.public_workers
   tags                            = merge(var.tags, {"Region" = var.region}, {"Tenant-Prefix" = var.tenant}, {"Env" = var.environment}, {"Stage" = var.stage})
   # Select the first 3 availability zones from the available list of AWS AZs. If <3 are available, select them all
   azs                             = slice(data.aws_availability_zones.available.names, 0, min(length(data.aws_availability_zones.available.names), 3))
