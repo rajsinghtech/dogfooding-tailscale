@@ -1,0 +1,10 @@
+components:
+  terraform:
+    google-gke-autopilot:
+      vars:
+        oauth_client_id: "redacted"
+        oauth_client_secret: "redacted"
+        tags:
+          "Owner": "Me"
+          "Team" : "Myself"
+          "ManagedBy": "Atmos"

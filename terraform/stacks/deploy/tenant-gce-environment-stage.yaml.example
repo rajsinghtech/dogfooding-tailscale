@@ -1,0 +1,15 @@
+vars:
+  region: us-central1
+  tenant: my-gke
+  environment: gce-uc1  
+  stage: test
+
+import:
+  - catalog/google-gke-autopilot
+
+components:
+  terraform:
+    google-gke-autopilot:
+      vars:
+        cluster_name: "my-gke-cluster1-gce-uc1"
+        allowed_ip: "<my-public-ip>/32"

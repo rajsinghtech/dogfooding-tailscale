@@ -1,0 +1,81 @@
+name: Workflows for Tailscale-GKE
+description: Atmos workflows for managing Tailscale-GKE
+
+workflows:
+  validate-phase1:
+    description: |
+      Run 'terraform validate' on google-gke-autopilot component in all stacks
+    steps:
+      - command: terraform validate google-gke-autopilot -s tenant-gce-environment1-stage
+      - command: terraform validate google-gke-autopilot -s tenant-gce-environment2-stage
+
+  plan-phase1:
+    description: |
+      Run 'terraform plan' on google-gke-autopilot component in all stacks
+    steps:
+      - command: terraform plan google-gke-autopilot -s tenant-gce-environment1-stage
+      - command: terraform plan google-gke-autopilot -s tenant-gce-environment2-stage
+
+  apply-phase1:
+    description: |
+      Run 'terraform apply -auto-approve' on google-gke-autopilot component in all stacks
+    steps:
+      - command: terraform apply google-gke-autopilot -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform apply google-gke-autopilot -auto-approve -s tenant-gce-environment2-stage
+
+  validate-phase2:
+    description: |
+      Run 'terraform validate' on google-k8s-setup component in all stacks
+    steps:
+      - command: terraform validate google-k8s-setup -s tenant-gce-environment1-stage
+      - command: terraform validate google-k8s-setup -s tenant-gce-environment2-stage
+
+  plan-phase2:
+    description: |
+      Run 'terraform plan' on google-k8s-setup component in all stacks
+    steps:
+      - command: terraform plan google-k8s-setup -s tenant-gce-environment1-stage
+      - command: terraform plan google-k8s-setup -s tenant-gce-environment2-stage
+
+  apply-phase2:
+    description: |
+      Run 'terraform apply -auto-approve' on google-k8s-setup component in all stacks
+    steps:
+      - command: terraform apply google-k8s-setup -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform apply google-k8s-setup -auto-approve -s tenant-gce-environment2-stage
+
+  plan-all:
+    description: |
+      Run 'terraform plan' on all components in all stacks
+    steps:
+      - command: terraform plan google-gke-autopilot -s tenant-gce-environment1-stage
+      - command: terraform plan google-k8s-setup -s tenant-gce-environment1-stage 
+      - command: terraform plan google-gke-autopilot -s tenant-gce-environment2-stage
+      - command: terraform plan google-k8s-setup -s tenant-gce-environment2-stage
+
+  apply-all:
+    description: |
+      Run 'terraform apply -auto-approve' on all components in all stacks
+    steps:
+      - command: terraform apply google-gke-autopilot -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform apply google-k8s-setup -auto-approve -s tenant-gce-environment1-stage 
+      - command: terraform apply google-gke-autopilot -auto-approve -s tenant-gce-environment2-stage
+      - command: terraform apply google-k8s-setup -auto-approve -s tenant-gce-environment2-stage
+
+  destroy-all:
+    description: |
+      Run 'terraform destroy' on all components in all stacks
+    steps:
+      - command: terraform destroy google-k8s-setup -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform destroy google-gke-autopilot -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform destroy google-k8s-setup -auto-approve -s tenant-gce-environment2-stage
+      - command: terraform destroy google-gke-autopilot -auto-approve -s tenant-gce-environment2-stage
+
+  clean-all:
+    description: |
+      Run 'terraform clean' on all components in all stacks
+    steps:
+      - command: terraform clean google-k8s-setup -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform clean google-gke-autopilot -auto-approve -s tenant-gce-environment1-stage
+      - command: terraform clean google-k8s-setup -auto-approve -s tenant-gce-environment2-stage
+      - command: terraform clean google-gke-autopilot -auto-approve -s tenant-gce-environment2-stage
