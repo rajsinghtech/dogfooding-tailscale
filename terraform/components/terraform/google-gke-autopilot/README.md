@@ -24,11 +24,16 @@ The following variables can be configured:
 - `project_id`: Google Cloud Project ID
 - `region`: Region for the cluster (default: us-central1)
 - `zone`: Zone for the cluster (default: us-central1-a)
-- `allowed_ip`: IP address to allow access to kube-apiserver
+- `oauth_client_id`: OAuth client ID for the cluster
+- `oauth_client_secret`: OAuth client secret for the cluster
 - `cluster_name`: Name of the GKE cluster (default: autopilot-cluster)
 - `machine_type`: Node machine type (default: e2-medium)
 - `min_nodes`: Minimum number of nodes (default: 1)
 - `max_nodes`: Maximum number of nodes (default: 3)
+- `tenant`: Tenant name for the cluster (default: sales)
+- `environment`: Environment name for the cluster (default: sandbox)
+- `stage`: Stage name for the cluster (default: test)
+- `authorized_networks`: Map of CIDR blocks and their display names for allowed networks/ACL to the kubeapiserver
 
 ## Usage
 
@@ -37,31 +42,25 @@ The following variables can be configured:
    ```bash
    terraform init
    ```
-3. Plan the deployment:
+3. Setup vars in a .tfvars file or as command line variables below
+4. Plan the deployment:
    ```bash
-   terraform plan -var="project_id=your-project-id" -var="allowed_ip=your-ip-address"
+   terraform plan -var="project_id=your-project-id" -var="oauth_client_id=your-oauth-client-id" -var="oauth_client_secret=your-oauth-client-secret" -var="authorized_networks={\"your-ip-address/32\": \"your-ip-address\"}"
    ```
-4. Apply the configuration:
+5. Apply the configuration:
    ```bash
-   terraform apply -var="project_id=your-project-id" -var="allowed_ip=your-ip-address"
+   terraform apply -var="project_id=your-project-id" -var="oauth_client_id=your-oauth-client-id" -var="oauth_client_secret=your-oauth-client-secret" -var="authorized_networks={\"your-ip-address/32\": \"your-ip-address\"}"
    ```
 
-5. Get the kubeconfig:
+6. Get the kubeconfig:
    The `terraform apply` output will show you the exact command to get the kubeconfig. It will look like:
    ```bash
    gcloud container clusters get-credentials <cluster-name> --region <region>
    ```
    After running this command, you can use `kubectl` to interact with your cluster.
 
-## Security Features
-
-- IP whitelisting for kube-apiserver access
-- Network Policy enabled
-- Binary Authorization enabled
-- Workload Identity enabled
-
 ## Notes
 
-- The cluster uses a custom VPC network and subnet
+- The cluster for now is using public controlplane/APIserver and uses a custom VPC network and subnet
 - The cluster is configured with autoscaling
 - The configuration includes timeouts for long-running operations

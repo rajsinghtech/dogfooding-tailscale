@@ -65,9 +65,12 @@ resource "google_container_cluster" "primary" {
 
   # Enable master authorized networks
   master_authorized_networks_config {
-    cidr_blocks {
-      cidr_block   = var.allowed_ip
-      display_name = "Allowed IP"
+    dynamic "cidr_blocks" {
+      for_each = var.authorized_networks
+      content {
+        cidr_block   = cidr_blocks.key
+        display_name = cidr_blocks.value
+      }
     }
   }
 

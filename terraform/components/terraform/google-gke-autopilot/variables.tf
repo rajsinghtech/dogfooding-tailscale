@@ -16,9 +16,9 @@ variable "zone" {
   default     = "us-central1-a"
 }
 
-variable "allowed_ip" {
-  description = "The IP address to allow access to the kube-apiserver"
-  type        = string
+variable "authorized_networks" {
+  description = "Map of CIDR blocks and their display names for master authorized networks"
+  type        = map(string)
 }
 
 variable "cluster_name" {
@@ -30,16 +30,19 @@ variable "cluster_name" {
 variable "tenant" {
   description = "The tenant name for the cluster"
   type        = string
+  default     = "sales"
 }
 
 variable "environment" {
   description = "The environment name for the cluster"
   type        = string
+  default     = "sandbox"
 }
 
 variable "stage" {
   description = "The stage name for the cluster"
   type        = string
+  default     = "test"
 }
 
 variable "oauth_client_id" {
