@@ -24,8 +24,8 @@ The following variables can be configured:
 - `project_id`: Google Cloud Project ID
 - `region`: Region for the cluster (default: us-central1)
 - `zone`: Zone for the cluster (default: us-central1-a)
-- `oauth_client_id`: OAuth client ID for the cluster
-- `oauth_client_secret`: OAuth client secret for the cluster
+- `oauth_client_id`: Tailscale OAuth client ID for the cluster to properly install the Tailscale K8s Operator Helm chart (**Required user variable**)
+- `oauth_client_secret`: Tailscale OAuth client secret for the cluster properly install the Tailscale K8s Operator Helm chart (**Required user variable**)
 - `cluster_name`: Name of the GKE cluster (default: autopilot-cluster)
 - `machine_type`: Node machine type (default: e2-medium)
 - `min_nodes`: Minimum number of nodes (default: 1)
@@ -33,7 +33,7 @@ The following variables can be configured:
 - `tenant`: Tenant name for the cluster (default: sales)
 - `environment`: Environment name for the cluster (default: sandbox)
 - `stage`: Stage name for the cluster (default: test)
-- `authorized_networks`: Map of CIDR blocks and their display names for allowed networks/ACL to the kubeapiserver
+- `authorized_networks`: Map of CIDR blocks (your machine's public IP/s for example) and their display names for allowed networks/ACL to the kubeapiserver (**Required variable for access**)
 
 ## Usage
 
