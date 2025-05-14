@@ -21,7 +21,7 @@ This Terraform configuration creates a Google Kubernetes Engine (GKE) Autopilot 
 
 The following variables can be configured:
 
-- `project_id`: Google Cloud Project ID
+- `project_id`: Google Cloud Project ID (**Required user variable**)
 - `region`: Region for the cluster (default: us-central1)
 - `zone`: Zone for the cluster (default: us-central1-a)
 - `oauth_client_id`: Tailscale OAuth client ID for the cluster to properly install the Tailscale K8s Operator Helm chart (**Required user variable**)
