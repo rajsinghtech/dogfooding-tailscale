@@ -5,5 +5,5 @@
       "version": "latest"
     }
   },
-  "postStartCommand": "/usr/local/bin/tailscaled-devcontainer-start.sh"
+  "postStartCommand": "/usr/local/sbin/tailscaled-devcontainer-start"
 }
