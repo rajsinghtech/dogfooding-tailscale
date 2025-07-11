@@ -1,8 +1,9 @@
 {
   "name": "Codespace with Tailscale",
   "features": {
-  "ghcr.io/tailscale/codespace/tailscale": {
-    "version": "latest"
-  }
-}
+    "ghcr.io/tailscale/codespace/tailscale": {
+      "version": "latest"
+    }
+  },
+  "postStartCommand": "/usr/local/bin/tailscaled-devcontainer-start.sh"
 }
