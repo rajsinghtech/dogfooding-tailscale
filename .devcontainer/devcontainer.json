@@ -4,6 +4,5 @@
     "ghcr.io/tailscale/codespace/tailscale": {
       "version": "latest"
     }
-  },
-  "postStartCommand": "/usr/local/sbin/tailscaled-devcontainer-start"
+  }
 }
