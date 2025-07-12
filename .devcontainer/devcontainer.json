@@ -1,5 +1,6 @@
 {
   "name": "Codespace with Tailscale",
+  "runArgs": ["--device=/dev/net/tun"],
   "features": {
     "ghcr.io/tailscale/codespace/tailscale": {
       "version": "latest"
