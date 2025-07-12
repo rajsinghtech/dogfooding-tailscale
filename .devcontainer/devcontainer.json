@@ -1,6 +1,6 @@
 {
   "name": "Codespace with Tailscale",
-  "runArgs": ["--device=/dev/net/tun"],
+  "postStartCommand": "/usr/local/sbin/tailscaled-devcontainer-start.sh",
   "features": {
     "ghcr.io/tailscale/codespace/tailscale": {
       "version": "latest"
