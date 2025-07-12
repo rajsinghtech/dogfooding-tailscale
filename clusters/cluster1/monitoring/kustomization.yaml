@@ -7,7 +7,7 @@ resources:
 helmCharts:
   - name: prometheus-operator-crds
     repo: https://prometheus-community.github.io/helm-charts
-    version: 19.1.0  # Replace with the desired version
+    version: 21.0.0  # Replace with the desired version
     releaseName: prometheus-operator-crds
     namespace: monitoring
     includeCRDs: true
