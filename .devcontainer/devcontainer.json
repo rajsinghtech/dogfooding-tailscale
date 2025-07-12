@@ -1,6 +1,5 @@
 {
   "name": "Codespace with Tailscale",
-  "postStartCommand": "/usr/local/sbin/tailscaled-devcontainer-start",
   "features": {
     "ghcr.io/rajsinghtech/codespace/tailscale": {
       "version": "latest"
