@@ -44,3 +44,9 @@ terraform/stacks/workflows/*.yaml
 !terraform/stacks/workflows/*.yaml.example
 **/.kuberlr/darwin-arm64/*
 secret.yaml
+
+# Exclude rule files
+*.rules
+
+# Local development notes
+CL*.md
