@@ -1,0 +1,8 @@
+{
+  "name": "Codespace with Tailscale",
+  "features": {
+    "ghcr.io/rajsinghtech/codespace/tailscale": {
+      "version": "latest"
+    }
+  }
+}
