@@ -1,0 +1,12 @@
+components:
+  terraform:
+    azure-ts-perf-testing:
+      vars:
+        ssh_private_key_path: "~/.ssh/id_ed25519_me"
+        ssh_public_key_path: "~/.ssh/id_ed25519_me.pub"
+        oauth_client_id: "redacted"
+        oauth_client_secret: "redacted"
+        tags:
+          "Owner": "Me"
+          "Team" : "Myself"
+          "ManagedBy": "Atmos"
