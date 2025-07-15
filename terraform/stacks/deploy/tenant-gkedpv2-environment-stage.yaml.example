@@ -1,0 +1,27 @@
+vars:
+  region: us-central1
+  tenant: kb
+  environment: gkedpv2-uc1  
+  stage: test
+
+import:
+  - catalog/google-gke-dpv2.yaml
+
+components:
+  terraform:
+    google-gke-dpv2:
+      vars:
+        name: "myname"
+        region: "myregion"
+        zone: "myzone"
+        machine_type: "mymachinetype"
+        node_count: "1"
+        enable_sr: true
+        vpc_subnet_cidr: "10.20.0.0/20"
+        gke_subnet_cidr: "10.20.32.0/20"
+        gke_pod_range_cidr: "10.21.0.0/20"
+        gke_service_range_cidr: "10.31.0.0/20"
+        gke_master_cidr: "172.16.31.0/28"
+        authorized_networks: 
+          - name: "subnet-router"
+            cidr: "10.20.32.0/20" 

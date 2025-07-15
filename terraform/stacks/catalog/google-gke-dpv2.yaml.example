@@ -1,0 +1,12 @@
+components:
+  terraform:
+    google-gke-dpv2:
+      vars:
+        project_id: "myprojectid"
+        oauth_client_id: "myoauthclientid"
+        oauth_client_secret: "myoauthclientsecret"
+        ssh_public_keys: "myuser:ssh-ed25519 blahblah myuser@myhost"
+        tags:
+          "owner": "me"
+          "team" : "myteam"
+          "managed_by": "atmos"
