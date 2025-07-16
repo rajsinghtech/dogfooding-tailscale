@@ -5,3 +5,15 @@ An opinionated Terraform + ArgoCD GitOps way of setting up K8s infrastructure to
 # Disclaimer
 
 This repo is just for learning and not to be used for anything that actually matters. Here be dragons.
+
+# Root Module Coverage
+
+AWS:
+- EKS
+
+Azure: 
+- AKS
+
+Google:
+- GKE Autopilot
+- GKE Dataplane v2 
