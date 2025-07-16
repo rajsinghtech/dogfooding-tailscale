@@ -28,7 +28,7 @@ data "aws_eks_cluster_auth" "this" {
 module "eks" {
   enable_irsa = true
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  version = "~> 20.37"
 
   cluster_name                    = local.name
   cluster_version                 = local.cluster_version
