@@ -4,11 +4,11 @@ terraform {
   required_providers {
     cloudinit = {
       source  = "hashicorp/cloudinit"
-      version = ">= 2.0"
+      version = "~> 2.3"
     }
     tailscale = {
       source  = "tailscale/tailscale"
-      version = ">= 0.13.7"
+      version = "~> 0.21"
     }
   }
 }
