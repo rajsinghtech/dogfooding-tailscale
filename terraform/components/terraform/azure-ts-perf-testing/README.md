@@ -101,19 +101,13 @@ output "iperf_client_command" {
 After deploying the infrastructure, you can run performance tests between the instances:
 
 1. On the first VM (server), start the iperf3 server:
+
    ```bash
    iperf3 -s
    ```
 
 2. On the second VM (client), run the iperf3 client to test the connection:
+
    ```bash
-   iperf3 -c <server-private-ip> -t 60 -P 8
+   iperf3 -i 0 -c $TARGET_IP -t 10 -C cubic -V
    ```
-
-## Cleanup
-
-To destroy all resources created by this module:
-
-```bash
-terraform destroy
-```

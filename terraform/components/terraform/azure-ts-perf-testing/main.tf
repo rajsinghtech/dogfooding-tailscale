@@ -21,6 +21,11 @@ resource "azurerm_resource_group" "main" {
   })
 }
 
+# Get current public IP for NSG rule
+data "http" "my_public_ip" {
+  url = "https://ipinfo.io/ip"
+}
+
 # Create a virtual network
 resource "azurerm_virtual_network" "main" {
   name                = format("%s-%s-%s-vnet", var.tenant, var.environment, var.stage)
@@ -106,6 +111,19 @@ resource "azurerm_network_security_group" "main" {
     source_address_prefixes    = [var.vnet_cidr]
     destination_address_prefix = "*"
     description               = "Allow iperf3 traffic within VPC"
+  }
+
+  security_rule {
+    name                       = "iperf3-wan"
+    priority                   = 130
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5201"
+    source_address_prefix      = format("%s/32", chomp(data.http.my_public_ip.response_body))
+    destination_address_prefix = "*"
+    description               = "Allow iperf3 traffic from my public IP for WAN testing"
   }
 }
 
