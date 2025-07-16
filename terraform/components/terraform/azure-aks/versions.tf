@@ -3,11 +3,19 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.0.0"
+      version = "~> 4.0"
     }
     tailscale = {
       source  = "tailscale/tailscale"
-      version = ">= 0.13.7"
+      version = "~> 0.21"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.35"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.19"
     }
   }
 }
