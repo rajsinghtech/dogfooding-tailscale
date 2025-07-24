@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - dashboard-tailscale.yaml
+  - ingress.yaml
 
 helmCharts:
   # - name: prometheus-operator-crds
