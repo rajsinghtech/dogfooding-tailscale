@@ -463,7 +463,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "sum by(ts_proxy_parent_name, path) (irate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8)",
+              "expr": "irate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "{{ts_proxy_parent_name}} recv {{path}}",
@@ -477,7 +477,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by(ts_proxy_parent_name, path) (irate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8)",
+              "expr": "irate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8",
               "hide": false,
               "instant": false,
               "legendFormat": "{{ts_proxy_parent_name}} trans {{path}}",
