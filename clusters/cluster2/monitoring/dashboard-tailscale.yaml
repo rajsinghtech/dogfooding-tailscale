@@ -30,7 +30,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 46,
+      "id": 33,
       "links": [],
       "panels": [
         {
@@ -49,8 +49,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -82,7 +81,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -148,8 +147,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -184,7 +182,7 @@ data:
               "sort": "none"
             }
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -254,8 +252,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "yellow",
@@ -292,7 +289,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -339,8 +336,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
-                    "value": null
+                    "color": "red"
                   },
                   {
                     "color": "yellow",
@@ -378,7 +374,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -444,8 +440,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -465,6 +460,30 @@ data:
                   {
                     "id": "custom.transform",
                     "value": "negative-Y"
+                  }
+                ]
+              },
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "iperf-server recv peer_relay_ipv4"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
                   }
                 ]
               }
@@ -495,7 +514,7 @@ data:
               "sort": "none"
             }
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -546,8 +565,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -581,7 +599,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -697,8 +715,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -748,7 +765,7 @@ data:
               "sort": "none"
             }
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -830,8 +847,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -851,6 +867,30 @@ data:
                   {
                     "id": "custom.transform",
                     "value": "negative-Y"
+                  }
+                ]
+              },
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "iperf-server recv peer_relay_ipv4"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
                   }
                 ]
               }
@@ -881,7 +921,7 @@ data:
               "sort": "none"
             }
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -964,7 +1004,7 @@ data:
               "sort": "none"
             }
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -998,6 +1038,30 @@ data:
               "legendFormat": "DERP Relay",
               "range": true,
               "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv4\"}[$__rate_interval]))",
+              "hide": false,
+              "legendFormat": "Peer Relay IPv4",
+              "range": true,
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv6\"}[$__rate_interval]))",
+              "hide": false,
+              "legendFormat": "Peer Relay IPv6",
+              "range": true,
+              "refId": "E"
             }
           ],
           "title": "Connection Types Distribution",
@@ -1021,8 +1085,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
-                    "value": null
+                    "color": "red"
                   },
                   {
                     "color": "yellow",
@@ -1069,7 +1132,7 @@ data:
             "sizing": "auto",
             "valueMode": "color"
           },
-          "pluginVersion": "11.5.2",
+          "pluginVersion": "11.6.0",
           "targets": [
             {
               "datasource": {
@@ -1093,6 +1156,18 @@ data:
               "legendFormat": "DERP Relay %",
               "range": true,
               "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "100 * sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"peer_relay.*\"}[$__rate_interval])) / sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))",
+              "hide": false,
+              "legendFormat": "Peer Relay %",
+              "range": true,
+              "refId": "C"
             }
           ],
           "title": "Connection Efficiency",
@@ -1100,7 +1175,7 @@ data:
         }
       ],
       "preload": false,
-      "schemaVersion": 40,
+      "schemaVersion": 41,
       "tags": [
         "tailscale"
       ],
@@ -1167,6 +1242,5 @@ data:
       "timezone": "browser",
       "title": "Tailscale Network Metrics",
       "uid": "de9fpk1payv40c",
-      "version": 8,
-      "weekStart": ""
+      "version": 1
     }
