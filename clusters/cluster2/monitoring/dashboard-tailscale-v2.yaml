@@ -1,0 +1,1463 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    grafana_folder: Tailscale
+  labels:
+    grafana_dashboard: "1"
+  name: tailscale-grafana-dashboard-v2
+  namespace: monitoring
+data:
+  tailscale-v2.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Dashboard for monitoring Tailscale v2 with UDP relay, common ingress, and peer relay metrics in cluster2. Shows health, connectivity, traffic patterns, and performance for all Tailscale proxy types.",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 40,
+          "panels": [],
+          "title": "Overview",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Total number of active Tailscale nodes by proxy type",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 1
+          },
+          "id": 15,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "count(group by(ts_proxy_parent_name) ({namespace=\"tailscale\", ts_proxy_type=~\"$proxy_type\", __name__=~\"tailscaled_.*\"}))",
+              "legendFormat": "Active Nodes",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Active Nodes",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Total health messages across all selected nodes",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 1
+          },
+          "id": 11,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(tailscaled_health_messages{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"})",
+              "legendFormat": "Total Health Messages",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Health Messages",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Percentage of advertised routes that are approved",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 1
+          },
+          "id": 30,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "100 * sum(tailscaled_approved_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}) / clamp_min(sum(tailscaled_advertised_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}), 1)",
+              "legendFormat": "Approval Rate",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Route Approval Rate",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Total advertised and approved routes",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "id": 12,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(tailscaled_advertised_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"})",
+              "legendFormat": "Advertised",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(tailscaled_approved_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Approved",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Subnet Routes",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Connection efficiency - percentage of traffic using different connection types",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 30
+                  },
+                  {
+                    "color": "green",
+                    "value": 70
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "id": 31,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "100 * (sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"direct.*\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"direct.*\"}[$__rate_interval]))) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
+              "legendFormat": "Direct %",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "100 * (sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval]))) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
+              "hide": false,
+              "legendFormat": "DERP %",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "100 * (sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"peer_relay.*\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"peer_relay.*\"}[$__rate_interval]))) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
+              "hide": false,
+              "legendFormat": "Peer Relay %",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Connection Efficiency",
+          "type": "bargauge"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "id": 41,
+          "panels": [],
+          "title": "Network Traffic Analysis",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Network traffic breakdown by connection path including peer relay",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bps"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "/.*Outbound.*/"
+                },
+                "properties": [
+                  {
+                    "id": "custom.transform",
+                    "value": "negative-Y"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 6
+          },
+          "id": 42,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(path) (rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8)",
+              "legendFormat": "Inbound {{path}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(path) (rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8)",
+              "legendFormat": "Outbound {{path}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Traffic by Connection Path",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Network traffic per node showing all connection paths",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 6
+          },
+          "id": 43,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(ts_proxy_parent_name, path) (rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]) + rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))*8",
+              "legendFormat": "{{ts_proxy_parent_name}} - {{path}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Traffic Per Node by Path",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Distribution of traffic across different connection types",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "mappings": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 14
+          },
+          "id": 14,
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": ["percent", "value"]
+            },
+            "pieType": "donut",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv4\"}[$__rate_interval]) + rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv4\"}[$__rate_interval]))",
+              "legendFormat": "Direct IPv4",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv6\"}[$__rate_interval]) + rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv6\"}[$__rate_interval]))",
+              "legendFormat": "Direct IPv6",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval]) + rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval]))",
+              "legendFormat": "DERP Relay",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv4\"}[$__rate_interval]) + rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv4\"}[$__rate_interval]))",
+              "legendFormat": "Peer Relay IPv4",
+              "range": true,
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv6\"}[$__rate_interval]) + rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv6\"}[$__rate_interval]))",
+              "legendFormat": "Peer Relay IPv6",
+              "range": true,
+              "refId": "E"
+            }
+          ],
+          "title": "Traffic Distribution by Path",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Packet rate by connection path",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "packets/sec",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "pps"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "/.*Outbound.*/"
+                },
+                "properties": [
+                  {
+                    "id": "custom.transform",
+                    "value": "negative-Y"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 16,
+            "x": 8,
+            "y": 14
+          },
+          "id": 44,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(path) (rate(tailscaled_inbound_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))",
+              "legendFormat": "Inbound {{path}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(path) (rate(tailscaled_outbound_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))",
+              "legendFormat": "Outbound {{path}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Packet Rate by Path",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "id": 45,
+          "panels": [],
+          "title": "Dropped Packets & Errors",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Critical dropped packets by reason (ACL, errors, protocol issues)",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "packets/second",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "pps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 23
+          },
+          "id": 16,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(reason) (rate(tailscaled_inbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))",
+              "legendFormat": "Inbound {{reason}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(reason) (rate(tailscaled_outbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))",
+              "legendFormat": "Outbound {{reason}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Dropped Packets by Reason",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Dropped packets per node",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "packets/second",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "pps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 23
+          },
+          "id": 46,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by(ts_proxy_parent_name) (rate(tailscaled_inbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]) + rate(tailscaled_outbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval]))",
+              "legendFormat": "{{ts_proxy_parent_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Dropped Packets by Node",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "id": 47,
+          "panels": [],
+          "title": "Node Details",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Health messages by type for each node",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 32
+          },
+          "id": 48,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "horizontal",
+            "showValue": "auto",
+            "stacking": "normal",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "tailscaled_health_messages{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}",
+              "legendFormat": "{{ts_proxy_parent_name}} - {{type}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Health Messages by Node",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Route status per node",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Advertised"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "blue"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Approved"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "green"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Approval %"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percent"
+                  },
+                  {
+                    "id": "custom.displayMode",
+                    "value": "gradient-gauge"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": null
+                        },
+                        {
+                          "color": "yellow",
+                          "value": 50
+                        },
+                        {
+                          "color": "green",
+                          "value": 90
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 32
+          },
+          "id": 49,
+          "options": {
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "11.6.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "tailscaled_advertised_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "tailscaled_approved_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "100 * tailscaled_approved_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"} / clamp_min(tailscaled_advertised_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}, 1)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "range": false,
+              "refId": "C"
+            }
+          ],
+          "title": "Route Status by Node",
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "ts_proxy_parent_name",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Time 1": true,
+                  "Time 2": true,
+                  "Time 3": true,
+                  "__name__": true,
+                  "__name__ 1": true,
+                  "__name__ 2": true,
+                  "__name__ 3": true,
+                  "job": true,
+                  "job 1": true,
+                  "job 2": true,
+                  "job 3": true,
+                  "namespace": true,
+                  "namespace 1": true,
+                  "namespace 2": true,
+                  "namespace 3": true,
+                  "ts_proxy_type": true,
+                  "ts_proxy_type 1": true,
+                  "ts_proxy_type 2": true,
+                  "ts_proxy_type 3": true
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "Value #A": "Advertised",
+                  "Value #B": "Approved",
+                  "Value #C": "Approval %",
+                  "ts_proxy_parent_name": "Node"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "tailscale",
+        "networking",
+        "cluster2"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "definition": "label_values({namespace=\"tailscale\", ts_proxy_parent_name!=\"\"}, ts_proxy_parent_name)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Node",
+            "multi": true,
+            "name": "node",
+            "options": [],
+            "query": {
+              "query": "label_values({namespace=\"tailscale\", ts_proxy_parent_name!=\"\"}, ts_proxy_parent_name)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "definition": "label_values({namespace=\"tailscale\", ts_proxy_type!=\"\"}, ts_proxy_type)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Proxy Type",
+            "multi": true,
+            "name": "proxy_type",
+            "options": [],
+            "query": {
+              "query": "label_values({namespace=\"tailscale\", ts_proxy_type!=\"\"}, ts_proxy_type)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Tailscale Network Metrics v2",
+      "uid": "tailscale-v2-cluster2",
+      "version": 1,
+      "weekStart": ""
+    }
