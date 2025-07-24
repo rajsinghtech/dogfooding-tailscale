@@ -1183,14 +1183,14 @@ data:
         "list": [
           {
             "current": {},
-            "definition": "label_values(tailscaled_health_messages{namespace=\"tailscale\"}, ts_proxy_parent_name)",
+            "definition": "label_values({namespace=\"tailscale\", __name__=~\"tailscaled_.*\", ts_proxy_parent_name!=\"\"}, ts_proxy_parent_name)",
             "includeAll": true,
             "label": "Tailscale Node",
             "name": "node",
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(tailscaled_health_messages{namespace=\"tailscale\"}, ts_proxy_parent_name)",
+              "query": "label_values({namespace=\"tailscale\", __name__=~\"tailscaled_.*\", ts_proxy_parent_name!=\"\"}, ts_proxy_parent_name)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -1200,14 +1200,14 @@ data:
           },
           {
             "current": {},
-            "definition": "label_values(tailscaled_health_messages{namespace=\"tailscale\"}, ts_proxy_type)",
+            "definition": "label_values({namespace=\"tailscale\", __name__=~\"tailscaled_.*\", ts_proxy_type!=\"\"}, ts_proxy_type)",
             "includeAll": true,
             "label": "Proxy Type",
             "name": "proxy_type",
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(tailscaled_health_messages{namespace=\"tailscale\"}, ts_proxy_type)",
+              "query": "label_values({namespace=\"tailscale\", __name__=~\"tailscaled_.*\", ts_proxy_type!=\"\"}, ts_proxy_type)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
