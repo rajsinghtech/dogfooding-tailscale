@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: monitoring
+  annotations:
+    tailscale.com/tailnet-ip: 100.123.191.46
+  name: udp-relay-1
+spec:
+  externalName: placeholder   # any value - will be overwritten by operator
+  type: ExternalName
+  ports:
+    - port: 8080
+      protocol: TCP
+      name: web
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: scrape-udp-relay-1
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  staticConfigs:
+  - targets:
+    - udp-relay-1.monitoring.svc.cluster.local:8080
+    labels:
+      namespace: tailscale
+      ts_proxy_parent_name: udp-relay-kb-cluster2-aws-uw2-sr-1-1
+      ts_proxy_type: udp-relay   
+  metricsPath: /metrics
+  scrapeInterval: 5s
