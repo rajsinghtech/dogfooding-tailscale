@@ -523,7 +523,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "irate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"$path\"}[$__rate_interval])*8",
+              "expr": "irate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "{{ts_proxy_parent_name}} recv {{path}}",
@@ -537,7 +537,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "irate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"$path\"}[$__rate_interval])*8",
+              "expr": "irate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8",
               "hide": false,
               "instant": false,
               "legendFormat": "{{ts_proxy_parent_name}} trans {{path}}",
@@ -933,7 +933,7 @@ data:
               "expr": "rate(tailscaled_inbound_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "{{ts_proxy_parent_name}} recv {{path}}",
+              "legendFormat": "{{ts_proxy_parent_name}} recv",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -947,7 +947,7 @@ data:
               "expr": "rate(tailscaled_outbound_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "{{ts_proxy_parent_name}} trans {{path}}",
+              "legendFormat": "{{ts_proxy_parent_name}} trans",
               "range": true,
               "refId": "B"
             }
