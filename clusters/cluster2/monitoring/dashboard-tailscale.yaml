@@ -89,7 +89,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "count(count by(ts_proxy_parent_name) ({namespace=\"tailscale\", ts_proxy_type=~\"$proxy_type\", __name__=~\"tailscaled_.*\"}))",
+              "expr": "count(group by(ts_proxy_parent_name) ({namespace=\"tailscale\", ts_proxy_type=~\"$proxy_type\", __name__=~\"tailscaled_.*\"}))",
               "legendFormat": "Active Nodes",
               "range": true,
               "refId": "A"
@@ -103,7 +103,7 @@ data:
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows ACL and error dropped packets for incoming and outgoing traffic",
+          "description": "Shows dropped packets by important reasons (ACL, errors, and protocol issues)",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -190,8 +190,8 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by(reason)(rate(tailscaled_inbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", reason=\"acl\"}[$__rate_interval]))",
-              "legendFormat": "Inbound - {{reason}}",
+              "expr": "sum by(reason) (rate(tailscaled_inbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", reason=~\"acl|error|unknown_protocol|too_short|fragment\"}[$__rate_interval]))",
+              "legendFormat": "Inbound {{reason}}",
               "range": true,
               "refId": "A"
             },
@@ -201,38 +201,14 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by(reason)(rate(tailscaled_outbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", reason=\"acl\"}[$__rate_interval]))",
+              "expr": "sum by(reason) (rate(tailscaled_outbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", reason=~\"acl|error|unknown_protocol|too_short|fragment\"}[$__rate_interval]))",
               "hide": false,
-              "legendFormat": "Outbound - {{reason}}",
+              "legendFormat": "Outbound {{reason}}",
               "range": true,
               "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "sum by(reason)(rate(tailscaled_inbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", reason=\"error\"}[$__rate_interval]))",
-              "hide": false,
-              "legendFormat": "Inbound - {{reason}}",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "sum by(reason)(rate(tailscaled_outbound_dropped_packets_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", reason=\"error\"}[$__rate_interval]))",
-              "hide": false,
-              "legendFormat": "Outbound - {{reason}}",
-              "range": true,
-              "refId": "D"
             }
           ],
-          "title": "ACL and Error Dropped Packets",
+          "title": "Critical Dropped Packets",
           "type": "timeseries"
         },
         {
@@ -297,25 +273,13 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "tailscaled_health_messages{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}",
-              "legendFormat": "{{type}}",
+              "expr": "sum(tailscaled_health_messages{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"})",
+              "legendFormat": "Total Health Messages",
               "range": true,
               "refId": "A"
             }
           ],
           "title": "Health Messages",
-          "transformations": [
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "reduceRow",
-                "reduce": {
-                  "reducer": "sum"
-                },
-                "replaceFields": true
-              }
-            }
-          ],
           "type": "gauge"
         },
         {
@@ -499,7 +463,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "irate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8",
+              "expr": "sum by(ts_proxy_parent_name, path) (irate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "{{ts_proxy_parent_name}} recv {{path}}",
@@ -513,7 +477,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "irate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8",
+              "expr": "sum by(ts_proxy_parent_name, path) (irate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])*8)",
               "hide": false,
               "instant": false,
               "legendFormat": "{{ts_proxy_parent_name}} trans {{path}}",
@@ -583,7 +547,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "tailscaled_advertised_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}",
+              "expr": "sum(tailscaled_advertised_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"})",
               "legendFormat": "Advertised Routes",
               "range": true,
               "refId": "A"
@@ -594,7 +558,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "tailscaled_approved_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}",
+              "expr": "sum(tailscaled_approved_routes{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "Approved Routes",
@@ -603,44 +567,6 @@ data:
             }
           ],
           "title": "Subnet Router",
-          "transformations": [
-            {
-              "filter": {
-                "id": "byRefId",
-                "options": "A"
-              },
-              "id": "calculateField",
-              "options": {
-                "alias": "Advertised Routes",
-                "mode": "reduceRow",
-                "reduce": {
-                  "include": [
-                    "Advertised Routes"
-                  ],
-                  "reducer": "sum"
-                },
-                "replaceFields": true
-              }
-            },
-            {
-              "filter": {
-                "id": "byRefId",
-                "options": "B"
-              },
-              "id": "calculateField",
-              "options": {
-                "alias": "Approved Routes",
-                "mode": "reduceRow",
-                "reduce": {
-                  "include": [
-                    "Approved Routes"
-                  ],
-                  "reducer": "sum"
-                },
-                "replaceFields": true
-              }
-            }
-          ],
           "type": "gauge"
         },
         {
@@ -964,7 +890,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv4\"}[$__rate_interval]))",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv4\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv4\"}[$__rate_interval]))",
               "legendFormat": "Direct IPv4",
               "range": true,
               "refId": "A"
@@ -975,7 +901,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv6\"}[$__rate_interval]))",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv6\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"direct_ipv6\"}[$__rate_interval]))",
               "legendFormat": "Direct IPv6",
               "range": true,
               "refId": "B"
@@ -986,7 +912,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval]))",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval]))",
               "legendFormat": "DERP Relay",
               "range": true,
               "refId": "C"
@@ -997,7 +923,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv4\"}[$__rate_interval]))",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv4\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv4\"}[$__rate_interval]))",
               "hide": false,
               "legendFormat": "Peer Relay IPv4",
               "range": true,
@@ -1009,7 +935,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv6\"}[$__rate_interval]))",
+              "expr": "sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv6\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"peer_relay_ipv6\"}[$__rate_interval]))",
               "hide": false,
               "legendFormat": "Peer Relay IPv6",
               "range": true,
@@ -1092,7 +1018,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "100 * sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"direct.*\"}[$__rate_interval])) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
+              "expr": "100 * (sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"direct.*\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"direct.*\"}[$__rate_interval]))) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
               "legendFormat": "Direct Connection %",
               "range": true,
               "refId": "A"
@@ -1103,7 +1029,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "100 * sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval])) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
+              "expr": "100 * (sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=\"derp\"}[$__rate_interval]))) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
               "hide": false,
               "legendFormat": "DERP Relay %",
               "range": true,
@@ -1115,7 +1041,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "100 * sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"peer_relay.*\"}[$__rate_interval])) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
+              "expr": "100 * (sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"peer_relay.*\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\", path=~\"peer_relay.*\"}[$__rate_interval]))) / clamp_min(sum(rate(tailscaled_inbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])) + sum(rate(tailscaled_outbound_bytes_total{namespace=\"tailscale\", ts_proxy_parent_name=~\"$node\", ts_proxy_type=~\"$proxy_type\"}[$__rate_interval])), 0.001)",
               "hide": false,
               "legendFormat": "Peer Relay %",
               "range": true,
