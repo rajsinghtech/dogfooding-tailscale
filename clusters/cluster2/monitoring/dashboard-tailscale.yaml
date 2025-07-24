@@ -1095,14 +1095,14 @@ data:
           },
           {
             "current": {},
-            "definition": "label_values(tailscaled_inbound_bytes_total{namespace=\"tailscale\"}, path)",
+            "definition": "label_values({__name__=\"tailscaled_inbound_bytes_total\", namespace=\"tailscale\"}, path)",
             "includeAll": true,
             "label": "Connection Path",
             "name": "path",
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(tailscaled_inbound_bytes_total{namespace=\"tailscale\"}, path)",
+              "query": "label_values({__name__=\"tailscaled_inbound_bytes_total\", namespace=\"tailscale\"}, path)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
