@@ -1,20 +1,20 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: tailscale
-  namespace: argocd
-spec:
-  destination:
-    namespace: tailscale
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    path: clusters/cluster2/tailscale
-    repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
-    targetRevision: HEAD
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: tailscale
+#   namespace: argocd
+# spec:
+#   destination:
+#     namespace: tailscale
+#     server: https://kubernetes.default.svc
+#   project: default
+#   source:
+#     path: clusters/cluster2/tailscale
+#     repoURL: https://github.com/rajsinghtech/dogfooding-tailscale
+#     targetRevision: HEAD
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true

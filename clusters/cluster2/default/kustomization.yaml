@@ -6,4 +6,6 @@ resources:
 - goldpinger.yaml
 - ingress.yaml
 - debug.yaml
-# - egress.yaml
+- egress.yaml
+- iperf-server.yaml
+- nginx.yaml
