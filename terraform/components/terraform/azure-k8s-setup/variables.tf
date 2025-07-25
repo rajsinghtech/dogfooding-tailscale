@@ -22,3 +22,15 @@ variable "proxy_replicas" {
   description = "Number of replicas for Tailscale ProxyGroup pods"
   type        = string
 }
+
+variable "tailscale_operator_image_tag" {
+  description = "Image tag for the Tailscale operator (e.g., 'stable', 'unstable', or a specific version)"
+  type        = string
+  default     = "stable"
+}
+
+variable "tailscale_proxy_image_tag" {
+  description = "Image tag for the Tailscale proxy (e.g., 'stable', 'unstable', or a specific version)"
+  type        = string
+  default     = "stable"
+}

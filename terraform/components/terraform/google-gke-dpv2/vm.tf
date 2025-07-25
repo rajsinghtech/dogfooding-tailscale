@@ -28,6 +28,8 @@ module "cloudinit_config" {
   advertise_routes = local.all_advertised_routes
   primary_tag   = "subnet-router"
   additional_tags = ["infra"]
+  track             = var.tailscale_track
+  relay_server_port = var.tailscale_relay_server_port
 }
 
 resource "google_compute_instance" "gce_sr" {
@@ -186,6 +188,36 @@ resource "google_compute_firewall" "private_vm_ingress" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["pvt-test-vm"]
+}
+
+# Dynamic firewall rule for Tailscale relay server (IPv4)
+resource "google_compute_firewall" "tailscale_relay_ipv4" {
+  count   = var.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
+  name    = "${var.name}-tailscale-relay-ipv4"
+  network = module.vpc.vpc_id
+
+  allow {
+    protocol = "udp"
+    ports    = [tostring(var.tailscale_relay_server_port)]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["gce-sr"]
+}
+
+# Dynamic firewall rule for Tailscale relay server (IPv6)
+resource "google_compute_firewall" "tailscale_relay_ipv6" {
+  count   = var.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
+  name    = "${var.name}-tailscale-relay-ipv6"
+  network = module.vpc.vpc_id
+
+  allow {
+    protocol = "udp"
+    ports    = [tostring(var.tailscale_relay_server_port)]
+  }
+
+  source_ranges = ["::/0"]
+  target_tags   = ["gce-sr"]
 }
 
 # Ops Agent configuration

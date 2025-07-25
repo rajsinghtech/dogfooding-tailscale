@@ -125,6 +125,22 @@ resource "azurerm_network_security_group" "main" {
     destination_address_prefix = "*"
     description               = "Allow iperf3 traffic from my public IP for WAN testing"
   }
+
+  dynamic "security_rule" {
+    for_each = var.tailscale_relay_server_port != null ? [1] : []
+    content {
+      name                       = "TailscaleRelay"
+      priority                   = 140
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = tostring(var.tailscale_relay_server_port)
+      source_address_prefix      = "0.0.0.0/0"
+      destination_address_prefix = "*"
+      description               = "Allow Tailscale relay server traffic"
+    }
+  }
 }
 
 # Create a network interface for each VM
@@ -187,12 +203,14 @@ module "cloudinit_ts" {
     tailscale = tailscale
   }
 
-  hostname         = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
-  accept_routes    = true
-  enable_ssh       = true
-  primary_tag      = "infra"
-  reusable         = true
-  ephemeral        = false
+  hostname            = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
+  accept_routes       = true
+  enable_ssh          = true
+  primary_tag         = "infra"
+  reusable            = true
+  ephemeral           = false
+  track               = var.tailscale_track
+  relay_server_port   = var.tailscale_relay_server_port
 
   additional_parts = [
     {

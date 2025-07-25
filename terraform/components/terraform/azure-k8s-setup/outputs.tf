@@ -9,7 +9,7 @@ Next Steps:
    ssh -i ${local.ssh_private_key_path} ubuntu@${local.azure_vm_client_public_ip}
 
 3. Configure your kubeconfig for Tailscale Operator APIserver proxy access by running:
-   tailscale configure kubeconfig tailscale-operator-${local.environment}-${local.stage}
+   tailscale configure kubeconfig ${local.tenant}-${local.environment}-${local.stage}-operator
 
 Happy deploying <3
 EOT

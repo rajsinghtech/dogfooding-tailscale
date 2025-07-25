@@ -47,6 +47,19 @@ do
   # Check the exit status of the previous command
   if [ $? -eq 0 ]; then
     echo "Tailscale installation and configuration succeeded"
+    
+    # Configure relay server port if on unstable track
+    if [ "${TRACK}" = "unstable" ] && [ -n "${RELAY_SERVER_PORT}" ]; then
+      echo "Configuring peer relay on port ${RELAY_SERVER_PORT} (unstable track feature)"
+      tailscale set --relay-server-port="${RELAY_SERVER_PORT}"
+      if [ $? -eq 0 ]; then
+        echo "Peer relay configuration succeeded on port ${RELAY_SERVER_PORT}"
+      else
+        echo "Failed to configure peer relay on port ${RELAY_SERVER_PORT}"
+        exit 1
+      fi
+    fi
+    
     exit 0
   else
     echo "Tailscale installation and configuration failed. Retry attempt $i"

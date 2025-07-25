@@ -1,11 +1,13 @@
 # Use the same cloudinit-ts child module as AWS for Tailscale and Docker setup
 module "ubuntu-tailscale-client" {
-  source           = "../modules/cloudinit-ts"
-  hostname         = local.hostname
-  accept_routes    = true
-  enable_ssh       = true
-  advertise_routes = concat(local.advertise_routes,[azurerm_private_dns_resolver_inbound_endpoint.main.ip_configurations[0].private_ip_address])
-  primary_tag      = "subnet-router"
+  source            = "../modules/cloudinit-ts"
+  hostname          = local.hostname
+  accept_routes     = true
+  enable_ssh        = true
+  advertise_routes  = concat(local.advertise_routes,[azurerm_private_dns_resolver_inbound_endpoint.main.ip_configurations[0].private_ip_address])
+  primary_tag       = "subnet-router"
+  track             = var.tailscale_track
+  relay_server_port = var.tailscale_relay_server_port
   additional_parts = [
     {
       filename     = "install_docker.sh"
@@ -124,6 +126,23 @@ resource "azurerm_network_security_group" "main" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+  
+  dynamic "security_rule" {
+    for_each = var.tailscale_relay_server_port != null ? [1] : []
+    content {
+      name                       = "TailscaleRelay"
+      priority                   = 1004
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = tostring(var.tailscale_relay_server_port)
+      source_address_prefix      = "0.0.0.0/0"
+      destination_address_prefix = "*"
+      description               = "Allow Tailscale relay server traffic"
+    }
+  }
+  
   tags = local.tags
 }
 

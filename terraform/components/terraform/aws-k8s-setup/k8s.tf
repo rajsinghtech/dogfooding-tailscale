@@ -18,7 +18,7 @@ provider "kubectl" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = local.eks_cluster_endpoint
     cluster_ca_certificate = local.eks_cluster_ca_certificate
     token                  = local.eks_cluster_auth_token
@@ -52,6 +52,14 @@ resource "helm_release" "tailscale_operator" {
       }
       operatorConfig = {
         hostname = "${local.tenant}-${local.environment}-${local.stage}-operator"
+        image = {
+          tag = var.tailscale_operator_image_tag
+        }
+      }
+      proxyConfig = {
+        image = {
+          tag = var.tailscale_proxy_image_tag
+        }
       }
     })
   ]
@@ -68,18 +76,19 @@ resource "helm_release" "ebs_csi_driver" {
   namespace  = "kube-system"
   version    = "2.30.0"
 
-  set {
-    name  = "controller.serviceAccount.create"
-    value = "true"
-  }
-  set {
-    name  = "controller.serviceAccount.name"
-    value = "ebs-csi-controller-sa"
-  }
-  set {
-    name  = "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = local.eks_ebs_csi_iam_role_arn
-  }
+  values = [
+    yamlencode({
+      controller = {
+        serviceAccount = {
+          create = true
+          name   = "ebs-csi-controller-sa"
+          annotations = {
+            "eks.amazonaws.com/role-arn" = local.eks_ebs_csi_iam_role_arn
+          }
+        }
+      }
+    })
+  ]
 }
 
 ################################################################################
@@ -93,72 +102,65 @@ resource "helm_release" "aws_lb_controller" {
   version    = "1.7.1"
   create_namespace = false
 
-  set {
-    name  = "clusterName"
-    value = local.cluster_name
-  }
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-  set {
-    name  = "serviceAccount.name"
-    value = "aws-load-balancer-controller"
-  }
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = local.aws_lb_controller_iam_role_arn
-  }
-  set {
-    name  = "region"
-    value = local.region
-  }
+  values = [
+    yamlencode({
+      clusterName = local.cluster_name
+      region      = local.region
+      serviceAccount = {
+        create = true
+        name   = "aws-load-balancer-controller"
+        annotations = {
+          "eks.amazonaws.com/role-arn" = local.aws_lb_controller_iam_role_arn
+        }
+      }
+    })
+  ]
 }
 
 ######################################################################
 # Install ArgoCD via Helm                                            #
 ######################################################################
 
-resource "helm_release" "argocd" {
-  name             = "argo-cd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = "7.8.26"
-  namespace        = "argocd"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-  values           = [file("${path.module}/../files/argocd-values.yaml")]
-}
+# resource "helm_release" "argocd" {
+#   name             = "argo-cd"
+#   repository       = "https://argoproj.github.io/argo-helm"
+#   chart            = "argo-cd"
+#   version          = "7.8.26"
+#   namespace        = "argocd"
+#   create_namespace = true
+#   atomic           = true
+#   cleanup_on_fail  = true
+#   values           = [file("${path.module}/../files/argocd-values.yaml")]
+# }
 
-resource "kubectl_manifest" "argocdapps" {
-    wait      = true
-    yaml_body = <<YAML
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: argo-cd-apps
-  namespace: argocd
-spec:
-  destination:
-    namespace: argocd
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    path: ${local.argo_config_path}
-    repoURL: ${local.argo_repo_url}
-    targetRevision: HEAD
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-YAML
-    depends_on = [
-    helm_release.argocd
-    ]
-}
+# resource "kubectl_manifest" "argocdapps" {
+#     wait      = true
+#     yaml_body = <<YAML
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: argo-cd-apps
+#   namespace: argocd
+# spec:
+#   destination:
+#     namespace: argocd
+#     server: https://kubernetes.default.svc
+#   project: default
+#   source:
+#     path: ${local.argo_config_path}
+#     repoURL: ${local.argo_repo_url}
+#     targetRevision: HEAD
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+# YAML
+#     depends_on = [
+#     helm_release.argocd
+#     ]
+# }
 
 ######################################################################
 # Apply manifests and CRs                                            #
