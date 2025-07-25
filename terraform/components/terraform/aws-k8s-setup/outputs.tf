@@ -6,7 +6,7 @@ Next Steps:
    aws eks --region ${local.region} update-kubeconfig --name ${local.name} --alias ${local.name}
 
 2. Configure your kubeconfig for Tailscale Operator APIserver proxy access by running:
-   tailscale configure kubeconfig tailscale-operator-${local.environment}-${local.stage}
+   tailscale configure kubeconfig ${local.tenant}-${local.environment}-${local.stage}-operator
 
 Happy deploying <3
 EOT

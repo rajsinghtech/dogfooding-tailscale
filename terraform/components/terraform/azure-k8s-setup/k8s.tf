@@ -24,7 +24,15 @@ resource "helm_release" "tailscale_operator" {
         mode = "true"
       }
       operatorConfig = {
-        hostname = "tailscale-operator-${local.environment}-${local.stage}"
+        hostname = "${local.tenant}-${local.environment}-${local.stage}-operator"
+        image = {
+          tag = var.tailscale_operator_image_tag
+        }
+      }
+      proxyConfig = {
+        image = {
+          tag = var.tailscale_proxy_image_tag
+        }
       }
     })
   ] 

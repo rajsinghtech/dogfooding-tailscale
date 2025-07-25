@@ -117,3 +117,26 @@ variable "advertise_routes" {
   type        = list(string)
   default     = []
 }
+
+variable "tailscale_track" {
+  description = "Version of the Tailscale client to install"
+  type        = string
+  default     = "stable"
+  validation {
+    condition     = contains(["stable", "unstable"], var.tailscale_track)
+    error_message = "Allowed values for tailscale_track are \"stable\", \"unstable\""
+  }
+}
+
+variable "tailscale_relay_server_port" {
+  description = "Port for the Tailscale peer relay server (only available in unstable track)"
+  type        = number
+  default     = null
+  validation {
+    condition = (
+      var.tailscale_relay_server_port == null ||
+      (var.tailscale_relay_server_port >= 1024 && var.tailscale_relay_server_port <= 65535)
+    )
+    error_message = "tailscale_relay_server_port must be between 1024 and 65535 if set."
+  }
+}
