@@ -13,6 +13,7 @@ charts
 # .tfstate files
 *.tfstate
 *.tfstate.*
+*.atmos
 
 # Crash and history log files
 crash.log
