@@ -1,0 +1,44 @@
+network-debug-6498bf97cf-2ssjl:~# curl udp-relay-2.monitoring.svc.cluster.local:8080/metrics
+# TYPE tailscaled_advertised_routes gauge
+# HELP tailscaled_advertised_routes Number of advertised network routes (e.g. by a subnet router)
+tailscaled_advertised_routes 1
+# TYPE tailscaled_approved_routes gauge
+# HELP tailscaled_approved_routes Number of approved network routes (e.g. by a subnet router)
+tailscaled_approved_routes 1
+# TYPE tailscaled_health_messages gauge
+# HELP tailscaled_health_messages Number of health messages broken down by type.
+tailscaled_health_messages{type="warning"} 1
+# TYPE tailscaled_inbound_bytes_total counter
+# HELP tailscaled_inbound_bytes_total Counts the number of bytes received from other peers
+tailscaled_inbound_bytes_total{path="derp"} 4136
+tailscaled_inbound_bytes_total{path="direct_ipv4"} 4372468
+tailscaled_inbound_bytes_total{path="direct_ipv6"} 0
+tailscaled_inbound_bytes_total{path="peer_relay_ipv4"} 0
+tailscaled_inbound_bytes_total{path="peer_relay_ipv6"} 0
+# TYPE tailscaled_inbound_dropped_packets_total counter
+# HELP tailscaled_inbound_dropped_packets_total Counts the number of dropped packets received by the node from other peers
+# TYPE tailscaled_inbound_packets_total counter
+# HELP tailscaled_inbound_packets_total Counts the number of packets received from other peers
+tailscaled_inbound_packets_total{path="derp"} 31
+tailscaled_inbound_packets_total{path="direct_ipv4"} 25762
+tailscaled_inbound_packets_total{path="direct_ipv6"} 0
+tailscaled_inbound_packets_total{path="peer_relay_ipv4"} 0
+tailscaled_inbound_packets_total{path="peer_relay_ipv6"} 0
+# TYPE tailscaled_outbound_bytes_total counter
+# HELP tailscaled_outbound_bytes_total Counts the number of bytes sent to other peers
+tailscaled_outbound_bytes_total{path="derp"} 36748
+tailscaled_outbound_bytes_total{path="direct_ipv4"} 20850712
+tailscaled_outbound_bytes_total{path="direct_ipv6"} 0
+tailscaled_outbound_bytes_total{path="peer_relay_ipv4"} 0
+tailscaled_outbound_bytes_total{path="peer_relay_ipv6"} 0
+# TYPE tailscaled_outbound_dropped_packets_total counter
+# HELP tailscaled_outbound_dropped_packets_total Counts the number of packets dropped while being sent to other peers
+tailscaled_outbound_dropped_packets_total{reason="error"} 0
+tailscaled_outbound_dropped_packets_total{reason="unknown_protocol"} 6
+# TYPE tailscaled_outbound_packets_total counter
+# HELP tailscaled_outbound_packets_total Counts the number of packets sent to other peers
+tailscaled_outbound_packets_total{path="derp"} 77
+tailscaled_outbound_packets_total{path="direct_ipv4"} 26780
+tailscaled_outbound_packets_total{path="direct_ipv6"} 0
+tailscaled_outbound_packets_total{path="peer_relay_ipv4"} 0
+tailscaled_outbound_packets_total{path="peer_relay_ipv6"} 0

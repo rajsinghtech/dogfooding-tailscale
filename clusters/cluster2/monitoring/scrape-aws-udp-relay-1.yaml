@@ -20,15 +20,33 @@ metadata:
   namespace: monitoring
   labels:
     release: kube-prometheus-stack
+    tailscale.com/managed: "true"
+    tailscale.com/metrics-target: udp-relay-1
+    ts_prom_job: ts_udp_relay_monitoring_udp-relay-1
+    ts_proxy_parent_name: udp-relay-kb-cluster2-aws-uw2-sr-1-1
+    ts_proxy_parent_namespace: monitoring
+    ts_proxy_type: udp-relay
 spec:
   staticConfigs:
   - targets:
     - udp-relay-1.monitoring.svc.cluster.local:8080
     labels:
+      ts_prom_job: ts_udp_relay_monitoring_udp-relay-1
       ts_proxy_parent_name: udp-relay-kb-cluster2-aws-uw2-sr-1-1
+      ts_proxy_parent_namespace: monitoring
       ts_proxy_type: udp-relay
+      tailscale.com/managed: "true"
+      tailscale.com/metrics-target: udp-relay-1
   metricsPath: /metrics
   scrapeInterval: 5s
   relabelings:
   - targetLabel: namespace
     replacement: tailscale
+  - sourceLabels: [ts_prom_job]
+    targetLabel: job
+  - sourceLabels: [ts_proxy_parent_name]
+    targetLabel: ts_proxy_parent_name
+  - sourceLabels: [ts_proxy_parent_namespace]
+    targetLabel: ts_proxy_parent_namespace
+  - sourceLabels: [ts_proxy_type]
+    targetLabel: ts_proxy_type
