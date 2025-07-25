@@ -27,6 +27,8 @@ module "ubuntu-tailscale-client" {
   reusable      = true
   advertise_routes = local.advertise_routes
   primary_tag      = "subnet-router"
+  track            = local.tailscale_track
+  relay_server_port = local.tailscale_relay_server_port
 }
 
 # Pick the latest Ubuntu 22.04 AMI in the region for our EC2 instance
@@ -66,6 +68,17 @@ resource "aws_security_group" "main" {
     protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow Tailscale WG direct connection access"
+  }
+
+  dynamic "ingress" {
+    for_each = local.tailscale_relay_server_port != null ? [local.tailscale_relay_server_port] : []
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow Tailscale relay server access"
+    }
   }
 
   egress {
