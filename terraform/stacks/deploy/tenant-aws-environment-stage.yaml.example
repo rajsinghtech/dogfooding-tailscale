@@ -1,7 +1,7 @@
 vars:
-  region: us-east-1
+  region: us-west-2
   tenant: my
-  environment: aws-ue1  
+  environment: aws-uw2  
   stage: test
 
 import:
@@ -11,16 +11,23 @@ components:
   terraform:
     aws-eks:
       vars:
-        name: "cluster1-aws-ue1"
-        sr_instance_hostname: "cluster1-aws-ue1-sr"
-        vpc_cidr: "10.0.0.0/16"
-        cluster_service_ipv4_cidr: "10.40.0.0/16"
-        advertise_routes: ["fd7a:115c:a1e0:b1a:0:1:a00:0/112"]
+        name: "my-cluster2-aws-uw2"
+        public_workers: false
+        sr_instance_hostname: "my-cluster2-aws-uw2-sr"
+        cluster_endpoint_public_access: false
+        cluster_endpoint_private_access: true
+        vpc_cidr: "10.1.0.0/16"
+        cluster_service_ipv4_cidr: "10.41.0.0/16"
+        advertise_routes: ["10.1.0.0/16"]
+        tailscale_track: "unstable"
+        tailscale_relay_server_port: 45641
     aws-k8s-setup:
       vars:
-        connector_cidr: "fd7a:115c:a1e0:b1a:0:1::/96"
-        argo_config_path: "clusters/cluster1/argocd/apps"
+        connector_cidr: "10.40.0.0/16"
+        argo_config_path: "clusters/cluster2/argocd/apps"
         argo_repo_url: "https://github.com/rajsinghtech/dogfooding-tailscale"
+        tailscale_operator_image_tag: "unstable"
+        tailscale_proxy_image_tag: "unstable"
       settings:
         depends_on:
           1:
