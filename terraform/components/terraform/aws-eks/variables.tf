@@ -168,3 +168,33 @@ variable "public_workers" {
   description = "If true, EKS worker nodes are launched in the first public subnet and assigned a public IP. If false, they are in private subnets with no public IP."
   type        = bool
 }
+
+variable "sr_accept_routes" {
+  description = "Whether the subnet router should accept routes from other devices"
+  type        = bool
+  default     = false
+}
+
+variable "sr_enable_ssh" {
+  description = "Whether to enable SSH on the subnet router"
+  type        = bool
+  default     = true
+}
+
+variable "sr_ephemeral" {
+  description = "Whether the subnet router should be ephemeral"
+  type        = bool
+  default     = true
+}
+
+variable "sr_reusable" {
+  description = "Whether the subnet router auth key should be reusable"
+  type        = bool
+  default     = true
+}
+
+variable "sr_primary_tag" {
+  description = "Primary tag for the subnet router"
+  type        = string
+  default     = "subnet-router"
+}

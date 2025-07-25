@@ -3,12 +3,12 @@ module "ubuntu-tailscale-client" {
   count         = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
   source        = "../modules/cloudinit-ts"
   hostname      = "${local.sr_instance_hostname}-${count.index + 1}"
-  accept_routes = true
-  enable_ssh    = true
-  ephemeral     = true
-  reusable      = true
+  accept_routes = var.sr_accept_routes
+  enable_ssh    = var.sr_enable_ssh
+  ephemeral     = var.sr_ephemeral
+  reusable      = var.sr_reusable
   advertise_routes = local.advertise_routes
-  primary_tag      = "subnet-router"
+  primary_tag      = var.sr_primary_tag
   track             = var.tailscale_track
   relay_server_port = var.tailscale_relay_server_port
 }
