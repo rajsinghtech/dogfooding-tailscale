@@ -6,7 +6,7 @@ Sync Tailscale ACL files to Tailnets
 ## Disclaimer
 
 > [!WARNING]
-> This repo is intended to be used for educational purposes only. This is just a starting point to get up and running as a proof-of-concept. Please do not attempt to use this for a production setup or anything serious as I won't be responsible or provide support. You are responsible for backing up your ACL files. Honestly, this repo doesn't need to exist and you shouldn't use it.
+> This repo is intended to be used for educational purposes only. This is just a starting point to get up and running as a proof-of-concept. Please do not attempt to use this for a production setup or anything serious as I won't be responsible or provide support. You are responsible for backing up your ACL files. Honestly, this repo doesn't need to exist and you shouldn't use it. The [Tailscale Gitops](https://tailscale.com/kb/1306/gitops-acls-github) way is what should be used and what this repo uses now. 
 
 ## Description
 
