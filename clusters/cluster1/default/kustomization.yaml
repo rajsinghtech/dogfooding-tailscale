@@ -6,4 +6,7 @@ resources:
 - goldpinger.yaml
 - ingress.yaml
 - debug.yaml
-# - egress.yaml
+- egress.yaml
+- iperf-server.yaml
+- iperf-client.yaml  # Note: Contains the ProxyGroup for egress
+- nginx.yaml

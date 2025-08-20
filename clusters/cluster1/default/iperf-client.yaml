@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iperf-client
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iperf-client
+  template:
+    metadata:
+      labels:
+        app: iperf-client
+    spec:
+      containers:
+      - name: iperf-client
+        image: networkstatic/iperf3
+        # The container will stay alive and not run iperf immediately
+        # so we can exec into it and run tests manually
+        command: 
+        - "sleep"
+        - "infinity"
+---
+# Note: Update the tailnet-fqdn annotation to match your cluster1 setup
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: cluster1-egress-proxy  # Changed from cluster2-egress-proxy
+spec:
+  type: egress
+  replicas: 3
+  proxyClass: prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iperf-server-egress
+  namespace: default
+  annotations:
+    # TODO: Update this FQDN to match your cluster1 tailnet configuration
+    tailscale.com/tailnet-fqdn: "default-iperf-server.monitor-squeaker.ts.net"
+    tailscale.com/proxy-group: "cluster1-egress-proxy"  # Changed from cluster2-egress-proxy
+  labels:
+    tailscale.com/proxy-class: "prod"
+spec:
+  type: ExternalName
+  externalName: unused  
+  ports:
+  - port: 5201
+    targetPort: 5201
+    protocol: TCP
+    name: iperf

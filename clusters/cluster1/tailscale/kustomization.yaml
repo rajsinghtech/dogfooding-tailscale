@@ -20,3 +20,5 @@ resources:
 - connector.yaml
 - proxy-class.yaml
 - ./tsdnsreflector
+# Note: Temporary ClusterRole - may be removed once included in Helm chart
+# - tmp-clusterrole.yaml
