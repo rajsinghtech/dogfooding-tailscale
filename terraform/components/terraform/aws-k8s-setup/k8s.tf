@@ -184,10 +184,6 @@ kind: ProxyClass
 metadata:
   name: ${local.stage}
 spec:
-  metrics:
-    enable: true
-    serviceMonitor:
-      enable: true
   statefulSet:
     pod:
       labels:
