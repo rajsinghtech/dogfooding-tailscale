@@ -184,6 +184,10 @@ kind: ProxyClass
 metadata:
   name: ${local.stage}
 spec:
+  metrics:
+    enable: true
+    serviceMonitor:
+      enable: true
   statefulSet:
     pod:
       labels:
@@ -192,6 +196,27 @@ spec:
         stage: ${local.stage}
       nodeSelector:
         beta.kubernetes.io/os: "linux"
+YAML
+    depends_on = [
+    helm_release.tailscale_operator
+    ]
+}
+
+# Apiserver Proxygroup
+resource "kubectl_manifest" "apiserverproxygroup" {
+    wait      = true
+    yaml_body = <<YAML
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: ${local.stage}-apiserverproxy-ha
+spec:
+  replicas: 2
+  tags: ["tag:k8s"]
+  type: kube-apiserver
+  proxyClass: ${local.stage}
+  kubeAPIServer:
+    mode: auth
 YAML
     depends_on = [
     helm_release.tailscale_operator
