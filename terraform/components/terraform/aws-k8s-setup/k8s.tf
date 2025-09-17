@@ -99,7 +99,7 @@ resource "helm_release" "aws_lb_controller" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   namespace  = "kube-system"
-  version    = "1.7.1"
+  version    = "1.13.4"
   create_namespace = false
 
   values = [
