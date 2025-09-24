@@ -74,7 +74,7 @@ resource "helm_release" "ebs_csi_driver" {
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   chart      = "aws-ebs-csi-driver"
   namespace  = "kube-system"
-  version    = "2.30.0"
+  version    = "2.49.1"
 
   values = [
     yamlencode({
