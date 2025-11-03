@@ -1,5 +1,9 @@
 base_path: "./"
 
+settings:
+  telemetry:
+    enabled: false
+
 components:
   terraform:
     base_path: "components/terraform"
