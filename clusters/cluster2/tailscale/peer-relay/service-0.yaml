@@ -12,7 +12,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: peer-relay
+    app: kb-cluster2-aws-uw2-peer-relay
   ports:
   - name: relay
     port: 7777
