@@ -37,6 +37,38 @@ locals {
   # advertise_routes                = distinct(concat(local.private_subnets, coalesce(var.advertise_routes, []), ["${local.vpc_plus_2_ip}/32"]))
   advertise_routes                = var.advertise_routes
 
-  # Enable SR if cluster endpoint is private and not public 
+  # Enable SR if cluster endpoint is private and not public
   enable_sr = local.cluster_endpoint_private_access && !local.cluster_endpoint_public_access
+
+  # EKS Auto Mode configuration
+  eks_auto_mode            = var.eks_auto_mode
+  eks_auto_mode_node_pools = var.eks_auto_mode_node_pools
+
+  # Node security group rules - only used when Auto Mode is disabled
+  node_security_group_rules = {
+    ingress_to_metrics_server = {
+      description                   = "Cluster API to metrics-server"
+      protocol                      = "tcp"
+      from_port                     = 30000
+      to_port                       = 30000
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+    ingress_self_all = {
+      description = "Allow all traffic within the worker-node security group"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      protocol    = "-1"
+      self        = true
+    }
+    ingress_vpc_all = {
+      description = "Allow all traffic within VPC"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      protocol    = "-1"
+      cidr_blocks = [local.vpc_cidr]
+    }
+  }
 }

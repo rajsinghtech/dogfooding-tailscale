@@ -27,39 +27,53 @@ data "aws_eks_cluster_auth" "this" {
 
 module "eks" {
   enable_irsa = true
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.37"
+  source      = "terraform-aws-modules/eks/aws"
+  version     = "~> 21.0"
 
-  cluster_name                    = local.name
-  cluster_version                 = local.cluster_version
-  cluster_endpoint_public_access  = local.cluster_endpoint_public_access
-  cluster_endpoint_private_access = local.cluster_endpoint_private_access
-  
+  # Cluster configuration (v21 variable names)
+  name               = local.name
+  kubernetes_version = local.cluster_version
+
+  # API endpoint access
+  endpoint_public_access  = local.cluster_endpoint_public_access
+  endpoint_private_access = local.cluster_endpoint_private_access
+
   enable_cluster_creator_admin_permissions = true
-  
-  cluster_addons = {
-    coredns                = {}
-    kube-proxy             = {}
-    vpc-cni                = {}
-    metrics-server         = {}   
+
+  # EKS Auto Mode configuration - when enabled, AWS manages compute, storage, and load balancing
+  # Note: compute_config, storage_config, and kubernetes_network_config must all be enabled/disabled together
+  compute_config = {
+    enabled    = local.eks_auto_mode
+    node_pools = local.eks_auto_mode ? local.eks_auto_mode_node_pools : []
   }
 
-  cluster_enabled_log_types   = []
+  # Cluster add-ons - only needed when Auto Mode is disabled
+  # Auto Mode manages these automatically
+  addons = local.eks_auto_mode ? {} : {
+    coredns        = {}
+    kube-proxy     = {}
+    vpc-cni        = {}
+    metrics-server = {}
+  }
+
+  enabled_log_types       = []
   create_cloudwatch_log_group = false
 
-  vpc_id                    = module.vpc.vpc_id
-  subnet_ids = local.public_workers ? slice(module.vpc.public_subnets, 0, length(local.azs)) : slice(module.vpc.private_subnets, 0, length(local.azs))
-  cluster_service_ipv4_cidr = local.cluster_service_ipv4_cidr
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids      = local.public_workers ? slice(module.vpc.public_subnets, 0, length(local.azs)) : slice(module.vpc.private_subnets, 0, length(local.azs))
+  service_ipv4_cidr = local.cluster_service_ipv4_cidr
 
-  eks_managed_node_groups = {
+  # Managed node groups - only created when Auto Mode is disabled
+  # Auto Mode manages compute automatically via node pools
+  eks_managed_node_groups = local.eks_auto_mode ? {} : {
     "${local.name}-wg" = {
-      instance_types = [local.cluster_worker_instance_type]
+      instance_types         = [local.cluster_worker_instance_type]
       node_group_name_prefix = "${local.name}-wg"
 
       min_size     = local.min_cluster_worker_count
       max_size     = local.max_cluster_worker_count
       desired_size = local.desired_cluster_worker_count
-      
+
       disk_size = local.cluster_worker_boot_disk_size
 
       # Associate public IP if public_workers is true
@@ -74,39 +88,16 @@ module "eks" {
 
       tags = merge(
         local.tags,
-        { 
+        {
           "Name" = "${local.name}-worker"
         }
       )
     }
   }
 
-  node_security_group_additional_rules = {
-    ingress_to_metrics_server = {
-      description                   = "Cluster API to metrics-server"
-      protocol                      = "tcp"
-      from_port                     = 30000
-      to_port                       = 30000
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    ingress_self_all = {
-      description = "Allow all traffic within the worker-node security group"
-      from_port   = 0
-      to_port     = 0
-      type        = "ingress"
-      protocol    = "-1"
-      self        = true
-    }
-    ingress_vpc_all = {
-      description = "Allow all traffic within VPC"
-      from_port   = 0
-      to_port     = 0
-      type        = "ingress"
-      protocol    = "-1"
-      cidr_blocks = [local.vpc_cidr]
-    }
-  }
+  # Node security group rules - these are applied regardless of Auto Mode
+  # In Auto Mode, they apply to the cluster security group but have no effect since there are no managed node groups
+  node_security_group_additional_rules = local.node_security_group_rules
 
   tags = local.tags
 }

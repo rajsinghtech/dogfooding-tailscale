@@ -198,3 +198,29 @@ variable "sr_primary_tag" {
   type        = string
   default     = "subnet-router"
 }
+
+variable "eks_auto_mode" {
+  description = <<-EOF
+  Enable EKS Auto Mode. When enabled, AWS manages compute, storage, and load balancing automatically.
+  This disables managed node groups and uses EKS Auto Mode node pools instead.
+  Note: To disable Auto Mode after enabling, you must first set this to false and apply,
+  before removing the variable entirely.
+  EOF
+  type        = bool
+  default     = false
+}
+
+variable "eks_auto_mode_node_pools" {
+  description = <<-EOF
+  List of EKS Auto Mode node pools to enable. Only used when eks_auto_mode is true.
+  Valid values: "general-purpose", "system"
+  EOF
+  type        = list(string)
+  default     = ["general-purpose", "system"]
+  validation {
+    condition = alltrue([
+      for pool in var.eks_auto_mode_node_pools : contains(["general-purpose", "system"], pool)
+    ])
+    error_message = "Valid node pool values are: \"general-purpose\", \"system\""
+  }
+}

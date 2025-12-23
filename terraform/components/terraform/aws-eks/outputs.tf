@@ -18,6 +18,11 @@ output "enable_sr" {
   sensitive = true
 }
 
+output "eks_auto_mode" {
+  description = "Whether EKS Auto Mode is enabled"
+  value       = local.eks_auto_mode
+}
+
 
 output "sr_instance_hostname" {
   value     = local.sr_instance_hostname
@@ -79,6 +84,8 @@ output "Message" {
   description = "Instructions for configuring your environment after Terraform apply."
   value = join("\n", compact([
     "Next Steps:",
+    local.eks_auto_mode ? "Cluster Mode: EKS Auto Mode (AWS manages compute, storage, and load balancing)" : "Cluster Mode: Standard EKS with Managed Node Groups",
+    "",
     "1. Configure your kubeconfig for kubectl by running:",
     "   aws eks --region ${local.region} update-kubeconfig --name ${module.eks.cluster_name} --alias ${module.eks.cluster_name}",
     "",
