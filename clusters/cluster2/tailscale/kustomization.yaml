@@ -20,4 +20,4 @@ resources:
 - proxy-class.yaml
 - ./peer-relay
 - rbac.yaml
-- secret.yaml
+# - secret.yaml  # managed outside ArgoCD (gitignored)
