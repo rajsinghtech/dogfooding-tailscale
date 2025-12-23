@@ -8,7 +8,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "tcp"
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "9002"
-    service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-041a34ed6cbd6f67f,eipalloc-0b836be466ab7e550"
+    service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-041a34ed6cbd6f67f,eipalloc-0b836be466ab7e550,eipalloc-039346fbd31161ef8"
 spec:
   type: LoadBalancer
   selector:
