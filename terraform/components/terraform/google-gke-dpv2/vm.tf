@@ -1,9 +1,9 @@
 locals {
-  # Get all subnets from the VPC
+  # Get all subnets from the VPC module - includes primary and secondary ranges
+  gke_subnet_name = "${var.name}-gke-subnet"
   vpc_subnets = concat(
-    [for ip in module.vpc.subnets_ips : ip],                                             # Get IP ranges from VPC subnets
-    [google_compute_subnetwork.gke_subnet.ip_cidr_range],                                # Add GKE subnet
-    [for r in google_compute_subnetwork.gke_subnet.secondary_ip_range : r.ip_cidr_range] # Add GKE secondary ranges
+    [for ip in module.vpc.subnets_ips : ip],                                                                  # Get IP ranges from VPC subnets
+    [for r in lookup(module.vpc.subnets_secondary_ranges, local.gke_subnet_name, []) : r.ip_cidr_range]       # Add GKE secondary ranges
   )
 
   # Combine VPC subnets with user-provided routes, removing any duplicates
@@ -49,7 +49,7 @@ resource "google_compute_instance" "gce_sr" {
   }
 
   network_interface {
-    subnetwork = google_compute_subnetwork.gke_subnet.self_link
+    subnetwork = module.vpc.subnets_self_links[1] # GKE subnet
 
     access_config {
       // Ephemeral public IP
@@ -93,8 +93,7 @@ resource "google_compute_instance" "pvt_vm_test" {
   }
 
   network_interface {
-    subnetwork = google_compute_subnetwork.gke_subnet.self_link
-    # No access_config block to ensure no public IP
+    subnetwork = module.vpc.subnets_self_links[1] # GKE subnet, no public IP
   }
 
   service_account {
