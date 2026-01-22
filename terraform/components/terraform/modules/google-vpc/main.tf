@@ -10,7 +10,7 @@ locals {
 module "vpc" {
   # https://registry.terraform.io/modules/terraform-google-modules/network/google/latest
   source  = "terraform-google-modules/network/google"
-  version = ">= 7.0, < 8.0"
+  version = "~> 10.0"
 
   project_id   = var.project_id
   network_name = var.name
@@ -38,7 +38,7 @@ module "vpc" {
 module "cloud_router" {
   # https://registry.terraform.io/modules/terraform-google-modules/cloud-router/google/latest
   source  = "terraform-google-modules/cloud-router/google"
-  version = ">= 6.0, < 7.0"
+  version = "~> 7.0"
 
   count = var.create_router ? 1 : 0
 
