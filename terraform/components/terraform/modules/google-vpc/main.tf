@@ -51,7 +51,7 @@ module "cloud_router" {
   nats = var.create_nat ? [{
     name                               = "${var.name}-nat"
     source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-    
+
     # Include all GKE subnets (primary and secondary ranges)
     subnetworks = [
       for subnet in local.subnets_with_secondaries : {
@@ -65,5 +65,5 @@ module "cloud_router" {
         ]
       }
     ]
-  }]
+  }] : []
 }

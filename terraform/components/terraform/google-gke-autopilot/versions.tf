@@ -22,5 +22,9 @@ terraform {
       source  = "tailscale/tailscale"
       version = "~> 0.21"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.17"
+    }
   }
 }
