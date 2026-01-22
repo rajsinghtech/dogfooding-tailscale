@@ -50,8 +50,8 @@ jobs:
         id: changes
         run: |
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            # For pushes to main, validate all components
-            CHANGED_DIRS=$(find terraform/components/terraform -maxdepth 1 -mindepth 1 -type d ! -name 'modules' | sort)
+            # For pushes to main, validate all components (output basename only)
+            CHANGED_DIRS=$(find terraform/components/terraform -maxdepth 1 -mindepth 1 -type d ! -name 'modules' -exec basename {} \; | sort)
           else
             # For PRs, only validate changed components
             BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
