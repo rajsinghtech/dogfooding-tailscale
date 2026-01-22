@@ -2,8 +2,8 @@ locals {
   # Get all subnets from the VPC module - includes primary and secondary ranges
   gke_subnet_name = "${var.name}-gke-subnet"
   vpc_subnets = concat(
-    [for ip in module.vpc.subnets_ips : ip],                                                                  # Get IP ranges from VPC subnets
-    [for r in lookup(module.vpc.subnets_secondary_ranges, local.gke_subnet_name, []) : r.ip_cidr_range]       # Add GKE secondary ranges
+    [for ip in module.vpc.subnets_ips : ip],                                                            # Get IP ranges from VPC subnets
+    [for r in lookup(module.vpc.subnets_secondary_ranges, local.gke_subnet_name, []) : r.ip_cidr_range] # Add GKE secondary ranges
   )
 
   # Combine VPC subnets with user-provided routes, removing any duplicates

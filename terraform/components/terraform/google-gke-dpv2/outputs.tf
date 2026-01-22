@@ -20,9 +20,9 @@ output "vpc_id" {
   value       = module.vpc.vpc_id
 }
 
-output "subnet_ids" {
-  description = "The IDs of the subnets"
-  value       = module.vpc.subnets_ids
+output "subnets" {
+  description = "The subnet details from the VPC module"
+  value       = module.vpc.subnets
 }
 
 output "gcloud_get_credentials" {
