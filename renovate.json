@@ -6,7 +6,7 @@
   "description": "Renovate configuration for Terraform provider updates",
   "enabledManagers": ["terraform"],
   "fileMatch": ["terraform/components/terraform/**/*.tf"],
-  "schedule": ["after 9am on Monday"],
+  "schedule": ["after 9am every weekday"],
   "timezone": "America/New_York",
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
