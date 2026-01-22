@@ -1,0 +1,61 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "description": "Renovate configuration for Terraform provider updates",
+  "enabledManagers": ["terraform"],
+  "fileMatch": ["terraform/components/terraform/**/*.tf"],
+  "schedule": ["after 9am on Monday"],
+  "timezone": "America/New_York",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "labels": ["renovate", "terraform"],
+  "packageRules": [
+    {
+      "description": "Group AWS provider updates",
+      "matchManagers": ["terraform"],
+      "matchPackagePatterns": ["^hashicorp/aws$"],
+      "groupName": "AWS Terraform Provider",
+      "labels": ["renovate", "terraform", "aws"]
+    },
+    {
+      "description": "Group Azure provider updates",
+      "matchManagers": ["terraform"],
+      "matchPackagePatterns": ["^hashicorp/azurerm$", "^hashicorp/azuread$"],
+      "groupName": "Azure Terraform Providers",
+      "labels": ["renovate", "terraform", "azure"]
+    },
+    {
+      "description": "Group GCP provider updates",
+      "matchManagers": ["terraform"],
+      "matchPackagePatterns": ["^hashicorp/google$", "^hashicorp/google-beta$"],
+      "groupName": "GCP Terraform Providers",
+      "labels": ["renovate", "terraform", "gcp"]
+    },
+    {
+      "description": "Tailscale provider - separate PRs for visibility",
+      "matchManagers": ["terraform"],
+      "matchPackagePatterns": ["^tailscale/tailscale$"],
+      "groupName": "Tailscale Terraform Provider",
+      "labels": ["renovate", "terraform", "tailscale"],
+      "automerge": false
+    },
+    {
+      "description": "Group Kubernetes-related providers",
+      "matchManagers": ["terraform"],
+      "matchPackagePatterns": ["^hashicorp/kubernetes$", "^hashicorp/helm$", "^gavinbunney/kubectl$", "^alekc/kubectl$"],
+      "groupName": "Kubernetes Terraform Providers",
+      "labels": ["renovate", "terraform", "kubernetes"]
+    },
+    {
+      "description": "Group utility providers",
+      "matchManagers": ["terraform"],
+      "matchPackagePatterns": ["^hashicorp/random$", "^hashicorp/null$", "^hashicorp/local$", "^hashicorp/tls$", "^hashicorp/time$", "^hashicorp/http$"],
+      "groupName": "Utility Terraform Providers",
+      "labels": ["renovate", "terraform"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ]
+}

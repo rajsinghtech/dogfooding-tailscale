@@ -1,0 +1,27 @@
+# Checkov configuration for Terraform compliance scanning
+# Documentation: https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+
+# Soft fail mode - report issues but don't block PRs initially
+# Set to false after addressing initial findings
+soft-fail: true
+
+# Framework to scan
+framework:
+  - terraform
+
+# Skip checks that don't apply to this repository
+skip-check:
+  # CKV_TF_1: Ensure Terraform module sources use a commit hash
+  # We use version constraints instead of commit hashes
+  - CKV_TF_1
+
+  # CKV_TF_2: Ensure Terraform module sources use a tag with a version number
+  # We use version constraints in the provider block
+  - CKV_TF_2
+
+# Compact output for CI
+compact: true
+
+# Output format
+output:
+  - cli

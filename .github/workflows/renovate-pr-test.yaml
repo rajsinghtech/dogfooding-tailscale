@@ -1,0 +1,140 @@
+name: Renovate PR Compatibility Test
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**/*.tf'
+
+env:
+  TF_VERSION: '1.9.0'
+
+jobs:
+  check-renovate-pr:
+    name: Check if Renovate PR
+    runs-on: ubuntu-latest
+    outputs:
+      is_renovate: ${{ steps.check.outputs.is_renovate }}
+    steps:
+      - name: Check PR author
+        id: check
+        run: |
+          if [ "${{ github.event.pull_request.user.login }}" = "renovate[bot]" ] || \
+             [ "${{ github.event.pull_request.user.login }}" = "renovate" ]; then
+            echo "is_renovate=true" >> $GITHUB_OUTPUT
+            echo "This is a Renovate PR"
+          else
+            echo "is_renovate=false" >> $GITHUB_OUTPUT
+            echo "This is not a Renovate PR"
+          fi
+
+  full-init-test:
+    name: Full Init Test - All Components
+    runs-on: ubuntu-latest
+    needs: check-renovate-pr
+    if: needs.check-renovate-pr.outputs.is_renovate == 'true'
+    outputs:
+      results: ${{ steps.test.outputs.results }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Test All Components
+        id: test
+        run: |
+          RESULTS=""
+          FAILED=0
+
+          for dir in terraform/components/terraform/*/; do
+            COMPONENT=$(basename "$dir")
+
+            # Skip modules directory
+            if [ "$COMPONENT" = "modules" ]; then
+              continue
+            fi
+
+            echo "Testing: $COMPONENT"
+
+            if terraform -chdir="$dir" init -backend=false > /tmp/init.log 2>&1; then
+              RESULTS="$RESULTS\n| $COMPONENT | :white_check_mark: Pass |"
+              echo "  - Init: Success"
+            else
+              RESULTS="$RESULTS\n| $COMPONENT | :x: Failed |"
+              echo "  - Init: Failed"
+              cat /tmp/init.log
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          # Save results for comment
+          echo "results<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$RESULTS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          if [ $FAILED -gt 0 ]; then
+            echo "::warning::$FAILED component(s) failed init"
+          fi
+
+      - name: Generate Provider Report
+        id: providers
+        run: |
+          echo "## Provider Versions in This PR" >> /tmp/provider-report.md
+          echo "" >> /tmp/provider-report.md
+          echo "| Provider | Version Constraint | Source |" >> /tmp/provider-report.md
+          echo "|----------|-------------------|--------|" >> /tmp/provider-report.md
+
+          # Find all provider version constraints
+          grep -rh "version\s*=" terraform/components/terraform/*/versions.tf 2>/dev/null | \
+            grep -v "required_version" | \
+            sort -u | while read -r line; do
+              echo "| - | $line | versions.tf |" >> /tmp/provider-report.md
+          done
+
+          cat /tmp/provider-report.md >> $GITHUB_STEP_SUMMARY
+
+  post-comment:
+    name: Post PR Comment
+    runs-on: ubuntu-latest
+    needs: [check-renovate-pr, full-init-test]
+    if: needs.check-renovate-pr.outputs.is_renovate == 'true'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post Compatibility Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = `${{ needs.full-init-test.outputs.results }}`;
+
+            const body = `## Terraform Provider Compatibility Report
+
+            This PR was created by Renovate to update Terraform provider versions.
+
+            ### Component Init Test Results
+
+            | Component | Status |
+            |-----------|--------|
+            ${results}
+
+            ### What was tested
+            - \`terraform init -backend=false\` on all components
+            - This verifies provider downloads succeed with new version constraints
+
+            ### What was NOT tested
+            - \`terraform plan\` (requires cloud credentials)
+            - Runtime compatibility (API changes in providers)
+
+            > **Note**: If all components pass init, the provider version is downloadable and syntactically compatible. Runtime issues may still occur.
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });

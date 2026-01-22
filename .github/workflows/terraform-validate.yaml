@@ -1,0 +1,221 @@
+name: Terraform Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/**/*.tf'
+      - '.github/workflows/terraform-validate.yaml'
+      - '.tflint.hcl'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**/*.tf'
+      - '.github/workflows/terraform-validate.yaml'
+      - '.tflint.hcl'
+
+env:
+  TF_VERSION: '1.9.0'
+  TFLINT_VERSION: 'v0.53.0'
+
+jobs:
+  terraform-fmt:
+    name: Terraform Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive -diff terraform/
+
+  detect-changes:
+    name: Detect Changed Components
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.changes.outputs.components }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Terraform Components
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # For pushes to main, validate all components
+            CHANGED_DIRS=$(find terraform/components/terraform -maxdepth 1 -mindepth 1 -type d ! -name 'modules' | sort)
+          else
+            # For PRs, only validate changed components
+            BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+
+            CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'terraform/components/terraform/**/*.tf' 2>/dev/null || echo "")
+
+            if [ -z "$CHANGED_FILES" ]; then
+              echo "No Terraform files changed"
+              echo "components=[]" >> $GITHUB_OUTPUT
+              echo "has_changes=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # Extract unique component directories
+            CHANGED_DIRS=$(echo "$CHANGED_FILES" | grep -E '^terraform/components/terraform/[^/]+/' | sed 's|terraform/components/terraform/\([^/]*\)/.*|\1|' | sort -u)
+
+            # Handle changes in modules - if modules change, validate components using them
+            if echo "$CHANGED_FILES" | grep -q '^terraform/components/terraform/modules/'; then
+              # Add all components since module changes could affect any of them
+              CHANGED_DIRS=$(find terraform/components/terraform -maxdepth 1 -mindepth 1 -type d ! -name 'modules' -printf '%f\n' | sort)
+            fi
+          fi
+
+          # Convert to JSON array
+          if [ -n "$CHANGED_DIRS" ]; then
+            COMPONENTS_JSON=$(echo "$CHANGED_DIRS" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "components=$COMPONENTS_JSON" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changed components: $COMPONENTS_JSON"
+          else
+            echo "components=[]" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+  terraform-validate:
+    name: Validate - ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJson(needs.detect-changes.outputs.components) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        id: init
+        working-directory: terraform/components/terraform/${{ matrix.component }}
+        run: terraform init -backend=false
+        continue-on-error: true
+
+      - name: Terraform Validate
+        id: validate
+        if: steps.init.outcome == 'success'
+        working-directory: terraform/components/terraform/${{ matrix.component }}
+        run: terraform validate -no-color
+        continue-on-error: true
+
+      - name: Report Status
+        run: |
+          if [ "${{ steps.init.outcome }}" != "success" ]; then
+            echo "::error::Terraform init failed for ${{ matrix.component }}"
+            exit 1
+          fi
+          if [ "${{ steps.validate.outcome }}" != "success" ]; then
+            echo "::error::Terraform validate failed for ${{ matrix.component }}"
+            exit 1
+          fi
+          echo "Validation passed for ${{ matrix.component }}"
+
+  tflint:
+    name: TFLint - ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJson(needs.detect-changes.outputs.components) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        working-directory: terraform/components/terraform/${{ matrix.component }}
+        run: tflint --format compact
+        continue-on-error: true
+
+  trivy-security:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'terraform/'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          trivyignores: '.trivyignore'
+
+  checkov-compliance:
+    name: Checkov Compliance Scan
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          config_file: .checkov.yaml
+          output_format: cli
+          soft_fail: true
+
+  validation-summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [terraform-fmt, terraform-validate, tflint, trivy-security, checkov-compliance]
+    if: always()
+    steps:
+      - name: Check Results
+        run: |
+          echo "## Validation Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Terraform Format | ${{ needs.terraform-fmt.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Terraform Validate | ${{ needs.terraform-validate.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TFLint | ${{ needs.tflint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy Security | ${{ needs.trivy-security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Checkov Compliance | ${{ needs.checkov-compliance.result }} |" >> $GITHUB_STEP_SUMMARY
+
+          # Fail if critical jobs failed
+          if [ "${{ needs.terraform-fmt.result }}" = "failure" ] || \
+             [ "${{ needs.terraform-validate.result }}" = "failure" ]; then
+            echo ""
+            echo "Critical validation checks failed!"
+            exit 1
+          fi

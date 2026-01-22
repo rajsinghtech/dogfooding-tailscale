@@ -1,0 +1,6 @@
+# Trivy ignore file for Terraform security scanning
+# Add rule IDs here to suppress false positives
+# Format: RULE_ID
+# Example: AVD-AWS-0089
+
+# No ignores configured yet - add as needed
