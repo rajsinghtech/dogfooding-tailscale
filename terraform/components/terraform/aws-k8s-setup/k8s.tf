@@ -1,7 +1,7 @@
 # Use tfstate values from phase-1 for the providers defined in locals.tf
 provider "tailscale" {
-  oauth_client_id        = local.oauth_client_id
-  oauth_client_secret    = local.oauth_client_secret
+  oauth_client_id     = local.oauth_client_id
+  oauth_client_secret = local.oauth_client_secret
 }
 
 provider "kubernetes" {
@@ -14,7 +14,7 @@ provider "kubectl" {
   host                   = local.eks_cluster_endpoint
   cluster_ca_certificate = local.eks_cluster_ca_certificate
   token                  = local.eks_cluster_auth_token
-  load_config_file = false
+  load_config_file       = false
 }
 
 provider "helm" {
@@ -95,11 +95,11 @@ resource "helm_release" "ebs_csi_driver" {
 # AWS Load Balancer Controller Setup
 ################################################################################
 resource "helm_release" "aws_lb_controller" {
-  name       = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  namespace  = "kube-system"
-  version    = "1.7.1"
+  name             = "aws-load-balancer-controller"
+  repository       = "https://aws.github.io/eks-charts"
+  chart            = "aws-load-balancer-controller"
+  namespace        = "kube-system"
+  version          = "1.7.1"
   create_namespace = false
 
   values = [
@@ -177,8 +177,8 @@ resource "kubectl_manifest" "app_manifests" {
 
 # Create a ProxyClass to standardize configs applied to operator resources
 resource "kubectl_manifest" "proxyclass" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: tailscale.com/v1alpha1
 kind: ProxyClass
 metadata:
@@ -193,15 +193,15 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: "linux"
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Apiserver Proxygroup
 resource "kubectl_manifest" "apiserverproxygroup" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: tailscale.com/v1alpha1
 kind: ProxyGroup
 metadata:
@@ -214,15 +214,15 @@ spec:
   kubeAPIServer:
     mode: auth
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Create the Connector CR for subnet router w/the proxy class
 resource "kubectl_manifest" "connector" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
@@ -236,15 +236,15 @@ spec:
   tags:
     - "tag:k8s-operator"
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Rewrite the domain for unique ones for split-DNS across clusters
 resource "kubectl_manifest" "coredns" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -271,9 +271,9 @@ data:
         loadbalance
     }
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 

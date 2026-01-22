@@ -60,7 +60,7 @@ output "oauth_client_secret" {
 
 output "Message" {
   description = "Instructions for configuring your environment after Terraform apply."
-  value = <<-EOT
+  value       = <<-EOT
 Next Steps:
 1. Configure your kubeconfig for kubectl by running:
    az aks get-credentials --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_kubernetes_cluster.main.name} --overwrite-existing

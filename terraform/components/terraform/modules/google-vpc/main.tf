@@ -14,7 +14,7 @@ module "vpc" {
 
   project_id   = var.project_id
   network_name = var.name
-  
+
   # Configure subnets with secondary ranges
   subnets = [
     for subnet in local.subnets_with_secondaries : {
@@ -23,7 +23,7 @@ module "vpc" {
       subnet_region         = subnet.subnet_region
       subnet_private_access = lookup(subnet, "subnet_private_access", false)
       subnet_flow_logs      = lookup(subnet, "subnet_flow_logs", false)
-      
+
       # Add secondary ranges if they exist
       secondary_ip_ranges = [
         for range in subnet.secondary_ip_ranges : {
@@ -55,7 +55,7 @@ module "cloud_router" {
     # Include all GKE subnets (primary and secondary ranges)
     subnetworks = [
       for subnet in local.subnets_with_secondaries : {
-        name                    = subnet.subnet_name
+        name = subnet.subnet_name
         source_ip_ranges_to_nat = concat(
           ["PRIMARY_IP_RANGE"],
           length(subnet.secondary_ip_ranges) > 0 ? ["LIST_OF_SECONDARY_IP_RANGES"] : []

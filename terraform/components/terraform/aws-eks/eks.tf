@@ -56,11 +56,11 @@ module "eks" {
     metrics-server = {}
   }
 
-  enabled_log_types       = []
+  enabled_log_types           = []
   create_cloudwatch_log_group = false
 
-  vpc_id          = module.vpc.vpc_id
-  subnet_ids      = local.public_workers ? slice(module.vpc.public_subnets, 0, length(local.azs)) : slice(module.vpc.private_subnets, 0, length(local.azs))
+  vpc_id            = module.vpc.vpc_id
+  subnet_ids        = local.public_workers ? slice(module.vpc.public_subnets, 0, length(local.azs)) : slice(module.vpc.private_subnets, 0, length(local.azs))
   service_ipv4_cidr = local.cluster_service_ipv4_cidr
 
   # Managed node groups - only created when Auto Mode is disabled
@@ -146,7 +146,7 @@ resource "aws_iam_role_policy_attachment" "aws_lb_controller" {
 ################################################################################
 data "aws_iam_policy_document" "ebs_csi_assume_role" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["sts:AssumeRoleWithWebIdentity"]
     principals {
       type        = "Federated"

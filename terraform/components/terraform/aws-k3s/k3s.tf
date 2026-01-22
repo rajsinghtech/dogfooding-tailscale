@@ -32,7 +32,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_security_group" "k3s" {
   vpc_id      = module.vpc.vpc_id
   description = "Required access traffic for K3s"
-    
+
   ingress {
     from_port   = 22
     to_port     = 22

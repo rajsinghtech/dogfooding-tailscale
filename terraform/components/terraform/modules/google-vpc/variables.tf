@@ -20,12 +20,12 @@ variable "name" {
 variable "subnets" {
   description = "List of subnet configurations"
   type = list(object({
-    subnet_name   = string
-    subnet_ip     = string
-    subnet_region = string
-    subnet_range_name = optional(string)
+    subnet_name           = string
+    subnet_ip             = string
+    subnet_region         = string
+    subnet_range_name     = optional(string)
     subnet_private_access = optional(bool, false)
-    subnet_flow_logs = optional(bool, false)
+    subnet_flow_logs      = optional(bool, false)
   }))
 }
 

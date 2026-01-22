@@ -18,16 +18,16 @@ data "aws_availability_zones" "available" {}
 
 # Use the module to add the EC2 instance into our tailnet
 module "ubuntu-tailscale-client" {
-  count         = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
-  source        = "../modules/cloudinit-ts"
-  hostname      = "${local.sr_instance_hostname}-${count.index + 1}"
-  accept_routes = true
-  enable_ssh    = true
-  ephemeral     = true
-  reusable      = true
-  advertise_routes = local.advertise_routes
-  primary_tag      = "subnet-router"
-  track            = local.tailscale_track
+  count             = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
+  source            = "../modules/cloudinit-ts"
+  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
+  accept_routes     = true
+  enable_ssh        = true
+  ephemeral         = true
+  reusable          = true
+  advertise_routes  = local.advertise_routes
+  primary_tag       = "subnet-router"
+  track             = local.tailscale_track
   relay_server_port = local.tailscale_relay_server_port
 }
 
@@ -53,7 +53,7 @@ resource "aws_security_group" "main" {
   count       = local.enable_sr ? 1 : 0
   vpc_id      = module.vpc.vpc_id
   description = "Required access traffic"
-    
+
   ingress {
     from_port   = 22
     to_port     = 22
@@ -116,13 +116,13 @@ resource "aws_launch_template" "sr_ec2" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(local.tags, { "Name" = local.sr_instance_hostname })
+    tags          = merge(local.tags, { "Name" = local.sr_instance_hostname })
   }
 }
 
 resource "aws_autoscaling_group" "sr_ec2" {
-  count         = local.enable_sr ? 1 : 0
-  name                      = "${local.name}-sr-ec2-asg"
+  count = local.enable_sr ? 1 : 0
+  name  = "${local.name}-sr-ec2-asg"
   launch_template {
     id      = aws_launch_template.sr_ec2[0].id
     version = "$Latest"
@@ -161,7 +161,7 @@ resource "aws_instance" "client" {
   subnet_id              = module.vpc.private_subnets[0]
   vpc_security_group_ids = [aws_security_group.main[0].id]
   source_dest_check      = false
-  key_name               = local.key_name 
+  key_name               = local.key_name
   ebs_optimized          = true
 
   user_data_base64 = base64encode(<<EOF

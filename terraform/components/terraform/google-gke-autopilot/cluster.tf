@@ -1,5 +1,5 @@
 locals {
-  name = "${var.cluster_name}"
+  name = var.cluster_name
 }
 
 provider "google" {
@@ -43,14 +43,14 @@ resource "google_compute_subnetwork" "subnet" {
 
 # Create the GKE Autopilot cluster
 resource "google_container_cluster" "primary" {
-  name     = local.name
+  name = local.name
 
-  location = var.region
-  enable_autopilot = true
+  location                 = var.region
+  enable_autopilot         = true
   enable_l4_ilb_subsetting = true
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = "10.1.0.0/16"
+    cluster_ipv4_cidr_block  = "10.1.0.0/16"
     services_ipv4_cidr_block = "10.2.0.0/16"
   }
 

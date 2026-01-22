@@ -21,17 +21,17 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   network_profile {
-    network_plugin     = "azure"
-    dns_service_ip     = cidrhost(local.aks_service_ipv4_cidr, 10)
-    service_cidr       = local.aks_service_ipv4_cidr
-    outbound_type      = local.cluster_outbound_type
-    load_balancer_sku  = "standard"
+    network_plugin    = "azure"
+    dns_service_ip    = cidrhost(local.aks_service_ipv4_cidr, 10)
+    service_cidr      = local.aks_service_ipv4_cidr
+    outbound_type     = local.cluster_outbound_type
+    load_balancer_sku = "standard"
   }
 
   api_server_access_profile {
     authorized_ip_ranges = ["${local.vnet_cidr}"] # API server is private
   }
-  
+
   private_cluster_enabled = true
 
   identity {

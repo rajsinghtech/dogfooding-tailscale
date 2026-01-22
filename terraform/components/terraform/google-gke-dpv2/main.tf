@@ -28,13 +28,13 @@ module "vpc" {
   project_id = local.project_id
   region     = local.region
   name       = var.name
-  
+
   # Enable router and NAT
-  create_router = true
-  create_nat    = true
-  router_name   = "${var.name}-router"
+  create_router                       = true
+  create_nat                          = true
+  router_name                         = "${var.name}-router"
   enable_endpoint_independent_mapping = var.enable_endpoint_independent_mapping
-  
+
   # Configure subnets with proper structure
   subnets = [
     # Main VPC subnet
@@ -56,7 +56,7 @@ module "vpc" {
       subnet_tags           = [for k, v in var.tags : "${k}-${v}" if v != ""]
     }
   ]
-  
+
   # Secondary IP ranges for GKE
   secondary_ranges = {
     "${var.name}-gke-subnet" = [
@@ -76,10 +76,10 @@ module "vpc" {
 resource "google_container_cluster" "primary" {
   name     = "${var.name}-gkedpv2-cluster"
   location = local.region
-  
+
   # Add labels to GKE cluster
   resource_labels = var.tags
-  
+
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -87,9 +87,9 @@ resource "google_container_cluster" "primary" {
   initial_node_count       = 1
 
   network    = module.vpc.vpc_id
-  subnetwork = module.vpc.subnets_self_links[1]  # Using the GKE subnet from the VPC module
+  subnetwork = module.vpc.subnets_self_links[1] # Using the GKE subnet from the VPC module
 
-  datapath_provider = "ADVANCED_DATAPATH"  # This enables GKE Dataplane V2 with default CNI
+  datapath_provider = "ADVANCED_DATAPATH" # This enables GKE Dataplane V2 with default CNI
 
   ip_allocation_policy {
     cluster_secondary_range_name  = "${var.name}-pod-range"
@@ -108,8 +108,8 @@ resource "google_container_cluster" "primary" {
 
   # Private cluster config
   private_cluster_config {
-    enable_private_nodes    = var.enable_sr    # Private when enable_sr is true
-    enable_private_endpoint = var.enable_sr    # Private when enable_sr is true
+    enable_private_nodes    = var.enable_sr # Private when enable_sr is true
+    enable_private_endpoint = var.enable_sr # Private when enable_sr is true
     master_ipv4_cidr_block  = var.gke_master_cidr
   }
 
@@ -119,7 +119,7 @@ resource "google_container_cluster" "primary" {
 
   # Configure master authorized networks only when private
   dynamic "master_authorized_networks_config" {
-    for_each = var.enable_sr ? [1] : []  # Only apply when enable_sr is true
+    for_each = var.enable_sr ? [1] : [] # Only apply when enable_sr is true
     content {
       dynamic "cidr_blocks" {
         for_each = var.authorized_networks
@@ -130,7 +130,7 @@ resource "google_container_cluster" "primary" {
       }
     }
   }
-  
+
   depends_on = [
     google_compute_subnetwork.gke_subnet
   ]
@@ -141,7 +141,7 @@ resource "google_container_node_pool" "primary_nodes" {
   location   = local.region
   cluster    = google_container_cluster.primary.name
   node_count = var.node_count
-  
+
   # Add labels to node pool
   node_locations = [local.zone]
 
@@ -149,9 +149,9 @@ resource "google_container_node_pool" "primary_nodes" {
     machine_type = var.machine_type
     disk_size_gb = 100
     disk_type    = "pd-standard"
-    
+
     # Add labels to node config
-    labels = var.tags
+    labels          = var.tags
     resource_labels = var.tags
 
     # Add metadata for tags and disable legacy endpoints
@@ -169,7 +169,7 @@ resource "google_container_node_pool" "primary_nodes" {
         cpu_cfs_quota        = kubelet_config.value.cpu_cfs_quota
         cpu_cfs_quota_period = kubelet_config.value.cpu_cfs_quota_period
         pod_pids_limit       = kubelet_config.value.pod_pids_limit
-      } 
+      }
     }
 
     # Google recommends custom service accounts with minimal permissions
@@ -182,17 +182,17 @@ resource "google_container_node_pool" "primary_nodes" {
     workload_metadata_config {
       mode = "GKE_METADATA"
     }
-    
+
     # Add tags to identify nodes in the VPC network
     tags = ["gke-node", "${var.name}-nodes"]
   }
-  
+
   # Add management settings to control node updates
   management {
     auto_repair  = true
     auto_upgrade = true
   }
-  
+
   # Configure rolling updates for node pool
 
   upgrade_settings {

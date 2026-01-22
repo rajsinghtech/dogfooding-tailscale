@@ -4,7 +4,7 @@ module "ubuntu-tailscale-client" {
   hostname          = local.hostname
   accept_routes     = true
   enable_ssh        = true
-  advertise_routes  = concat(local.advertise_routes,[azurerm_private_dns_resolver_inbound_endpoint.main.ip_configurations[0].private_ip_address])
+  advertise_routes  = concat(local.advertise_routes, [azurerm_private_dns_resolver_inbound_endpoint.main.ip_configurations[0].private_ip_address])
   primary_tag       = "subnet-router"
   track             = var.tailscale_track
   relay_server_port = var.tailscale_relay_server_port
@@ -27,9 +27,9 @@ resource "azurerm_public_ip" "main" {
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = format("%s-%s-%s-%s-vm-nic", local.tenant, local.environment, local.stage, local.hostname)
-  location            = local.location
-  resource_group_name = azurerm_resource_group.main.name
+  name                  = format("%s-%s-%s-%s-vm-nic", local.tenant, local.environment, local.stage, local.hostname)
+  location              = local.location
+  resource_group_name   = azurerm_resource_group.main.name
   ip_forwarding_enabled = true
   ip_configuration {
     name                          = "internal"
@@ -41,17 +41,17 @@ resource "azurerm_network_interface" "main" {
 }
 
 resource "azurerm_linux_virtual_machine" "main" {
-  name                = local.hostname
-  location            = local.location
-  resource_group_name = azurerm_resource_group.main.name
-  size                = local.vm_size
-  admin_username      = "ubuntu"
+  name                  = local.hostname
+  location              = local.location
+  resource_group_name   = azurerm_resource_group.main.name
+  size                  = local.vm_size
+  admin_username        = "ubuntu"
   network_interface_ids = [azurerm_network_interface.main.id]
   admin_ssh_key {
     username   = "ubuntu"
     public_key = file(var.ssh_public_key_path)
   }
-  custom_data         = module.ubuntu-tailscale-client.rendered
+  custom_data = module.ubuntu-tailscale-client.rendered
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
@@ -72,13 +72,13 @@ resource "azurerm_linux_virtual_machine" "main" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/ubuntu/nginx_docker"  # Ensure the directory is created
+      "mkdir -p /home/ubuntu/nginx_docker" # Ensure the directory is created
     ]
   }
-  
+
   provisioner "file" {
-    source      = "../files/nginx.conf"  # Local file path
-    destination = "/home/ubuntu/nginx_docker/nginx.conf"  # Target path
+    source      = "../files/nginx.conf"                  # Local file path
+    destination = "/home/ubuntu/nginx_docker/nginx.conf" # Target path
   }
 
   connection {
@@ -126,7 +126,7 @@ resource "azurerm_network_security_group" "main" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-  
+
   dynamic "security_rule" {
     for_each = var.tailscale_relay_server_port != null ? [1] : []
     content {
@@ -139,10 +139,10 @@ resource "azurerm_network_security_group" "main" {
       destination_port_range     = tostring(var.tailscale_relay_server_port)
       source_address_prefix      = "0.0.0.0/0"
       destination_address_prefix = "*"
-      description               = "Allow Tailscale relay server traffic"
+      description                = "Allow Tailscale relay server traffic"
     }
   }
-  
+
   tags = local.tags
 }
 

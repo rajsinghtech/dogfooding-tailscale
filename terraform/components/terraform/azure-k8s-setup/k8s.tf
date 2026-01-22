@@ -35,7 +35,7 @@ resource "helm_release" "tailscale_operator" {
         }
       }
     })
-  ] 
+  ]
 }
 
 ######################################################################
@@ -53,8 +53,8 @@ resource "kubectl_manifest" "app_manifests" {
 
 # Create a ProxyClass to standardize configs applied to operator resources
 resource "kubectl_manifest" "proxyclass" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: tailscale.com/v1alpha1
 kind: ProxyClass
 metadata:
@@ -69,15 +69,15 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: "linux"
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Create the Connector CR for subnet router w/the proxy class
 resource "kubectl_manifest" "connector" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
@@ -92,9 +92,9 @@ spec:
   tags:
     - "tag:k8s-operator"
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Grab the client EC2 instance's Tailscale device details
@@ -105,8 +105,8 @@ data "tailscale_device" "client_device" {
 
 # Create a ProxyGroup for egress proxies in each cluster
 resource "kubectl_manifest" "egressproxygroup" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: tailscale.com/v1alpha1
 kind: ProxyGroup
 metadata:
@@ -116,16 +116,16 @@ spec:
   replicas: ${local.proxy_replicas}
   proxyClass: ${local.stage}
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Create the Egress Service in the cluster to the nginx server running on the client EC2 instance
 # Boldly assuming the first address from the Tailscale device is the IPv4 one for our annotation
 resource "kubectl_manifest" "egress-svc" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: v1
 kind: Service
 metadata:
@@ -144,15 +144,15 @@ spec:
     protocol: TCP
     name: nginx
 YAML
-    depends_on = [
+  depends_on = [
     helm_release.tailscale_operator
-    ]
+  ]
 }
 
 # Rewrite the domain for unique ones for split-DNS across clusters
 resource "kubectl_manifest" "coredns" {
-    wait      = true
-    yaml_body = <<YAML
+  wait      = true
+  yaml_body = <<YAML
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -15,7 +15,7 @@ provider "kubectl" {
   host                   = "https://${google_container_cluster.primary.endpoint}"
   cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
   token                  = data.google_client_config.default.access_token
-  load_config_file = false
+  load_config_file       = false
 }
 
 provider "helm" {
@@ -37,24 +37,24 @@ resource "helm_release" "tailscale_operator" {
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
-  
+
   # Dependencies managed through lifecycle
   lifecycle {
     create_before_destroy = false
     prevent_destroy       = false
-    
+
     replace_triggered_by = [
       google_container_cluster.primary,
       google_container_node_pool.primary_nodes
     ]
   }
-  
+
   # Conditional dependency on subnet router
   depends_on = [
     google_container_cluster.primary,
     google_container_node_pool.primary_nodes
   ]
-    
+
   values = [
     yamlencode({
       oauth = {

@@ -1,14 +1,14 @@
 # Use the module to add the EC2 instance into our tailnet
 module "ubuntu-tailscale-client" {
-  count         = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
-  source        = "../modules/cloudinit-ts"
-  hostname      = "${local.sr_instance_hostname}-${count.index + 1}"
-  accept_routes = var.sr_accept_routes
-  enable_ssh    = var.sr_enable_ssh
-  ephemeral     = var.sr_ephemeral
-  reusable      = var.sr_reusable
-  advertise_routes = local.advertise_routes
-  primary_tag      = var.sr_primary_tag
+  count             = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
+  source            = "../modules/cloudinit-ts"
+  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
+  accept_routes     = var.sr_accept_routes
+  enable_ssh        = var.sr_enable_ssh
+  ephemeral         = var.sr_ephemeral
+  reusable          = var.sr_reusable
+  advertise_routes  = local.advertise_routes
+  primary_tag       = var.sr_primary_tag
   track             = var.tailscale_track
   relay_server_port = var.tailscale_relay_server_port
 }
@@ -35,7 +35,7 @@ resource "aws_security_group" "main" {
   count       = local.enable_sr ? 1 : 0
   vpc_id      = module.vpc.vpc_id
   description = "Required access traffic"
-    
+
   ingress {
     from_port   = 22
     to_port     = 22
@@ -98,13 +98,13 @@ resource "aws_launch_template" "sr_ec2" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(local.tags, { "Name" = local.sr_instance_hostname })
+    tags          = merge(local.tags, { "Name" = local.sr_instance_hostname })
   }
 }
 
 resource "aws_autoscaling_group" "sr_ec2" {
-  count         = local.enable_sr ? 1 : 0
-  name                      = "${local.name}-sr-ec2-asg"
+  count = local.enable_sr ? 1 : 0
+  name  = "${local.name}-sr-ec2-asg"
   launch_template {
     id      = aws_launch_template.sr_ec2[0].id
     version = "$Latest"

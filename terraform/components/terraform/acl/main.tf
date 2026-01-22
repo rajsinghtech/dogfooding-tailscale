@@ -7,7 +7,7 @@ data "local_file" "acl" {
 }
 
 resource "tailscale_acl" "acl" {
-  acl = var.acl_format == "json" ? jsonencode(jsondecode(data.local_file.acl.content)) : trimspace(data.local_file.acl.content)
+  acl                        = var.acl_format == "json" ? jsonencode(jsondecode(data.local_file.acl.content)) : trimspace(data.local_file.acl.content)
   reset_acl_on_destroy       = true
   overwrite_existing_content = true
 }

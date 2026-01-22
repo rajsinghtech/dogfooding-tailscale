@@ -13,11 +13,11 @@ provider "tailscale" {
 resource "azurerm_resource_group" "main" {
   name     = format("%s-%s-%s-perf-test-rg", var.tenant, var.environment, var.stage)
   location = var.location
-  tags     = merge(var.tags, {
-    Region        = var.location
+  tags = merge(var.tags, {
+    Region = var.location
     Tenant = var.tenant
-    Env           = var.environment
-    Stage         = var.stage
+    Env    = var.environment
+    Stage  = var.stage
   })
 }
 
@@ -32,11 +32,11 @@ resource "azurerm_virtual_network" "main" {
   address_space       = [var.vnet_cidr]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  tags                = merge(var.tags, {
-    Region        = var.location
+  tags = merge(var.tags, {
+    Region = var.location
     Tenant = var.tenant
-    Env           = var.environment
-    Stage         = var.stage
+    Env    = var.environment
+    Stage  = var.stage
   })
 }
 
@@ -110,7 +110,7 @@ resource "azurerm_network_security_group" "main" {
     destination_port_range     = "5201"
     source_address_prefixes    = [var.vnet_cidr]
     destination_address_prefix = "*"
-    description               = "Allow iperf3 traffic within VPC"
+    description                = "Allow iperf3 traffic within VPC"
   }
 
   security_rule {
@@ -123,7 +123,7 @@ resource "azurerm_network_security_group" "main" {
     destination_port_range     = "5201"
     source_address_prefix      = format("%s/32", chomp(data.http.my_public_ip.response_body))
     destination_address_prefix = "*"
-    description               = "Allow iperf3 traffic from my public IP for WAN testing"
+    description                = "Allow iperf3 traffic from my public IP for WAN testing"
   }
 
   dynamic "security_rule" {
@@ -138,7 +138,7 @@ resource "azurerm_network_security_group" "main" {
       destination_port_range     = tostring(var.tailscale_relay_server_port)
       source_address_prefix      = "0.0.0.0/0"
       destination_address_prefix = "*"
-      description               = "Allow Tailscale relay server traffic"
+      description                = "Allow Tailscale relay server traffic"
     }
   }
 }
@@ -203,14 +203,14 @@ module "cloudinit_ts" {
     tailscale = tailscale
   }
 
-  hostname            = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
-  accept_routes       = true
-  enable_ssh          = true
-  primary_tag         = "infra"
-  reusable            = true
-  ephemeral           = false
-  track               = var.tailscale_track
-  relay_server_port   = var.tailscale_relay_server_port
+  hostname          = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
+  accept_routes     = true
+  enable_ssh        = true
+  primary_tag       = "infra"
+  reusable          = true
+  ephemeral         = false
+  track             = var.tailscale_track
+  relay_server_port = var.tailscale_relay_server_port
 
   additional_parts = [
     {

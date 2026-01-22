@@ -1,44 +1,44 @@
 locals {
   # Get all subnets from the VPC
   vpc_subnets = concat(
-    [for ip in module.vpc.subnets_ips : ip],  # Get IP ranges from VPC subnets
-    [google_compute_subnetwork.gke_subnet.ip_cidr_range],  # Add GKE subnet
-    [for r in google_compute_subnetwork.gke_subnet.secondary_ip_range : r.ip_cidr_range]  # Add GKE secondary ranges
+    [for ip in module.vpc.subnets_ips : ip],                                             # Get IP ranges from VPC subnets
+    [google_compute_subnetwork.gke_subnet.ip_cidr_range],                                # Add GKE subnet
+    [for r in google_compute_subnetwork.gke_subnet.secondary_ip_range : r.ip_cidr_range] # Add GKE secondary ranges
   )
-  
+
   # Combine VPC subnets with user-provided routes, removing any duplicates
   all_advertised_routes = distinct(concat(local.vpc_subnets, var.advertise_routes))
 }
 
 # Tailscale provider for subnet router
 provider "tailscale" {
-  oauth_client_id        = var.oauth_client_id
-  oauth_client_secret    = var.oauth_client_secret
+  oauth_client_id     = var.oauth_client_id
+  oauth_client_secret = var.oauth_client_secret
 }
 
 # Generate cloud-init configuration for Tailscale subnet router
 module "cloudinit_config" {
-  count         = var.enable_sr ? 1 : 0
-  source        = "../modules/cloudinit-ts"
-  hostname      = "${var.name}-sr-vm"
-  accept_routes = true
-  enable_ssh    = true
-  ephemeral     = false
-  reusable      = true
-  advertise_routes = local.all_advertised_routes
-  primary_tag   = "subnet-router"
-  additional_tags = ["infra"]
+  count             = var.enable_sr ? 1 : 0
+  source            = "../modules/cloudinit-ts"
+  hostname          = "${var.name}-sr-vm"
+  accept_routes     = true
+  enable_ssh        = true
+  ephemeral         = false
+  reusable          = true
+  advertise_routes  = local.all_advertised_routes
+  primary_tag       = "subnet-router"
+  additional_tags   = ["infra"]
   track             = var.tailscale_track
   relay_server_port = var.tailscale_relay_server_port
 }
 
 resource "google_compute_instance" "gce_sr" {
-  count        = var.enable_sr ? 1 : 0
-  name         = "${var.name}-sr-vm"
+  count = var.enable_sr ? 1 : 0
+  name  = "${var.name}-sr-vm"
   # Remove hostname as it needs to be FQDN and GCP will auto-generate one
   machine_type = var.machine_type
   zone         = local.zone
-  
+
   boot_disk {
     initialize_params {
       image = "projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250312"
@@ -50,7 +50,7 @@ resource "google_compute_instance" "gce_sr" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.gke_subnet.self_link
-    
+
     access_config {
       // Ephemeral public IP
     }
@@ -77,12 +77,12 @@ resource "google_compute_instance" "gce_sr" {
 
 # Private test VM for internal connectivity testing
 resource "google_compute_instance" "pvt_vm_test" {
-  count        = var.enable_sr ? 1 : 0
-  name         = "${var.name}-pvt-test-vm"
+  count = var.enable_sr ? 1 : 0
+  name  = "${var.name}-pvt-test-vm"
   # Remove hostname as it needs to be FQDN and GCP will auto-generate one
   machine_type = var.machine_type
   zone         = local.zone
-  
+
   boot_disk {
     initialize_params {
       image = "projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250312"
@@ -104,7 +104,7 @@ resource "google_compute_instance" "pvt_vm_test" {
   metadata = {
     enable-osconfig = "TRUE"
     ssh-keys        = join("\n", var.ssh_public_keys)
-    user-data = <<-EOT
+    user-data       = <<-EOT
       #cloud-config
       packages:
         - netcat
@@ -131,7 +131,7 @@ resource "google_compute_firewall" "subnet_router_ingress" {
     protocol = "udp"
     ports    = ["41641"]
   }
-  
+
   # Allow SSH
   allow {
     protocol = "tcp"
@@ -153,7 +153,7 @@ resource "google_compute_firewall" "subnet_router_ingress_ipv6" {
     protocol = "udp"
     ports    = ["41641"]
   }
-  
+
   # Allow SSH
   allow {
     protocol = "tcp"
@@ -184,7 +184,7 @@ resource "google_compute_firewall" "private_vm_ingress" {
   # Allow icmp
   allow {
     protocol = "icmp"
-  } 
+  }
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["pvt-test-vm"]
@@ -227,12 +227,12 @@ module "ops_agent_policy" {
   project       = local.project_id
   zone          = local.zone
   assignment_id = "${var.name}-ops-agent-policy"
-  
+
   agents_rule = {
     package_state = "installed"
     version       = "latest"
   }
-  
+
   instance_filter = {
     all = false
     inclusion_labels = [
@@ -248,6 +248,6 @@ module "ops_agent_policy" {
       }
     ]
   }
-  
+
   depends_on = [google_compute_instance.gce_sr[0], google_compute_instance.pvt_vm_test[0]]
 }

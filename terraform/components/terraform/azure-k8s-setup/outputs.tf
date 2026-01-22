@@ -1,6 +1,6 @@
 output "Message" {
   description = "Instructions for configuring your environment after Terraform apply."
-  value = <<-EOT
+  value       = <<-EOT
 Next Steps:
 1. Configure your kubeconfig for direct APIserver access by running:
    az aks get-credentials --resource-group ${local.resource_group_name} --name ${local.aks_cluster_name} --overwrite-existing

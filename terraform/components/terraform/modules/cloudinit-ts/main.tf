@@ -3,7 +3,7 @@ locals {
   primary_tag              = var.primary_tag
   prefixed_primary_tag     = "tag:${local.primary_tag}"
   prefixed_additional_tags = [for tag in var.additional_tags : "tag:${tag}"]
-  
+
   tailscale_tags = concat([local.prefixed_primary_tag], local.prefixed_additional_tags)
 
   # Validate that relay_server_port is only set when track is "unstable"
