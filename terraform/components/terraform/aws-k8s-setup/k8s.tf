@@ -179,70 +179,70 @@ resource "kubectl_manifest" "app_manifests" {
 }
 
 # Create a ProxyClass to standardize configs applied to operator resources
-resource "kubectl_manifest" "proxyclass" {
-  wait      = true
-  yaml_body = <<YAML
-apiVersion: tailscale.com/v1alpha1
-kind: ProxyClass
-metadata:
-  name: ${local.stage}
-spec:
-  statefulSet:
-    pod:
-      labels:
-        tenant: ${local.tenant}
-        environment: ${local.environment}
-        stage: ${local.stage}
-      nodeSelector:
-        beta.kubernetes.io/os: "linux"
-YAML
-  depends_on = [
-    helm_release.tailscale_operator
-  ]
-}
+# resource "kubectl_manifest" "proxyclass" {
+#   wait      = true
+#   yaml_body = <<YAML
+# apiVersion: tailscale.com/v1alpha1
+# kind: ProxyClass
+# metadata:
+#   name: ${local.stage}
+# spec:
+#   statefulSet:
+#     pod:
+#       labels:
+#         tenant: ${local.tenant}
+#         environment: ${local.environment}
+#         stage: ${local.stage}
+#       nodeSelector:
+#         beta.kubernetes.io/os: "linux"
+# YAML
+#   depends_on = [
+#     helm_release.tailscale_operator
+#   ]
+# }
 
 # Apiserver Proxygroup
-resource "kubectl_manifest" "apiserverproxygroup" {
-  wait      = true
-  yaml_body = <<YAML
-apiVersion: tailscale.com/v1alpha1
-kind: ProxyGroup
-metadata:
-  name: ${local.stage}-apiserverproxy-ha
-spec:
-  replicas: 2
-  tags: ["tag:k8s"]
-  type: kube-apiserver
-  proxyClass: ${local.stage}
-  kubeAPIServer:
-    mode: auth
-YAML
-  depends_on = [
-    helm_release.tailscale_operator
-  ]
-}
+# resource "kubectl_manifest" "apiserverproxygroup" {
+#   wait      = true
+#   yaml_body = <<YAML
+# apiVersion: tailscale.com/v1alpha1
+# kind: ProxyGroup
+# metadata:
+#   name: ${local.stage}-apiserverproxy-ha
+# spec:
+#   replicas: 2
+#   tags: ["tag:k8s"]
+#   type: kube-apiserver
+#   proxyClass: ${local.stage}
+#   kubeAPIServer:
+#     mode: auth
+# YAML
+#   depends_on = [
+#     helm_release.tailscale_operator
+#   ]
+# }
 
 # Create the Connector CR for subnet router w/the proxy class
-resource "kubectl_manifest" "connector" {
-  wait      = true
-  yaml_body = <<YAML
-apiVersion: tailscale.com/v1alpha1
-kind: Connector
-metadata:
-  name: ${local.name}-connector
-spec:
-  proxyClass: ${local.stage}
-  hostname: ${local.name}-connector
-  subnetRouter:
-    advertiseRoutes:
-      - "${local.connector_cidr}"
-  tags:
-    - "tag:k8s-operator"
-YAML
-  depends_on = [
-    helm_release.tailscale_operator
-  ]
-}
+# resource "kubectl_manifest" "connector" {
+#   wait      = true
+#   yaml_body = <<YAML
+# apiVersion: tailscale.com/v1alpha1
+# kind: Connector
+# metadata:
+#   name: ${local.name}-connector
+# spec:
+#   proxyClass: ${local.stage}
+#   hostname: ${local.name}-connector
+#   subnetRouter:
+#     advertiseRoutes:
+#       - "${local.connector_cidr}"
+#   tags:
+#     - "tag:k8s-operator"
+# YAML
+#   depends_on = [
+#     helm_release.tailscale_operator
+#   ]
+# }
 
 # Rewrite the domain for unique ones for split-DNS across clusters
 resource "kubectl_manifest" "coredns" {
