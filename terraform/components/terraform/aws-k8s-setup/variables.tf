@@ -18,11 +18,6 @@ variable "region" {
   type        = string
 }
 
-variable "connector_cidr" {
-  description = "Connector CIDR"
-  type        = string
-}
-
 variable "argo_repo_url" {
   description = "Argo repo URL"
   type        = string

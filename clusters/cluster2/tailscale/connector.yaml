@@ -3,11 +3,10 @@ kind: Connector
 metadata:
   name: cluster2-connector
 spec:
-#   proxyClass: prod 
+  proxyClass: prod
+  hostname: kb-cluster2-aws-uw2-connector
   tags:
-    - tag:k8s
+    - tag:k8s-operator
   subnetRouter:
     advertiseRoutes:
-      - fdc0:3361:b62f::/108
-      - 2600:1f18:16c8:6d00::/56
-  exitNode: true
+      - "10.41.0.0/16"

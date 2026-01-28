@@ -124,46 +124,46 @@ resource "helm_release" "aws_lb_controller" {
 # Install ArgoCD via Helm                                            #
 ######################################################################
 
-# resource "helm_release" "argocd" {
-#   name             = "argo-cd"
-#   repository       = "https://argoproj.github.io/argo-helm"
-#   chart            = "argo-cd"
-#   version          = "7.8.26"
-#   namespace        = "argocd"
-#   create_namespace = true
-#   atomic           = true
-#   cleanup_on_fail  = true
-#   values           = [file("${path.module}/../files/argocd-values.yaml")]
-# }
+resource "helm_release" "argocd" {
+  name             = "argo-cd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "7.8.26"
+  namespace        = "argocd"
+  create_namespace = true
+  atomic           = true
+  cleanup_on_fail  = true
+  values           = [file("${path.module}/../files/argocd-values.yaml")]
+}
 
-# resource "kubectl_manifest" "argocdapps" {
-#     wait      = true
-#     yaml_body = <<YAML
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: argo-cd-apps
-#   namespace: argocd
-# spec:
-#   destination:
-#     namespace: argocd
-#     server: https://kubernetes.default.svc
-#   project: default
-#   source:
-#     path: ${local.argo_config_path}
-#     repoURL: ${local.argo_repo_url}
-#     targetRevision: HEAD
-#   syncPolicy:
-#     automated:
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - CreateNamespace=true
-# YAML
-#     depends_on = [
-#     helm_release.argocd
-#     ]
-# }
+resource "kubectl_manifest" "argocdapps" {
+  wait      = true
+  yaml_body = <<YAML
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-cd-apps
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ${local.argo_config_path}
+    repoURL: ${local.argo_repo_url}
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+YAML
+  depends_on = [
+    helm_release.argocd
+  ]
+}
 
 ######################################################################
 # Apply manifests and CRs                                            #
@@ -172,77 +172,11 @@ data "kubectl_path_documents" "docs" {
   pattern = "manifests/*.yaml"
 }
 
-# Deploy all manifests into the cluster 
+# Deploy all manifests into the cluster
 resource "kubectl_manifest" "app_manifests" {
   for_each  = data.kubectl_path_documents.docs.manifests
   yaml_body = each.value
 }
-
-# Create a ProxyClass to standardize configs applied to operator resources
-# resource "kubectl_manifest" "proxyclass" {
-#   wait      = true
-#   yaml_body = <<YAML
-# apiVersion: tailscale.com/v1alpha1
-# kind: ProxyClass
-# metadata:
-#   name: ${local.stage}
-# spec:
-#   statefulSet:
-#     pod:
-#       labels:
-#         tenant: ${local.tenant}
-#         environment: ${local.environment}
-#         stage: ${local.stage}
-#       nodeSelector:
-#         beta.kubernetes.io/os: "linux"
-# YAML
-#   depends_on = [
-#     helm_release.tailscale_operator
-#   ]
-# }
-
-# Apiserver Proxygroup
-# resource "kubectl_manifest" "apiserverproxygroup" {
-#   wait      = true
-#   yaml_body = <<YAML
-# apiVersion: tailscale.com/v1alpha1
-# kind: ProxyGroup
-# metadata:
-#   name: ${local.stage}-apiserverproxy-ha
-# spec:
-#   replicas: 2
-#   tags: ["tag:k8s"]
-#   type: kube-apiserver
-#   proxyClass: ${local.stage}
-#   kubeAPIServer:
-#     mode: auth
-# YAML
-#   depends_on = [
-#     helm_release.tailscale_operator
-#   ]
-# }
-
-# Create the Connector CR for subnet router w/the proxy class
-# resource "kubectl_manifest" "connector" {
-#   wait      = true
-#   yaml_body = <<YAML
-# apiVersion: tailscale.com/v1alpha1
-# kind: Connector
-# metadata:
-#   name: ${local.name}-connector
-# spec:
-#   proxyClass: ${local.stage}
-#   hostname: ${local.name}-connector
-#   subnetRouter:
-#     advertiseRoutes:
-#       - "${local.connector_cidr}"
-#   tags:
-#     - "tag:k8s-operator"
-# YAML
-#   depends_on = [
-#     helm_release.tailscale_operator
-#   ]
-# }
 
 # Rewrite the domain for unique ones for split-DNS across clusters
 resource "kubectl_manifest" "coredns" {
@@ -291,7 +225,4 @@ data "kubernetes_service" "kubedns" {
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
   nameservers = [data.kubernetes_service.kubedns.spec[0].cluster_ip]
-  depends_on = [
-    kubectl_manifest.connector
-  ]
 }

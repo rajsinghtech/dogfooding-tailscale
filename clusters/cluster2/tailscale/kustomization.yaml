@@ -16,7 +16,7 @@ kind: Kustomization
 #         hostname: "cluster2-operator"
 
 resources:
-# - connector.yaml
+- connector.yaml
 - proxy-class.yaml
 - ./peer-relay
 - rbac.yaml
