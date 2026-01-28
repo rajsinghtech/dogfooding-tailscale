@@ -87,7 +87,7 @@ YAML
 # TS Split-DNS setup for K8s service FQDN resolution from Azure VM #
 ####################################################################
 
-data "kubernetes_service" "kubedns" {
+data "kubernetes_service_v1" "kubedns" {
   metadata {
     name      = "kube-dns"
     namespace = "kube-system"
@@ -96,5 +96,5 @@ data "kubernetes_service" "kubedns" {
 
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
-  nameservers = [data.kubernetes_service.kubedns.spec[0].cluster_ip]
+  nameservers = [data.kubernetes_service_v1.kubedns.spec[0].cluster_ip]
 }

@@ -18,13 +18,14 @@ variable "region" {
   type        = string
 }
 
-variable "argo_repo_url" {
-  description = "Argo repo URL"
+variable "flux_repo_url" {
+  description = "Flux Git repository URL"
   type        = string
+  default     = "https://github.com/rajsinghtech/dogfooding-tailscale"
 }
 
-variable "argo_config_path" {
-  description = "Connector CIDR"
+variable "flux_cluster_name" {
+  description = "Cluster name for Flux path (e.g., cluster2)"
   type        = string
 }
 

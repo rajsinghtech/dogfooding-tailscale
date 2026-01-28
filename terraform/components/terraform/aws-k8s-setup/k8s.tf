@@ -121,47 +121,61 @@ resource "helm_release" "aws_lb_controller" {
 }
 
 ######################################################################
-# Install ArgoCD via Helm                                            #
+# Flux Bootstrap                                                     #
 ######################################################################
 
-resource "helm_release" "argocd" {
-  name             = "argo-cd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = "7.8.26"
-  namespace        = "argocd"
+resource "helm_release" "flux" {
+  name             = "flux2"
+  repository       = "https://fluxcd-community.github.io/helm-charts"
+  chart            = "flux2"
+  version          = "2.14.1"
+  namespace        = "flux-system"
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
-  values           = [file("${path.module}/../files/argocd-values.yaml")]
 }
 
-resource "kubectl_manifest" "argocdapps" {
+resource "kubectl_manifest" "flux_gitrepository" {
   wait      = true
   yaml_body = <<YAML
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
 metadata:
-  name: argo-cd-apps
-  namespace: argocd
+  name: dogfooding-tailscale
+  namespace: flux-system
 spec:
-  destination:
-    namespace: argocd
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    path: ${local.argo_config_path}
-    repoURL: ${local.argo_repo_url}
-    targetRevision: HEAD
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+  interval: 30m
+  url: ${local.flux_repo_url}
+  ref:
+    branch: main
+  ignore: |
+    /*
+    !/clusters/common
+    !/clusters/${local.flux_cluster_name}
 YAML
   depends_on = [
-    helm_release.argocd
+    helm_release.flux
+  ]
+}
+
+resource "kubectl_manifest" "flux_cluster_kustomization" {
+  wait      = true
+  yaml_body = <<YAML
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/${local.flux_cluster_name}/flux
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+YAML
+  depends_on = [
+    kubectl_manifest.flux_gitrepository
   ]
 }
 
@@ -215,7 +229,7 @@ YAML
 # TS Split-DNS setup for K8s service FQDN resolution from tailnet #
 ###################################################################
 
-data "kubernetes_service" "kubedns" {
+data "kubernetes_service_v1" "kubedns" {
   metadata {
     name      = "kube-dns"
     namespace = "kube-system"
@@ -224,5 +238,5 @@ data "kubernetes_service" "kubedns" {
 
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
-  nameservers = [data.kubernetes_service.kubedns.spec[0].cluster_ip]
+  nameservers = [data.kubernetes_service_v1.kubedns.spec[0].cluster_ip]
 }
