@@ -49,10 +49,13 @@ module "eks" {
 
   # Cluster add-ons - only needed when Auto Mode is disabled
   # Auto Mode manages these automatically
+  # vpc-cni must be installed before compute (nodes) so pods can get IPs
   addons = local.eks_auto_mode ? {} : {
+    vpc-cni = {
+      before_compute = true
+    }
     coredns        = {}
     kube-proxy     = {}
-    vpc-cni        = {}
     metrics-server = {}
   }
 
