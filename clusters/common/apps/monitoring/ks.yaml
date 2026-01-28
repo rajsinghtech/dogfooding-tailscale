@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  interval: 30m
+  timeout: 15m
+  retryInterval: 1m
+  path: ./clusters/common/apps/monitoring/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  wait: true
+  dependsOn:
+    - name: monitoring-namespace

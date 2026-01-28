@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tailscale-crs
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/common/apps/tailscale/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  wait: true
+  dependsOn:
+    - name: tailscale-namespace
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings

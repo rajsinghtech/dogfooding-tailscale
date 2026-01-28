@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: default-apps
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/common/apps/default/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings

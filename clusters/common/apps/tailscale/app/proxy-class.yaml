@@ -1,0 +1,11 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: prod
+  namespace: tailscale
+spec:
+  metrics:
+    enable: true
+    serviceMonitor:
+      enable: true

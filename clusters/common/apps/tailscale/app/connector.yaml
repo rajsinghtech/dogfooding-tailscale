@@ -1,0 +1,14 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: ${CLUSTER_NAME}-connector
+  namespace: tailscale
+spec:
+  proxyClass: prod
+  hostname: ${CONNECTOR_HOSTNAME}
+  tags:
+    - tag:k8s-operator
+  subnetRouter:
+    advertiseRoutes:
+      - "${CONNECTOR_CIDR}"

@@ -1,0 +1,86 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  timeout: 15m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "77.12.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    grafana:
+      sidecar:
+        dashboards:
+          enabled: true
+          label: grafana_dashboard
+          folderAnnotation: grafana_folder
+          provider:
+            foldersFromFilesStructure: true
+      persistence:
+        enabled: false
+      admin:
+        userKey: admin-user
+        passwordKey: admin-password
+      serviceMonitor:
+        enabled: true
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: "default"
+              orgId: 1
+              folder: ""
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/default
+
+    prometheus:
+      prometheusSpec:
+        serviceMonitorSelector: {}
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        enableRemoteWriteReceiver: true
+        enableFeatures:
+          - exemplar-storage
+        retention: 30d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 100Gi
+      server:
+        retention: 30d
+
+    alertmanager:
+      enabled: true
+
+    kubeProxy:
+      enabled: false
+
+    kubeControllerManager:
+      enabled: true
+
+    kubeScheduler:
+      enabled: true

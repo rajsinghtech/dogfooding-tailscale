@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    tailscale.com/tailnet-fqdn: default-goldpinger-cluster1-1.tailf5f3d6.ts.net
+  name: goldpinger-cluster1
+  namespace: default
+spec:
+  externalName: placeholder
+  type: ExternalName
