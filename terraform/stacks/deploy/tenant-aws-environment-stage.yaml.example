@@ -23,8 +23,6 @@ components:
         tailscale_relay_server_port: 45641
     aws-k8s-setup:
       vars:
-        argo_config_path: "clusters/cluster2/argocd/apps"
-        argo_repo_url: "https://github.com/rajsinghtech/dogfooding-tailscale"
         tailscale_operator_image_tag: "unstable"
         tailscale_proxy_image_tag: "unstable"
       settings:

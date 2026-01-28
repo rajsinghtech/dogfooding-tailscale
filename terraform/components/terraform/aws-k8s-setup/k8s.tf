@@ -123,6 +123,7 @@ resource "helm_release" "aws_lb_controller" {
     yamlencode({
       clusterName = local.cluster_name
       region      = local.region
+      vpcId       = local.vpc_id
       serviceAccount = {
         create = true
         name   = "aws-load-balancer-controller"

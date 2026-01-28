@@ -36,6 +36,11 @@ output "vpc_cidr" {
   sensitive = true
 }
 
+output "vpc_id" {
+  value     = module.vpc.vpc_id
+  sensitive = true
+}
+
 output "cluster_service_ipv4_cidr" {
   value     = local.cluster_service_ipv4_cidr
   sensitive = true

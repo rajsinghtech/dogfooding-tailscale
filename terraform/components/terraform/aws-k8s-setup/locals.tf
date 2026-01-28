@@ -16,6 +16,7 @@ locals {
   stage                          = var.stage
   region                         = var.region
   cluster_name                   = data.terraform_remote_state.aws_tfstate.outputs.cluster_name
+  vpc_id                         = data.terraform_remote_state.aws_tfstate.outputs.vpc_id
   eks_cluster_endpoint           = data.terraform_remote_state.aws_tfstate.outputs.eks_cluster_endpoint
   eks_cluster_ca_certificate     = base64decode(data.terraform_remote_state.aws_tfstate.outputs.eks_cluster_ca_certificate)
   eks_cluster_auth_token         = data.aws_eks_cluster_auth.this.token
