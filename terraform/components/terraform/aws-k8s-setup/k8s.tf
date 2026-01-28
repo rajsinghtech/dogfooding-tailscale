@@ -63,6 +63,9 @@ resource "helm_release" "tailscale_operator" {
       }
     })
   ]
+  depends_on = [
+    kubectl_manifest.coredns
+  ]
 }
 
 ################################################################################
@@ -271,9 +274,6 @@ data:
         loadbalance
     }
 YAML
-  depends_on = [
-    helm_release.tailscale_operator
-  ]
 }
 
 
@@ -291,4 +291,7 @@ data "kubernetes_service" "kubedns" {
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
   nameservers = [data.kubernetes_service.kubedns.spec[0].cluster_ip]
+  depends_on = [
+    kubectl_manifest.connector
+  ]
 }
