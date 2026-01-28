@@ -31,6 +31,20 @@ data "aws_eks_cluster_auth" "this" {
 }
 
 ################################################################################
+# Flux CD Operator Setup
+################################################################################
+resource "helm_release" "flux" {
+  name             = "flux"
+  repository       = "oci://ghcr.io/fluxcd-community/charts"
+  chart            = "flux2"
+  version          = "2.14.1"
+  namespace        = "flux-system"
+  create_namespace = true
+  atomic           = true
+  cleanup_on_fail  = true
+}
+
+################################################################################
 # Tailscale Kubernetes Operator Setup
 ################################################################################
 resource "helm_release" "tailscale_operator" {
@@ -117,65 +131,6 @@ resource "helm_release" "aws_lb_controller" {
         }
       }
     })
-  ]
-}
-
-######################################################################
-# Flux Bootstrap                                                     #
-######################################################################
-
-resource "helm_release" "flux" {
-  name             = "flux2"
-  repository       = "https://fluxcd-community.github.io/helm-charts"
-  chart            = "flux2"
-  version          = "2.14.1"
-  namespace        = "flux-system"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-}
-
-resource "kubectl_manifest" "flux_gitrepository" {
-  wait      = true
-  yaml_body = <<YAML
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: dogfooding-tailscale
-  namespace: flux-system
-spec:
-  interval: 30m
-  url: ${local.flux_repo_url}
-  ref:
-    branch: main
-  ignore: |
-    /*
-    !/clusters/common
-    !/clusters/${local.flux_cluster_name}
-YAML
-  depends_on = [
-    helm_release.flux
-  ]
-}
-
-resource "kubectl_manifest" "flux_cluster_kustomization" {
-  wait      = true
-  yaml_body = <<YAML
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cluster
-  namespace: flux-system
-spec:
-  interval: 30m
-  path: ./clusters/${local.flux_cluster_name}/flux
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: dogfooding-tailscale
-YAML
-  depends_on = [
-    kubectl_manifest.flux_gitrepository
   ]
 }
 

@@ -4,6 +4,20 @@ data "azurerm_kubernetes_cluster" "credentials" {
 }
 
 ################################################################################
+# Flux CD Operator Setup
+################################################################################
+resource "helm_release" "flux" {
+  name             = "flux"
+  repository       = "oci://ghcr.io/fluxcd-community/charts"
+  chart            = "flux2"
+  version          = "2.14.1"
+  namespace        = "flux-system"
+  create_namespace = true
+  atomic           = true
+  cleanup_on_fail  = true
+}
+
+################################################################################
 # Tailscale Kubernetes Operator Setup
 ################################################################################
 resource "helm_release" "tailscale_operator" {
