@@ -7,8 +7,6 @@ metadata:
 spec:
   proxyClass: prod
   hostname: ${CONNECTOR_HOSTNAME}
-  tags:
-    - tag:k8s-operator
   subnetRouter:
     advertiseRoutes:
       - "${CONNECTOR_CIDR}"

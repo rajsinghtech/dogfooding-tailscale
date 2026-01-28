@@ -3,9 +3,7 @@ kind: Connector
 metadata:
   name: cluster1-connector
 spec:
-#   proxyClass: prod 
-  tags:
-    - tag:k8s
+#   proxyClass: prod
   subnetRouter:
     advertiseRoutes:
       - fd7e:2ded:c6d2::/108
