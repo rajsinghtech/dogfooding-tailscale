@@ -1,6 +1,5 @@
 ---
-# Flux OCIRepository for self-managed Flux components
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: flux-manifests
@@ -9,7 +8,7 @@ spec:
   interval: 10m
   url: oci://ghcr.io/fluxcd/flux-manifests
   ref:
-    tag: v2.4.0
+    tag: v2.7.5
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -24,3 +23,14 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: flux-manifests
+  patches:
+    # Remove the network policies
+    - patch: |
+        $patch: delete
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: not-used
+      target:
+        group: networking.k8s.io
+        kind: NetworkPolicy

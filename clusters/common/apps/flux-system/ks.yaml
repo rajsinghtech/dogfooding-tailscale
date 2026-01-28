@@ -2,19 +2,16 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps
+  name: flux-notifications
   namespace: flux-system
 spec:
   interval: 30m
-  path: ./clusters/common/apps
+  path: ./clusters/common/apps/flux-system/notifications
   prune: true
   sourceRef:
     kind: GitRepository
     name: dogfooding-tailscale
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-gpg
+  wait: true
   postBuild:
     substituteFrom:
       - kind: ConfigMap

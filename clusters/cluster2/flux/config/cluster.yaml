@@ -13,3 +13,39 @@ spec:
     /*
     !/clusters/common
     !/clusters/cluster2
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/cluster2/flux
+  prune: true
+  wait: false
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: common-cluster
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/common/flux
+  prune: true
+  wait: false
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
