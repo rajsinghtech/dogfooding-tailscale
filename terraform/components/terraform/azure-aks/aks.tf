@@ -8,10 +8,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   #checkov:skip=CKV_AZURE_172:Secrets Store CSI autorotation not needed, not using Azure Key Vault
   #checkov:skip=CKV_AZURE_116:Azure Policy add-on overkill for lab environment
   depends_on          = [azurerm_subnet_nat_gateway_association.private, azurerm_nat_gateway_public_ip_association.main]
-  name                = format("%s-%s-%s-%s-aks", local.tenant, local.environment, local.stage, local.cluster_name)
+  name                = format("%s-aks", local.aks_cluster_name)
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = format("%s-%s-%s-%s", local.tenant, local.environment, local.stage, local.cluster_name)
+  dns_prefix          = local.aks_cluster_name
   kubernetes_version  = local.aks_version
   sku_tier            = "Standard"
 

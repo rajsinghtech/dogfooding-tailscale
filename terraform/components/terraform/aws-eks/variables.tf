@@ -13,8 +13,8 @@ variable "stage" {
   type        = string
 }
 
-variable "name" {
-  description = "Name of cluster"
+variable "cluster_name" {
+  description = "Cluster identifier (e.g., cluster1, cluster2)"
   type        = string
 }
 

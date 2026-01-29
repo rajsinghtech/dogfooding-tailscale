@@ -30,13 +30,13 @@ module "vpc" {
   create_flow_log_cloudwatch_log_group = true
 
   public_subnet_tags = {
-    "kubernetes.io/role/elb"              = 1
-    "kubernetes.io/cluster/${local.name}" = "owned"
+    "kubernetes.io/role/elb"                          = 1
+    "kubernetes.io/cluster/${local.eks_cluster_name}" = "owned"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb"     = 1
-    "kubernetes.io/cluster/${local.name}" = "owned"
+    "kubernetes.io/role/internal-elb"                 = 1
+    "kubernetes.io/cluster/${local.eks_cluster_name}" = "owned"
   }
 
   tags = local.tags

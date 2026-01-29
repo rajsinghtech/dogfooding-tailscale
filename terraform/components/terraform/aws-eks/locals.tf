@@ -3,7 +3,12 @@
 #########################################################################################
 
 locals {
-  name                            = var.name
+  tenant                          = var.tenant
+  environment                     = var.environment
+  stage                           = var.stage
+  cluster_name                    = var.cluster_name
+  name                            = format("%s-%s-%s", local.tenant, local.environment, local.stage)
+  eks_cluster_name                = format("%s-%s-%s-%s", local.tenant, local.cluster_name, local.environment, local.stage)
   region                          = var.region
   vpc_cidr                        = var.vpc_cidr
   cluster_service_ipv4_cidr       = var.cluster_service_ipv4_cidr

@@ -7,6 +7,7 @@ locals {
   environment           = var.environment
   stage                 = var.stage
   cluster_name          = var.cluster_name
+  aks_cluster_name      = format("%s-%s-%s-%s", local.tenant, local.cluster_name, local.environment, local.stage)
   location              = var.location
   vnet_cidr             = var.vnet_cidr
   aks_service_ipv4_cidr = var.aks_service_ipv4_cidr

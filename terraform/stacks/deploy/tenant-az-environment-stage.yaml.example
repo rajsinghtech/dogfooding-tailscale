@@ -11,7 +11,7 @@ components:
   terraform:
     azure-aks:
       vars:
-        cluster_name: "my-aks-1"
+        cluster_name: "cluster1"
         sr_instance_hostname: "my-cluster1-az-ue1-sr"
         vnet_cidr: "10.2.0.0/16"
         aks_service_ipv4_cidr: "10.42.0.0/16"

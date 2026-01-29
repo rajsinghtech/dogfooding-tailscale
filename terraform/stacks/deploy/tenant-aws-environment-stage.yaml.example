@@ -11,7 +11,7 @@ components:
   terraform:
     aws-eks:
       vars:
-        name: "my-cluster2-aws-uw2"
+        cluster_name: "cluster2"
         public_workers: false
         sr_instance_hostname: "my-cluster2-aws-uw2-sr"
         cluster_endpoint_public_access: false

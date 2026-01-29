@@ -31,7 +31,7 @@ module "eks" {
   version     = "~> 21.0"
 
   # Cluster configuration (v21 variable names)
-  name               = local.name
+  name               = local.eks_cluster_name
   kubernetes_version = local.cluster_version
 
   # API endpoint access

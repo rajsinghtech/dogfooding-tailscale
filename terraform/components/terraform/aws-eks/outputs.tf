@@ -1,8 +1,3 @@
-output "name" {
-  value     = local.name
-  sensitive = true
-}
-
 output "ebs_csi_iam_role_arn" {
   description = "IAM Role ARN for EBS CSI driver (for IRSA)"
   value       = aws_iam_role.ebs_csi.arn
