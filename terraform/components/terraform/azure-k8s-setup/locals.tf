@@ -17,8 +17,6 @@ locals {
   location                       = var.location
   cluster_name                   = data.terraform_remote_state.azure_tfstate.outputs.cluster_name
   resource_group_name            = data.terraform_remote_state.azure_tfstate.outputs.resource_group_name
-  ssh_private_key_path           = data.terraform_remote_state.azure_tfstate.outputs.ssh_private_key_path
-  azure_vm_client_public_ip      = data.terraform_remote_state.azure_tfstate.outputs.client_public_ip
   aks_cluster_host               = data.terraform_remote_state.azure_tfstate.outputs.aks_cluster_host
   aks_cluster_ca_certificate     = base64decode(data.terraform_remote_state.azure_tfstate.outputs.aks_cluster_ca_certificate)
   aks_cluster_client_key         = base64decode(data.azurerm_kubernetes_cluster.credentials.kube_admin_config[0].client_key)

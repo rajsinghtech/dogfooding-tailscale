@@ -35,12 +35,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   tags = local.tags
 }
 
-data "azurerm_kubernetes_cluster" "credentials" {
-  depends_on          = [azurerm_kubernetes_cluster.main]
-  name                = azurerm_kubernetes_cluster.main.name
-  resource_group_name = azurerm_resource_group.main.name
-}
-
 #########################################################################################
 # TS Split-DNS setup for AKS private-only kube-apiserver FQDN resolution in the tailnet #
 #########################################################################################

@@ -152,18 +152,6 @@ variable "enable_sr" {
   default     = true
 }
 
-variable "sr_vmss_min_size" {
-  description = "Minimum number of VMs in the subnet router scale set"
-  type        = number
-  default     = 1
-}
-
-variable "sr_vmss_max_size" {
-  description = "Maximum number of VMs in the subnet router scale set"
-  type        = number
-  default     = 3
-}
-
 variable "sr_vmss_desired_size" {
   description = "Desired number of VMs in the subnet router scale set"
   type        = number
