@@ -1,42 +1,30 @@
-make init:
-	kind create cluster --name cluster0-kind --config kind-config.yaml
-	make apply
-make delete:
-	kind delete cluster --name cluster0-kind
+# Bootstrap Flux config - run AFTER Terraform installs operators
+# Applies sops-gpg secret and tells Flux what repo to watch
+bootstrap:
+	kubectl apply -k ../common/bootstrap/flux
+	kubectl apply -f flux/config/cluster.yaml
 
-make apply:
-	kubectl create namespace monitoring || true
-	kustomize build monitoring --enable-helm | kubectl apply --server-side -f - || true
-	kubectl create namespace argocd
-	kustomize build argocd --enable-helm | kubectl apply --server-side -f -
-	kubectl apply -f argocd/apps
-	kubectl apply -f ../../secret.yaml
-	make secrets
+# Check Flux status
+check:
+	flux check
 
-make local:
-	kubectl create namespace monitoring || true
-	kustomize build kube-system --enable-helm | kubectl apply --server-side -f - || true
-	kustomize build tailscale --enable-helm | kubectl apply --server-side -f - || true
-	kustomize build default --enable-helm | kubectl apply --server-side -f - || true
-	kubectl apply -f ../../secret.yaml
-	make secrets
+# Get all Flux resources
+status:
+	flux get all -A
 
-make secrets:
-	@if [ -z "$$CLIENT_ID" ] || [ -z "$$CLIENT_SECRET" ]; then \
-		echo "Error: CLIENT_ID and CLIENT_SECRET environment variables must be set"; \
-		echo "Set them with: export CLIENT_ID=your-client-id export CLIENT_SECRET=your-client-secret"; \
-		exit 1; \
-	fi
-	kubectl create namespace tailscale --dry-run=client -o yaml | kubectl apply -f -
-	kubectl delete secret operator-oauth --namespace tailscale || true
-	kubectl create secret generic operator-oauth --namespace tailscale \
-		--from-literal=client_id="$$CLIENT_ID" \
-		--from-literal=client_secret="$$CLIENT_SECRET"
+# Reconcile Flux
+reconcile:
+	flux reconcile source git dogfooding-tailscale
+	flux reconcile kustomization cluster
 
-make restart:
-	make delete && make init
+# Suspend Flux reconciliation
+suspend:
+	flux suspend kustomization --all
 
-make kubeconfig:
-	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c1
-	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c2
+# Resume Flux reconciliation
+resume:
+	flux resume kustomization --all
+
+# Create EKS kubeconfig
+kubeconfig:
 	eksctl utils write-kubeconfig --region us-east-1 --cluster raj-c3

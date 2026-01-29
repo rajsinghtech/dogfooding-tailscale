@@ -1,0 +1,51 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: dogfooding-tailscale
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://github.com/rajsinghtech/dogfooding-tailscale
+  ref:
+    branch: main
+  ignore: |
+    /*
+    !/clusters/common
+    !/clusters/cluster3
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/cluster3/flux
+  prune: true
+  wait: false
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: common-cluster
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/common/flux
+  prune: true
+  wait: false
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg

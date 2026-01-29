@@ -1,6 +1,6 @@
 components:
   terraform:
-    ts-azure-infra:
+    azure-aks:
       vars:
         ssh_private_key_path: "~/.ssh/id_ed25519_me"
         ssh_public_key_path: "~/.ssh/id_ed25519_me.pub"

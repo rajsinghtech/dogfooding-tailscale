@@ -2,7 +2,7 @@
 data "terraform_remote_state" "azure_tfstate" {
   backend = "local"
   config = {
-    path = "${path.root}/../ts-azure-infra/terraform.tfstate.d/${local.tenant}-${local.environment}-${local.stage}/terraform.tfstate"
+    path = "${path.root}/../azure-aks/terraform.tfstate.d/${local.tenant}-${local.environment}-${local.stage}/terraform.tfstate"
   }
 }
 

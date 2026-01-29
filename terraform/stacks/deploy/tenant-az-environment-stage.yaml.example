@@ -5,20 +5,19 @@ vars:
   stage: test
 
 import:
-  - catalog/ts-azure-infra
-  - catalog/ts-k8s-docker-azure
+  - catalog/azure-aks
 
 components:
   terraform:
-    ts-azure-infra:
+    azure-aks:
       vars:
         cluster_name: "my-aks-1"
         hostname: "my-az-sr-1"
         vnet_cidr: "10.2.0.0/16"
         aks_service_ipv4_cidr: "10.42.0.0/16"
         cluster_outbound_type: "loadBalancer"
-    ts-k8s-docker-azure:
+    azure-k8s-setup:
       settings:
         depends_on:
           1:
-            component: "ts-azure-infra"
+            component: "azure-aks"

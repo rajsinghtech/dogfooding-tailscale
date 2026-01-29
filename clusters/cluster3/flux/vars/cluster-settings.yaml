@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  CLUSTER_NAME: cluster3
+  CONNECTOR_CIDR: "fd7a:115c:a1e0:b1a:0:3::/96"
+  CONNECTOR_HOSTNAME: cluster3-connector
