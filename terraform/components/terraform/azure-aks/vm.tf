@@ -2,7 +2,7 @@
 module "ubuntu-tailscale-client" {
   count             = local.enable_sr ? local.sr_vmss_desired_size : 0
   source            = "../modules/cloudinit-ts"
-  hostname          = "${local.hostname}-${count.index + 1}"
+  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
   accept_routes     = var.sr_accept_routes
   enable_ssh        = var.sr_enable_ssh
   ephemeral         = var.sr_ephemeral
@@ -15,7 +15,7 @@ module "ubuntu-tailscale-client" {
 
 resource "azurerm_network_security_group" "vmss" {
   count               = local.enable_sr ? 1 : 0
-  name                = format("%s-%s-%s-%s-vmss-nsg", local.tenant, local.environment, local.stage, local.hostname)
+  name                = format("%s-%s-%s-%s-vmss-nsg", local.tenant, local.environment, local.stage, local.sr_instance_hostname)
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
 
@@ -80,7 +80,7 @@ resource "azurerm_network_security_group" "vmss" {
 resource "azurerm_linux_virtual_machine_scale_set" "sr" {
   #checkov:skip=CKV_AZURE_97:Encryption at host not needed for lab environment
   count                           = local.enable_sr ? 1 : 0
-  name                            = format("%s-%s-%s-%s-sr-vmss", local.tenant, local.environment, local.stage, local.hostname)
+  name                            = format("%s-%s-%s-%s-sr-vmss", local.tenant, local.environment, local.stage, local.sr_instance_hostname)
   location                        = local.location
   resource_group_name             = azurerm_resource_group.main.name
   sku                             = local.vm_size
@@ -125,7 +125,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "sr" {
   tags = merge(
     local.tags,
     {
-      "Name" = local.hostname
+      "Name" = local.sr_instance_hostname
     }
   )
 }

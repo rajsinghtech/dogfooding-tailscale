@@ -19,7 +19,7 @@ locals {
   oauth_client_id       = var.oauth_client_id
   oauth_client_secret   = var.oauth_client_secret
   tags                  = merge(var.tags, { "Region" = var.location }, { "Tenant-Prefix" = var.tenant }, { "Env" = var.environment }, { "Stage" = var.stage })
-  hostname              = var.hostname
+  sr_instance_hostname  = var.sr_instance_hostname
 
   # Subnet slicing logic
   public_subnets  = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k)]

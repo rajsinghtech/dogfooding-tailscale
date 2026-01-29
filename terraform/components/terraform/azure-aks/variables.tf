@@ -102,7 +102,7 @@ variable "oauth_client_secret" {
   EOF
 }
 
-variable "hostname" {
+variable "sr_instance_hostname" {
   description = "Tailscale Machine hostname of the VM instance"
   type        = string
 }

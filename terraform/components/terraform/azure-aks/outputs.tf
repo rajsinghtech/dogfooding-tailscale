@@ -3,8 +3,8 @@ output "cluster_name" {
   sensitive = true
 }
 
-output "hostname" {
-  value     = local.hostname
+output "sr_instance_hostname" {
+  value     = local.sr_instance_hostname
   sensitive = true
 }
 
