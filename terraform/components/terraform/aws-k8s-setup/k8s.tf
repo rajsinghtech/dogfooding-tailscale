@@ -42,6 +42,10 @@ resource "helm_release" "flux" {
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
+
+  depends_on = [
+    helm_release.aws_lb_controller
+  ]
 }
 
 ################################################################################
