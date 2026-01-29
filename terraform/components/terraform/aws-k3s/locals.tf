@@ -1,7 +1,8 @@
 locals {
-  enabled = true
-
-  name = var.name
+  tenant      = var.tenant
+  environment = var.environment
+  stage       = var.stage
+  name        = var.name
 
   vpc_cidr = var.vpc_cidr
 
@@ -19,6 +20,9 @@ locals {
     var.tags,
     {
       "terraform/component" = "aws-k3s"
+      "Tenant-Prefix"       = local.tenant
+      "Env"                 = local.environment
+      "Stage"               = local.stage
     }
   )
 } 

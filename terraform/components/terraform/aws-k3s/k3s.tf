@@ -6,7 +6,7 @@ module "k3s-tailscale" {
   enable_ssh        = true
   advertise_routes  = local.advertise_routes
   primary_tag       = "k3s"
-  additional_tags   = []
+  additional_tags   = local.tailscale_tags
   track             = var.tailscale_track
   relay_server_port = var.tailscale_relay_server_port
 }
