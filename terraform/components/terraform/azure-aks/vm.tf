@@ -111,9 +111,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "sr" {
     network_security_group_id = azurerm_network_security_group.vmss[0].id
 
     ip_configuration {
-      name                                   = "internal"
-      primary                                = true
-      subnet_id                              = azurerm_subnet.public[0].id
+      name      = "internal"
+      primary   = true
+      subnet_id = azurerm_subnet.public[0].id
       public_ip_address {
         name = "sr-pip"
       }

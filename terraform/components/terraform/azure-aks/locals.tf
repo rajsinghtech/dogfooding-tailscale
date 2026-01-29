@@ -25,8 +25,8 @@ locals {
   hostname              = var.hostname
 
   # Subnet slicing logic
-  public_subnets     = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k)]
-  private_subnets    = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k + 10)]
+  public_subnets  = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k)]
+  private_subnets = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k + 10)]
   # DNS resolver inbound subnet must be /24 or smaller
   dns_inbound_subnet = cidrsubnet(local.vnet_cidr, 8, 255)
 
