@@ -85,7 +85,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "sr" {
   sku                 = local.vm_size
   instances           = local.sr_vmss_desired_size
   admin_username      = "ubuntu"
-  custom_data         = base64encode(element(module.ubuntu-tailscale-client[*].rendered, 0))
+  custom_data         = element(module.ubuntu-tailscale-client[*].rendered, 0)
 
   admin_ssh_key {
     username   = "ubuntu"

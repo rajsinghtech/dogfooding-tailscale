@@ -8,16 +8,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   sku_tier            = "Standard"
 
   default_node_pool {
-    name                 = "np1"
-    type                 = "VirtualMachineScaleSets"
-    vm_size              = local.cluster_vm_size
-    vnet_subnet_id       = azurerm_subnet.private[0].id
-    auto_scaling_enabled = true
-    min_count            = local.min_count
-    node_count           = local.node_count
-    max_count            = local.max_count
-    os_disk_size_gb      = 50
-    tags                 = local.tags
+    name            = "np1"
+    type            = "VirtualMachineScaleSets"
+    vm_size         = local.cluster_vm_size
+    vnet_subnet_id  = azurerm_subnet.private[0].id
+    node_count      = local.node_count
+    os_disk_size_gb = 50
+    tags            = local.tags
   }
 
   network_profile {
@@ -28,11 +25,8 @@ resource "azurerm_kubernetes_cluster" "main" {
     load_balancer_sku = "standard"
   }
 
-  api_server_access_profile {
-    authorized_ip_ranges = ["${local.vnet_cidr}"] # API server is private
-  }
-
   private_cluster_enabled = true
+  oidc_issuer_enabled     = true
 
   identity {
     type = "SystemAssigned"
@@ -52,13 +46,13 @@ data "azurerm_kubernetes_cluster" "credentials" {
 #########################################################################################
 
 resource "tailscale_dns_split_nameservers" "azure_resolver" {
-  domain      = "hcp.${local.location}.azmk8s.io"
+  domain      = "privatelink.${local.location}.azmk8s.io"
   nameservers = [azurerm_private_dns_resolver_inbound_endpoint.main.ip_configurations[0].private_ip_address]
 }
 
 resource "tailscale_dns_search_paths" "aks_search_paths" {
   search_paths = [
-    "azmk8s.io",
+    "privatelink.${local.location}.azmk8s.io",
     "svc.cluster.local"
   ]
 }

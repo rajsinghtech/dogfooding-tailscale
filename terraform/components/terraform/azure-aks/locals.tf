@@ -27,10 +27,11 @@ locals {
   # Subnet slicing logic
   public_subnets     = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k)]
   private_subnets    = [for k in range(3) : cidrsubnet(local.vnet_cidr, 4, k + 10)]
-  dns_inbound_subnet = cidrsubnet(local.vnet_cidr, 4, 15)
+  # DNS resolver inbound subnet must be /24 or smaller
+  dns_inbound_subnet = cidrsubnet(local.vnet_cidr, 8, 255)
 
   # Tailscale advertise routes (private subnets, user routes)
-  advertise_routes = distinct(concat(local.private_subnets, coalesce(var.advertise_routes, [])))
+  advertise_routes = distinct(concat([local.vnet_cidr], coalesce(var.advertise_routes, [])))
 
   # Subnet router VMSS configuration
   enable_sr            = var.enable_sr

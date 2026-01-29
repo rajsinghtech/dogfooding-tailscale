@@ -47,7 +47,6 @@ resource "azurerm_subnet" "dns-inbound" {
   }
 }
 
-# Create the private DNS Resolver
 resource "azurerm_private_dns_resolver" "main" {
   name                = format("%s-%s-%s-dns-resolver", local.tenant, local.environment, local.stage)
   resource_group_name = azurerm_resource_group.main.name
