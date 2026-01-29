@@ -12,7 +12,7 @@ components:
     azure-aks:
       vars:
         cluster_name: "my-aks-1"
-        hostname: "my-az-sr-1"
+        sr_instance_hostname: "my-cluster1-az-ue1-sr"
         vnet_cidr: "10.2.0.0/16"
         aks_service_ipv4_cidr: "10.42.0.0/16"
         cluster_outbound_type: "loadBalancer"
