@@ -15,6 +15,10 @@ resource "azurerm_kubernetes_cluster" "main" {
     node_count      = local.node_count
     os_disk_size_gb = 50
     tags            = local.tags
+
+    upgrade_settings {
+      max_surge = "10%"
+    }
   }
 
   network_profile {
