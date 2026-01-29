@@ -1,3 +1,8 @@
+variable "subscription_id" {
+  description = "Azure subscription ID"
+  type        = string
+}
+
 variable "tenant" {
   description = "Name of the user/tenant for the Atmos Stack"
   type        = string
@@ -139,4 +144,58 @@ variable "tailscale_relay_server_port" {
     )
     error_message = "tailscale_relay_server_port must be between 1024 and 65535 if set."
   }
+}
+
+variable "enable_sr" {
+  description = "Enable subnet router VM Scale Set deployment"
+  type        = bool
+  default     = true
+}
+
+variable "sr_vmss_min_size" {
+  description = "Minimum number of VMs in the subnet router scale set"
+  type        = number
+  default     = 1
+}
+
+variable "sr_vmss_max_size" {
+  description = "Maximum number of VMs in the subnet router scale set"
+  type        = number
+  default     = 3
+}
+
+variable "sr_vmss_desired_size" {
+  description = "Desired number of VMs in the subnet router scale set"
+  type        = number
+  default     = 1
+}
+
+variable "sr_accept_routes" {
+  description = "Whether the subnet router should accept routes from other devices"
+  type        = bool
+  default     = false
+}
+
+variable "sr_enable_ssh" {
+  description = "Whether to enable SSH on the subnet router"
+  type        = bool
+  default     = true
+}
+
+variable "sr_ephemeral" {
+  description = "Whether the subnet router should be ephemeral"
+  type        = bool
+  default     = true
+}
+
+variable "sr_reusable" {
+  description = "Whether the subnet router auth key should be reusable"
+  type        = bool
+  default     = true
+}
+
+variable "sr_primary_tag" {
+  description = "Primary tag for the subnet router"
+  type        = string
+  default     = "subnet-router"
 }

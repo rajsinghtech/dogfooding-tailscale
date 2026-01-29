@@ -2,6 +2,7 @@ components:
   terraform:
     azure-aks:
       vars:
+        subscription_id: "your-azure-subscription-id"
         ssh_private_key_path: "~/.ssh/id_ed25519_me"
         ssh_public_key_path: "~/.ssh/id_ed25519_me.pub"
         oauth_client_id: "redacted"
