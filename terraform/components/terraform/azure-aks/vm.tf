@@ -77,8 +77,8 @@ resource "azurerm_network_security_group" "vmss" {
   tags = local.tags
 }
 
-#checkov:skip=CKV_AZURE_97:Encryption at host not needed for lab environment
 resource "azurerm_linux_virtual_machine_scale_set" "sr" {
+  #checkov:skip=CKV_AZURE_97:Encryption at host not needed for lab environment
   count                           = local.enable_sr ? 1 : 0
   name                            = format("%s-%s-%s-%s-sr-vmss", local.tenant, local.environment, local.stage, local.hostname)
   location                        = local.location

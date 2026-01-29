@@ -235,8 +235,8 @@ module "cloudinit_ts" {
 }
 
 # Create VMs
-#checkov:skip=CKV_AZURE_50:VM extensions may be needed for Tailscale perf testing setup
 resource "azurerm_linux_virtual_machine" "main" {
+  #checkov:skip=CKV_AZURE_50:VM extensions may be needed for Tailscale perf testing setup
   count                           = var.instance_count
   name                            = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
   resource_group_name             = azurerm_resource_group.main.name

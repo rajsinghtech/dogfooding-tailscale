@@ -31,8 +31,8 @@ data "aws_ami" "ubuntu" {
 }
 
 # Allow SSH access via public IP because we're not exploring Tailscale SSH yet (TBD in the future)
-#checkov:skip=CKV_AWS_382:Egress to 0.0.0.0/0 required for Tailscale connectivity to DERP servers and peers
 resource "aws_security_group" "main" {
+  #checkov:skip=CKV_AWS_382:Egress to 0.0.0.0/0 required for Tailscale connectivity to DERP servers and peers
   count       = local.enable_sr ? 1 : 0
   vpc_id      = module.vpc.vpc_id
   description = "Required access traffic"
@@ -75,8 +75,8 @@ resource "aws_security_group" "main" {
 
 # Provision the EC2 instance,pass in templatized base64-encoded cloudinit data from the module that sets up Tailscale client and Docker
 # EC2 instance for SR is now managed via an Auto Scaling Group.
-#checkov:skip=CKV_AWS_88:Public IP required for Tailscale subnet router direct WireGuard connections
 resource "aws_launch_template" "sr_ec2" {
+  #checkov:skip=CKV_AWS_88:Public IP required for Tailscale subnet router direct WireGuard connections
   count         = local.enable_sr ? 1 : 0
   name_prefix   = "${local.name}-sr-ec2-"
   image_id      = data.aws_ami.ubuntu.id

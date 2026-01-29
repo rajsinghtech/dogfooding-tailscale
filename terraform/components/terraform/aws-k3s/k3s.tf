@@ -29,8 +29,8 @@ data "aws_ami" "ubuntu" {
 }
 
 # Security group for the K3s instance
-#checkov:skip=CKV_AWS_382:Egress to 0.0.0.0/0 required for Tailscale connectivity to DERP servers and peers
 resource "aws_security_group" "k3s" {
+  #checkov:skip=CKV_AWS_382:Egress to 0.0.0.0/0 required for Tailscale connectivity to DERP servers and peers
   vpc_id      = module.vpc.vpc_id
   description = "Required access traffic for K3s"
 
@@ -139,9 +139,9 @@ EOT
 }
 
 # K3s EC2 instance with Tailscale integration
-#checkov:skip=CKV_AWS_88:Public IP required for Tailscale direct WireGuard connections
-#checkov:skip=CKV_AWS_126:Detailed monitoring not needed for lab environment
 resource "aws_instance" "k3s" {
+  #checkov:skip=CKV_AWS_88:Public IP required for Tailscale direct WireGuard connections
+  #checkov:skip=CKV_AWS_126:Detailed monitoring not needed for lab environment
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = local.instance_type
   subnet_id              = module.vpc.public_subnets[0]
