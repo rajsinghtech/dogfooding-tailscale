@@ -15,7 +15,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   kubernetes_version  = local.aks_version
   sku_tier            = "Standard"
 
-  automatic_channel_upgrade = "patch"
+  automatic_upgrade_channel = "patch"
 
   default_node_pool {
     name            = "np1"
