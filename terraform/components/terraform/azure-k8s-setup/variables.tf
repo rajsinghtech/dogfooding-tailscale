@@ -13,11 +13,6 @@ variable "stage" {
   type        = string
 }
 
-variable "location" {
-  description = "Azure region for deployment"
-  type        = string
-}
-
 variable "tailscale_operator_image_tag" {
   description = "Image tag for the Tailscale operator (e.g., 'stable', 'unstable', or a specific version)"
   type        = string

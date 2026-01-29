@@ -69,17 +69,7 @@ variable "aks_version" {
   type        = string
 }
 
-variable "min_count" {
-  description = "Number of cluster nodes"
-  type        = string
-}
-
 variable "node_count" {
-  description = "Number of cluster nodes"
-  type        = string
-}
-
-variable "max_count" {
   description = "Number of cluster nodes"
   type        = string
 }

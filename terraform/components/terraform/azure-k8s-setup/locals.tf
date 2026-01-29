@@ -14,7 +14,6 @@ locals {
   tenant                         = var.tenant
   environment                    = var.environment
   stage                          = var.stage
-  location                       = var.location
   cluster_name                   = data.terraform_remote_state.azure_tfstate.outputs.cluster_name
   resource_group_name            = data.terraform_remote_state.azure_tfstate.outputs.resource_group_name
   aks_cluster_host               = data.terraform_remote_state.azure_tfstate.outputs.aks_cluster_host

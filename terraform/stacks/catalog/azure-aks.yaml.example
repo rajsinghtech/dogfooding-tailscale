@@ -10,9 +10,7 @@ components:
         aks_version: "1.34"
         cluster_vm_size: "Standard_B2s"
         vm_size: "Standard_B2s"
-        min_count: "1"
         node_count: "2"
-        max_count: "3"
         tags:
           "Owner": "Me"
           "Team" : "Myself"
