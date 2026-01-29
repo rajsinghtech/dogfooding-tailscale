@@ -6,5 +6,9 @@ terraform {
       source  = "tailscale/tailscale"
       version = ">= 0.13.7"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.6"
+    }
   }
 }
