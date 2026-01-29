@@ -15,7 +15,7 @@ module "ubuntu-tailscale-client" {
 
 resource "azurerm_network_security_group" "vmss" {
   count               = local.enable_sr ? 1 : 0
-  name                = format("%s-%s-%s-%s-vmss-nsg", local.tenant, local.environment, local.stage, local.sr_instance_hostname)
+  name                = format("%s-%s-%s-sr-vmss-nsg", local.tenant, local.environment, local.stage)
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
 
@@ -80,7 +80,7 @@ resource "azurerm_network_security_group" "vmss" {
 resource "azurerm_linux_virtual_machine_scale_set" "sr" {
   #checkov:skip=CKV_AZURE_97:Encryption at host not needed for lab environment
   count                           = local.enable_sr ? 1 : 0
-  name                            = format("%s-%s-%s-%s-sr-vmss", local.tenant, local.environment, local.stage, local.sr_instance_hostname)
+  name                            = format("%s-%s-%s-sr-vmss", local.tenant, local.environment, local.stage)
   location                        = local.location
   resource_group_name             = azurerm_resource_group.main.name
   sku                             = local.vm_size
