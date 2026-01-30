@@ -33,12 +33,7 @@ output "secondary_ranges" {
   value       = var.secondary_ranges
 }
 
-output "nat_ips" {
-  description = "List of NAT IPs for the Cloud Router"
-  value       = length(module.cloud_router) > 0 ? module.cloud_router[0].nat_ips : []
-}
-
-output "nat_ids" {
-  description = "List of NAT IDs for the Cloud Router"
-  value       = length(module.cloud_router) > 0 ? [for nat in module.cloud_router[0].nat : nat.id] : []
+output "router" {
+  description = "The Cloud Router resource"
+  value       = length(module.cloud_router) > 0 ? module.cloud_router[0].router : null
 }

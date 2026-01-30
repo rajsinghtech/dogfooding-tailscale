@@ -17,6 +17,10 @@ terraform {
       source  = "gavinbunney/kubectl"
       version = "~> 1.19"
     }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
+    }
   }
 }
 

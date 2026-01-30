@@ -83,19 +83,18 @@ output "sr_ec2_public_ips" {
 }
 
 output "Message" {
-  description = "Instructions for configuring your environment after Terraform apply."
+  description = "Instructions for configuring your environment after Terraform apply"
   value = join("\n", compact([
     "Next Steps:",
-    local.eks_auto_mode ? "Cluster Mode: EKS Auto Mode (AWS manages compute, storage, and load balancing)" : "Cluster Mode: Standard EKS with Managed Node Groups",
     "",
-    "1. Configure your kubeconfig for kubectl by running:",
+    "1. Configure kubectl:",
     "   aws eks --region ${local.region} update-kubeconfig --name ${module.eks.cluster_name} --alias ${module.eks.cluster_name}",
     "",
-    "2. Test SSH to each EC2 instance's public IP (Only available if private APIServer endpoint is enabled):",
+    "2. SSH to subnet router:",
     local.enable_sr && length(data.aws_instances.sr_ec2.public_ips) > 0 ? join("\n", [
       for idx, ip in data.aws_instances.sr_ec2.public_ips :
       "   ssh -i ~/.ssh/${local.key_name} ubuntu@${ip} # ${local.sr_instance_hostname}-${idx + 1}"
-    ]) : "   N/A",
+    ]) : "   N/A (subnet router not enabled)",
     "",
     "Happy deploying <3"
   ]))

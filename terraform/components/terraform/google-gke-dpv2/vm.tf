@@ -1,55 +1,43 @@
-locals {
-  # Get all subnets from the VPC module - includes primary and secondary ranges
-  gke_subnet_name = "${var.name}-gke-subnet"
-  vpc_subnets = concat(
-    [for ip in module.vpc.subnets_ips : ip],                                                            # Get IP ranges from VPC subnets
-    [for r in lookup(module.vpc.subnets_secondary_ranges, local.gke_subnet_name, []) : r.ip_cidr_range] # Add GKE secondary ranges
-  )
-
-  # Combine VPC subnets with user-provided routes, removing any duplicates
-  all_advertised_routes = distinct(concat(local.vpc_subnets, var.advertise_routes))
-}
-
 # Tailscale provider for subnet router
 provider "tailscale" {
-  oauth_client_id     = var.oauth_client_id
-  oauth_client_secret = var.oauth_client_secret
+  oauth_client_id     = local.oauth_client_id
+  oauth_client_secret = local.oauth_client_secret
 }
 
 # Generate cloud-init configuration for Tailscale subnet router
 module "cloudinit_config" {
-  count             = var.enable_sr ? 1 : 0
+  count             = local.enable_sr ? local.sr_mig_desired_size : 0
   source            = "../modules/cloudinit-ts"
-  hostname          = "${var.name}-sr-vm"
-  accept_routes     = true
-  enable_ssh        = true
-  ephemeral         = false
-  reusable          = true
+  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
+  accept_routes     = var.sr_accept_routes
+  enable_ssh        = var.sr_enable_ssh
+  ephemeral         = var.sr_ephemeral
+  reusable          = var.sr_reusable
   advertise_routes  = local.all_advertised_routes
-  primary_tag       = "subnet-router"
+  primary_tag       = var.sr_primary_tag
   additional_tags   = ["infra"]
   track             = var.tailscale_track
   relay_server_port = var.tailscale_relay_server_port
 }
 
-resource "google_compute_instance" "gce_sr" {
-  count = var.enable_sr ? 1 : 0
-  name  = "${var.name}-sr-vm"
-  # Remove hostname as it needs to be FQDN and GCP will auto-generate one
-  machine_type = var.machine_type
-  zone         = local.zone
+# Instance template for subnet router MIG
+resource "google_compute_instance_template" "sr" {
+  count          = local.enable_sr ? 1 : 0
+  name_prefix    = format("%s-sr-", local.name)
+  machine_type   = var.machine_type
+  region         = local.region
+  can_ip_forward = true
 
-  boot_disk {
-    initialize_params {
-      image = "projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250312"
-      size  = 10
-      type  = "pd-balanced"
-    }
-    auto_delete = true
+  disk {
+    source_image = "projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250312"
+    disk_size_gb = 10
+    disk_type    = "pd-balanced"
+    auto_delete  = true
+    boot         = true
   }
 
   network_interface {
-    subnetwork = module.vpc.subnets_self_links[1] # GKE subnet
+    subnetwork = module.vpc.subnets["${local.region}/${local.name}-gke-subnet"].self_link
 
     access_config {
       // Ephemeral public IP
@@ -57,7 +45,6 @@ resource "google_compute_instance" "gce_sr" {
   }
 
   service_account {
-    # Use the default compute service account
     scopes = ["cloud-platform"]
   }
 
@@ -70,90 +57,74 @@ resource "google_compute_instance" "gce_sr" {
   labels = {
     managed-by = "terraform"
     purpose    = "gce-sr-instance"
+    name       = local.sr_instance_hostname
   }
 
   tags = ["gce-sr"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-# Private test VM for internal connectivity testing
-resource "google_compute_instance" "pvt_vm_test" {
-  count = var.enable_sr ? 1 : 0
-  name  = "${var.name}-pvt-test-vm"
-  # Remove hostname as it needs to be FQDN and GCP will auto-generate one
-  machine_type = var.machine_type
-  zone         = local.zone
+# Managed Instance Group for subnet router
+resource "google_compute_instance_group_manager" "sr" {
+  count              = local.enable_sr ? 1 : 0
+  name               = format("%s-sr-mig", local.name)
+  base_instance_name = format("%s-sr", local.name)
+  zone               = local.zone
+  target_size        = local.sr_mig_desired_size
 
-  boot_disk {
-    initialize_params {
-      image = "projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250312"
-      size  = 10
-      type  = "pd-balanced"
-    }
-    auto_delete = true
+  version {
+    instance_template = google_compute_instance_template.sr[0].self_link
   }
 
-  network_interface {
-    subnetwork = module.vpc.subnets_self_links[1] # GKE subnet, no public IP
+  named_port {
+    name = "tailscale"
+    port = 41641
   }
 
-  service_account {
-    scopes = ["cloud-platform"]
+  lifecycle {
+    create_before_destroy = true
   }
+}
 
-  metadata = {
-    enable-osconfig = "TRUE"
-    ssh-keys        = join("\n", var.ssh_public_keys)
-    user-data       = <<-EOT
-      #cloud-config
-      packages:
-        - netcat
-      runcmd:
-        - nohup nc -l -k -p 8089 > /dev/null 2>&1 &
-    EOT
-  }
+# Use external data source to get MIG instance public IPs
+data "external" "mig_ips" {
+  count   = local.enable_sr ? 1 : 0
+  program = ["bash", "-c", "ips=$(gcloud compute instances list --filter='name~${format("%s-sr", local.name)}' --format='value(networkInterfaces[0].accessConfigs[0].natIP)' --project=${local.project_id} 2>/dev/null | tr '\\n' ',' | sed 's/,$//'); echo \"{\\\"ips\\\": \\\"$ips\\\"}\""]
 
-  labels = {
-    managed-by = "terraform"
-    purpose    = "pvt-test-vm"
-  }
-
-  tags = ["pvt-test-vm"]
+  depends_on = [google_compute_instance_group_manager.sr]
 }
 
 # Firewall rules for subnet router VM
 resource "google_compute_firewall" "subnet_router_ingress" {
-  name    = "${var.name}-subnet-router-ingress"
+  name    = format("%s-subnet-router-ingress", local.name)
   network = module.vpc.vpc_id
 
-  # Allow Tailscale
   allow {
     protocol = "udp"
     ports    = ["41641"]
   }
 
-  # Allow SSH
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
 
-  # Separate IPv4 and IPv6 rules
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["gce-sr"]
 }
 
-# Separate IPv6 firewall rule for Tailscale
 resource "google_compute_firewall" "subnet_router_ingress_ipv6" {
-  name    = "${var.name}-subnet-router-ingress-ipv6"
+  name    = format("%s-subnet-router-ingress-ipv6", local.name)
   network = module.vpc.vpc_id
 
-  # Allow Tailscale
   allow {
     protocol = "udp"
     ports    = ["41641"]
   }
 
-  # Allow SSH
   allow {
     protocol = "tcp"
     ports    = ["22"]
@@ -163,36 +134,9 @@ resource "google_compute_firewall" "subnet_router_ingress_ipv6" {
   target_tags   = ["gce-sr"]
 }
 
-# Firewall rules for private test VM
-resource "google_compute_firewall" "private_vm_ingress" {
-  name    = "${var.name}-private-vm-ingress"
-  network = module.vpc.vpc_id
-
-  # Allow SSH
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-
-  # Allow netcat
-  allow {
-    protocol = "tcp"
-    ports    = ["8089"]
-  }
-
-  # Allow icmp
-  allow {
-    protocol = "icmp"
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["pvt-test-vm"]
-}
-
-# Dynamic firewall rule for Tailscale relay server (IPv4)
 resource "google_compute_firewall" "tailscale_relay_ipv4" {
-  count   = var.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
-  name    = "${var.name}-tailscale-relay-ipv4"
+  count   = local.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
+  name    = format("%s-tailscale-relay-ipv4", local.name)
   network = module.vpc.vpc_id
 
   allow {
@@ -204,10 +148,9 @@ resource "google_compute_firewall" "tailscale_relay_ipv4" {
   target_tags   = ["gce-sr"]
 }
 
-# Dynamic firewall rule for Tailscale relay server (IPv6)
 resource "google_compute_firewall" "tailscale_relay_ipv6" {
-  count   = var.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
-  name    = "${var.name}-tailscale-relay-ipv6"
+  count   = local.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
+  name    = format("%s-tailscale-relay-ipv6", local.name)
   network = module.vpc.vpc_id
 
   allow {
@@ -221,11 +164,12 @@ resource "google_compute_firewall" "tailscale_relay_ipv6" {
 
 # Ops Agent configuration
 module "ops_agent_policy" {
-  count         = var.enable_sr ? 1 : 0
-  source        = "github.com/terraform-google-modules/terraform-google-cloud-operations/modules/ops-agent-policy"
+  count         = local.enable_sr ? 1 : 0
+  source        = "terraform-google-modules/cloud-operations/google//modules/ops-agent-policy"
+  version       = "~> 0.6"
   project       = local.project_id
   zone          = local.zone
-  assignment_id = "${var.name}-ops-agent-policy"
+  assignment_id = format("%s-ops-agent-policy", local.name)
 
   agents_rule = {
     package_state = "installed"
@@ -239,14 +183,9 @@ module "ops_agent_policy" {
         labels = {
           purpose = "gce-sr-instance"
         }
-      },
-      {
-        labels = {
-          purpose = "pvt-test-vm"
-        }
       }
     ]
   }
 
-  depends_on = [google_compute_instance.gce_sr[0], google_compute_instance.pvt_vm_test[0]]
+  depends_on = [google_compute_instance_group_manager.sr]
 }

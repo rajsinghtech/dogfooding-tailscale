@@ -8,17 +8,13 @@ terraform {
       source  = "hashicorp/google-beta"
       version = ">= 4.47.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.18"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.7.0"
-    }
     tailscale = {
       source  = "tailscale/tailscale"
       version = "~> 0.22"
+    }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
     }
   }
   required_version = ">= 1.0.0"

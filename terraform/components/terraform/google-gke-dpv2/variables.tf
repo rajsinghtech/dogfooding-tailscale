@@ -3,8 +3,8 @@ variable "project_id" {
   type        = string
 }
 
-variable "name" {
-  description = "Name for all resources"
+variable "cluster_name" {
+  description = "Cluster identifier (e.g., cluster4)"
   type        = string
 }
 
@@ -56,6 +56,47 @@ variable "authorized_networks" {
 variable "enable_sr" {
   description = "Enable subnet router functionality"
   type        = bool
+}
+
+variable "enable_private_endpoint" {
+  description = "When true, the GKE control plane is only accessible via private IP (requires subnet router or VPN for access)"
+  type        = bool
+  default     = false
+}
+
+variable "sr_instance_hostname" {
+  description = "Tailscale Machine hostname for the subnet router"
+  type        = string
+}
+
+variable "sr_accept_routes" {
+  description = "Whether the subnet router should accept routes from other devices"
+  type        = bool
+  default     = false
+}
+
+variable "sr_enable_ssh" {
+  description = "Whether to enable SSH on the subnet router"
+  type        = bool
+  default     = true
+}
+
+variable "sr_ephemeral" {
+  description = "Whether the subnet router should be ephemeral"
+  type        = bool
+  default     = false
+}
+
+variable "sr_reusable" {
+  description = "Whether the subnet router auth key should be reusable"
+  type        = bool
+  default     = true
+}
+
+variable "sr_primary_tag" {
+  description = "Primary tag for the subnet router"
+  type        = string
+  default     = "subnet-router"
 }
 
 variable "advertise_routes" {
@@ -158,4 +199,15 @@ variable "tailscale_relay_server_port" {
     )
     error_message = "tailscale_relay_server_port must be between 1024 and 65535 if set."
   }
+}
+
+variable "sr_mig_desired_size" {
+  description = "Desired number of subnet router instances in the MIG"
+  type        = number
+  default     = 1
+}
+
+variable "kubernetes_version" {
+  description = "Kubernetes version for the GKE cluster (e.g., 1.31)"
+  type        = string
 }

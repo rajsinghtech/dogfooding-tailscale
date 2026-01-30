@@ -129,3 +129,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "sr" {
     }
   )
 }
+
+data "external" "vmss_ips" {
+  count   = local.enable_sr ? 1 : 0
+  program = ["bash", "-c", "ips=$(az vmss list-instance-public-ips --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_linux_virtual_machine_scale_set.sr[0].name} --query '[].ipAddress' -o tsv 2>/dev/null | tr '\\n' ',' | sed 's/,$//'); echo \"{\\\"ips\\\": \\\"$ips\\\"}\""]
+
+  depends_on = [azurerm_linux_virtual_machine_scale_set.sr]
+}

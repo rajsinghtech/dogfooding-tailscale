@@ -1,14 +1,3 @@
-locals {
-  google_metadata = {
-    Name = var.name
-  }
-
-  // Use variables consistently
-  project_id = var.project_id
-  region     = var.region
-  zone       = var.zone
-}
-
 provider "google" {
   project = local.project_id
   region  = local.region
@@ -27,45 +16,45 @@ module "vpc" {
 
   project_id = local.project_id
   region     = local.region
-  name       = var.name
+  name       = local.name
 
   # Enable router and NAT
   create_router                       = true
   create_nat                          = true
-  router_name                         = "${var.name}-router"
+  router_name                         = format("%s-router", local.name)
   enable_endpoint_independent_mapping = var.enable_endpoint_independent_mapping
 
   # Configure subnets with proper structure
   subnets = [
     # Main VPC subnet
     {
-      subnet_name           = "${var.name}-subnet"
+      subnet_name           = format("%s-subnet", local.name)
       subnet_ip             = var.vpc_subnet_cidr
       subnet_region         = local.region
       subnet_private_access = true
       subnet_flow_logs      = true
-      subnet_tags           = [for k, v in var.tags : "${k}-${v}" if v != ""]
+      subnet_tags           = [for k, v in local.tags : "${k}-${v}" if v != ""]
     },
     # GKE subnet
     {
-      subnet_name           = "${var.name}-gke-subnet"
+      subnet_name           = format("%s-gke-subnet", local.name)
       subnet_ip             = var.gke_subnet_cidr
       subnet_region         = local.region
       subnet_private_access = true
       subnet_flow_logs      = true
-      subnet_tags           = [for k, v in var.tags : "${k}-${v}" if v != ""]
+      subnet_tags           = [for k, v in local.tags : "${k}-${v}" if v != ""]
     }
   ]
 
   # Secondary IP ranges for GKE
   secondary_ranges = {
-    "${var.name}-gke-subnet" = [
+    "${local.name}-gke-subnet" = [
       {
-        range_name    = "${var.name}-pod-range"
+        range_name    = format("%s-pod-range", local.name)
         ip_cidr_range = var.gke_pod_range_cidr
       },
       {
-        range_name    = "${var.name}-service-range"
+        range_name    = format("%s-service-range", local.name)
         ip_cidr_range = var.gke_service_range_cidr
       }
     ]
@@ -74,11 +63,14 @@ module "vpc" {
 
 
 resource "google_container_cluster" "primary" {
-  name     = "${var.name}-gkedpv2-cluster"
+  name     = local.gke_cluster_name
   location = local.region
 
+  deletion_protection = false
+  min_master_version  = var.kubernetes_version
+
   # Add labels to GKE cluster
-  resource_labels = var.tags
+  resource_labels = local.tags
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -87,13 +79,13 @@ resource "google_container_cluster" "primary" {
   initial_node_count       = 1
 
   network    = module.vpc.vpc_id
-  subnetwork = module.vpc.subnets_self_links[1] # Using the GKE subnet from the VPC module
+  subnetwork = module.vpc.subnets["${local.region}/${local.name}-gke-subnet"].self_link
 
   datapath_provider = "ADVANCED_DATAPATH" # This enables GKE Dataplane V2 with default CNI
 
   ip_allocation_policy {
-    cluster_secondary_range_name  = "${var.name}-pod-range"
-    services_secondary_range_name = "${var.name}-service-range"
+    cluster_secondary_range_name  = format("%s-pod-range", local.name)
+    services_secondary_range_name = format("%s-service-range", local.name)
   }
 
   # Enable Workload Identity
@@ -108,8 +100,8 @@ resource "google_container_cluster" "primary" {
 
   # Private cluster config
   private_cluster_config {
-    enable_private_nodes    = var.enable_sr # Private when enable_sr is true
-    enable_private_endpoint = var.enable_sr # Private when enable_sr is true
+    enable_private_nodes    = local.enable_private_endpoint
+    enable_private_endpoint = local.enable_private_endpoint
     master_ipv4_cidr_block  = var.gke_master_cidr
   }
 
@@ -117,9 +109,9 @@ resource "google_container_cluster" "primary" {
   logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
 
-  # Configure master authorized networks only when private
+  # Configure master authorized networks when using private endpoint
   dynamic "master_authorized_networks_config" {
-    for_each = var.enable_sr ? [1] : [] # Only apply when enable_sr is true
+    for_each = local.enable_private_endpoint ? [1] : []
     content {
       dynamic "cidr_blocks" {
         for_each = var.authorized_networks
@@ -137,7 +129,7 @@ resource "google_container_cluster" "primary" {
 }
 
 resource "google_container_node_pool" "primary_nodes" {
-  name       = "${var.name}-node-pool"
+  name       = format("%s-node-pool", local.name)
   location   = local.region
   cluster    = google_container_cluster.primary.name
   node_count = var.node_count
@@ -151,15 +143,15 @@ resource "google_container_node_pool" "primary_nodes" {
     disk_type    = "pd-standard"
 
     # Add labels to node config
-    labels          = var.tags
-    resource_labels = var.tags
+    labels          = local.tags
+    resource_labels = local.tags
 
     # Add metadata for tags and disable legacy endpoints
     metadata = merge(
       {
         disable-legacy-endpoints = "true"
       },
-      var.tags
+      local.tags
     )
 
     dynamic "kubelet_config" {
@@ -184,7 +176,7 @@ resource "google_container_node_pool" "primary_nodes" {
     }
 
     # Add tags to identify nodes in the VPC network
-    tags = ["gke-node", "${var.name}-nodes"]
+    tags = ["gke-node", format("%s-nodes", local.name)]
   }
 
   # Add management settings to control node updates
@@ -199,4 +191,4 @@ resource "google_container_node_pool" "primary_nodes" {
     max_surge       = 1
     max_unavailable = 0
   }
-} 
+}
