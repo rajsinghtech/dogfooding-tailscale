@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-settings
+  namespace: flux-system
+data:
+  CLUSTER_NAME: cluster4
+  CONNECTOR_CIDR: "10.21.0.0/16"
+  CONNECTOR_HOSTNAME: kb-cluster4-gkedpv2-uc1-connector
