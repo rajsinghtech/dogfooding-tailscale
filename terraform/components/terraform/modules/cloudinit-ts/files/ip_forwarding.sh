@@ -13,8 +13,8 @@ else
   sudo sysctl -p /etc/sysctl.conf
 fi
 
-if command -v firewall-cmd >/dev/null 2>&1; then
-  echo "firewalld detected, enabling masquerading"
+if command -v firewall-cmd >/dev/null 2>&1 && sudo firewall-cmd --state >/dev/null 2>&1; then
+  echo "firewalld detected and running, enabling masquerading"
   sudo firewall-cmd --permanent --add-masquerade
   sudo firewall-cmd --reload
 fi
