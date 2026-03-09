@@ -6,3 +6,4 @@ resources:
   - ./vars
   - repositories.yaml
   - apps.yaml
+  - ../apps/tailscale/peer-relay/ks.yaml
