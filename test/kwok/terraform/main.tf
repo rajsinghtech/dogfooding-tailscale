@@ -61,3 +61,11 @@ module "flux_bootstrap" {
   tailscale_oauth_client_id     = "kwok-client-id"
   tailscale_oauth_client_secret = "kwok-client-secret"
 }
+
+# Also exercise the GKE split-DNS CoreDNS manifests against a real API server.
+module "split_dns" {
+  source = "../../../terraform/components/terraform/modules/split-dns-coredns"
+
+  environment = "kwok"
+  upstream    = "10.96.0.10"
+}

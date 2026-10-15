@@ -63,6 +63,7 @@ Flux and Flux Operator versions are pinned in `clusters/common/bootstrap/version
 make kwok-test CLUSTER=cluster2               # bootstrap through the Terraform flux-bootstrap module
 make kwok-test CLUSTER=cluster0-kind KWOK_BOOTSTRAP=make
 make atmos-validate                           # Atmos stacks + every workflow's validate-all
+make dns-test                                 # split-DNS CoreDNS rewrite used on GKE
 ```
 
 `test/kwok/run.sh` starts a [KWOK](https://kwok.sigs.k8s.io/) control plane (real kube-apiserver, etcd,

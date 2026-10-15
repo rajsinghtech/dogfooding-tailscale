@@ -64,7 +64,10 @@ jobs:
           done
 
       - name: Shellcheck
-        run: shellcheck test/kwok/run.sh test/kwok/lib/*.sh test/atmos/validate.sh
+        run: shellcheck test/kwok/run.sh test/kwok/lib/*.sh test/atmos/validate.sh test/dns/split-dns.sh
+
+      - name: GKE split-DNS CoreDNS rewrite
+        run: test/dns/split-dns.sh
 
   kwok:
     name: KWOK ${{ matrix.cluster }} (${{ matrix.bootstrap }})

@@ -28,10 +28,12 @@ locals {
   # Tags with standard enrichment (GCP requires lowercase label keys)
   tags = merge(var.tags, { "region" = var.region }, { "tenant-prefix" = var.tenant }, { "env" = var.environment }, { "stage" = var.stage })
 
-  # All subnet CIDRs to advertise via Tailscale (VPC subnets + GKE secondary ranges + master CIDR)
+  # Subnet CIDRs the subnet routers advertise: VPC subnets, the GKE pod range and
+  # the master CIDR. ClusterIPs only route inside the cluster, so the service
+  # range is advertised by the in-cluster Connector (clusters/cluster4) instead.
   vpc_subnets = concat(
     [var.vpc_subnet_cidr, var.gke_subnet_cidr],
-    [var.gke_pod_range_cidr, var.gke_service_range_cidr],
+    [var.gke_pod_range_cidr],
     local.enable_private_endpoint ? [var.gke_master_cidr] : []
   )
 
