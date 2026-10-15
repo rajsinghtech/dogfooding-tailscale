@@ -49,10 +49,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            # Space-separated peer goldpinger URLs on other clusters, set per cluster in cluster-settings.
             - name: HTTP_TARGETS
-              value: http://goldpinger-cluster1.default.svc.cluster1.local:8080 http://goldpinger-cluster2.default.svc.cluster2.local:8080 http://goldpinger-cluster3.default.svc.cluster3.local:8080
-          image: "docker.io/bloomberg/goldpinger:latest"
-          imagePullPolicy: Always
+              value: "${GOLDPINGER_HTTP_TARGETS:=}"
+          image: "docker.io/bloomberg/goldpinger:3.11.5@sha256:f7c60d31915048283bd91c41531388dde1956bc4ed7d99bbd28995871fab9a6e"
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

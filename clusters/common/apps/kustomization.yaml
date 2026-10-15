@@ -2,9 +2,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./default/ks.yaml
-  - ./monitoring/ks.yaml
-  - ./monitoring/namespace.yaml
-  - ./tailscale/ks.yaml
   - ./tailscale/namespace.yaml
+  - ./tailscale/operator.yaml
+  - ./tailscale/ks.yaml
+  - ./monitoring/namespace.yaml
+  - ./monitoring/ks.yaml
+  - ./default/ks.yaml
   - ./flux-system/ks.yaml

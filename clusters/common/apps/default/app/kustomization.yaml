@@ -4,4 +4,6 @@ kind: Kustomization
 resources:
   - goldpinger.yaml
   - debug.yaml
+  - nginx.yaml
   - egress.yaml
+  - ingress.yaml

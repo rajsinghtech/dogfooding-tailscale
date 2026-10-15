@@ -1,10 +1,11 @@
 ---
+# Egress from this cluster to cluster1's goldpinger over the tailnet.
 apiVersion: v1
 kind: Service
 metadata:
   annotations:
     tailscale.com/tailnet-fqdn: default-goldpinger-cluster1-1.tailf5f3d6.ts.net
-  name: goldpinger-cluster1
+  name: goldpinger-cluster1-egress
   namespace: default
 spec:
   externalName: placeholder
