@@ -3,57 +3,170 @@
   "extends": [
     "config:recommended"
   ],
-  "description": "Renovate configuration for Terraform provider updates",
-  "enabledManagers": ["terraform"],
-  "fileMatch": ["terraform/components/terraform/**/*.tf"],
-  "schedule": ["after 9am every weekday"],
+  "description": "Terraform providers/modules/charts, Flux HelmReleases, container images, GitHub Actions and pinned tool versions",
+  "enabledManagers": [
+    "terraform",
+    "flux",
+    "kubernetes",
+    "github-actions",
+    "custom.regex"
+  ],
+  "flux": {
+    "managerFilePatterns": [
+      "/^clusters/.+\\.ya?ml$/"
+    ]
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^clusters/.+\\.ya?ml$/"
+    ]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Versions annotated with a renovate comment on the previous line (versions.env, Terraform variable defaults, workflow env)",
+      "managerFilePatterns": [
+        "/^clusters/common/bootstrap/versions\\.env$/",
+        "/^terraform/components/terraform/modules/flux-bootstrap/variables\\.tf$/",
+        "/^\\.github/workflows/.+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s*[A-Za-z_]+\\s*[=:]\\s*['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
+      ]
+    }
+  ],
+  "schedule": [
+    "after 9am every weekday"
+  ],
   "timezone": "America/New_York",
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
-  "labels": ["renovate", "terraform"],
+  "labels": [
+    "renovate"
+  ],
   "packageRules": [
     {
+      "description": "Flux tags are v-prefixed while versions.env and Terraform defaults are not",
+      "matchDepNames": [
+        "fluxcd/flux2"
+      ],
+      "matchFileNames": [
+        "clusters/common/bootstrap/versions.env",
+        "terraform/components/terraform/modules/flux-bootstrap/variables.tf"
+      ],
+      "extractVersion": "^v(?<version>.+)$"
+    },
+    {
+      "description": "Flux and Flux Operator move together: CI requires versions.env and the flux-bootstrap defaults to match",
+      "matchDepNames": [
+        "fluxcd/flux2",
+        "ghcr.io/controlplaneio-fluxcd/charts/flux-operator",
+        "fluxcd/flux2/action"
+      ],
+      "groupName": "Flux",
+      "labels": [
+        "renovate",
+        "flux"
+      ]
+    },
+    {
       "description": "Group AWS provider updates",
-      "matchManagers": ["terraform"],
-      "matchPackagePatterns": ["^hashicorp/aws$"],
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchPackageNames": [
+        "hashicorp/aws"
+      ],
       "groupName": "AWS Terraform Provider",
-      "labels": ["renovate", "terraform", "aws"]
+      "labels": [
+        "renovate",
+        "terraform",
+        "aws"
+      ]
     },
     {
       "description": "Group Azure provider updates",
-      "matchManagers": ["terraform"],
-      "matchPackagePatterns": ["^hashicorp/azurerm$", "^hashicorp/azuread$"],
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchPackageNames": [
+        "hashicorp/azurerm",
+        "hashicorp/azuread"
+      ],
       "groupName": "Azure Terraform Providers",
-      "labels": ["renovate", "terraform", "azure"]
+      "labels": [
+        "renovate",
+        "terraform",
+        "azure"
+      ]
     },
     {
       "description": "Group GCP provider updates",
-      "matchManagers": ["terraform"],
-      "matchPackagePatterns": ["^hashicorp/google$", "^hashicorp/google-beta$"],
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchPackageNames": [
+        "hashicorp/google",
+        "hashicorp/google-beta"
+      ],
       "groupName": "GCP Terraform Providers",
-      "labels": ["renovate", "terraform", "gcp"]
+      "labels": [
+        "renovate",
+        "terraform",
+        "gcp"
+      ]
     },
     {
-      "description": "Tailscale provider - separate PRs for visibility",
-      "matchManagers": ["terraform"],
-      "matchPackagePatterns": ["^tailscale/tailscale$"],
-      "groupName": "Tailscale Terraform Provider",
-      "labels": ["renovate", "terraform", "tailscale"],
+      "description": "Tailscale provider, operator chart and images",
+      "matchPackageNames": [
+        "tailscale/tailscale",
+        "tailscale-operator",
+        "ghcr.io/tailscale/tailscale"
+      ],
+      "groupName": "Tailscale",
+      "labels": [
+        "renovate",
+        "tailscale"
+      ],
       "automerge": false
     },
     {
       "description": "Group Kubernetes-related providers",
-      "matchManagers": ["terraform"],
-      "matchPackagePatterns": ["^hashicorp/kubernetes$", "^hashicorp/helm$", "^gavinbunney/kubectl$", "^alekc/kubectl$"],
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchPackageNames": [
+        "hashicorp/kubernetes",
+        "hashicorp/helm",
+        "alekc/kubectl"
+      ],
       "groupName": "Kubernetes Terraform Providers",
-      "labels": ["renovate", "terraform", "kubernetes"]
+      "labels": [
+        "renovate",
+        "terraform",
+        "kubernetes"
+      ]
     },
     {
       "description": "Group utility providers",
-      "matchManagers": ["terraform"],
-      "matchPackagePatterns": ["^hashicorp/random$", "^hashicorp/null$", "^hashicorp/local$", "^hashicorp/tls$", "^hashicorp/time$", "^hashicorp/http$"],
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchPackageNames": [
+        "hashicorp/random",
+        "hashicorp/null",
+        "hashicorp/local",
+        "hashicorp/tls",
+        "hashicorp/time",
+        "hashicorp/http",
+        "hashicorp/external",
+        "hashicorp/cloudinit"
+      ],
       "groupName": "Utility Terraform Providers",
-      "labels": ["renovate", "terraform"],
+      "labels": [
+        "renovate",
+        "terraform"
+      ],
       "automerge": true,
       "automergeType": "pr"
     }

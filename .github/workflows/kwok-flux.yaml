@@ -1,0 +1,140 @@
+name: KWOK Flux
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'clusters/**'
+      - 'test/**'
+      - 'terraform/**'
+      - '.github/workflows/kwok-flux.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'clusters/**'
+      - 'test/**'
+      - 'terraform/**'
+      - '.github/workflows/kwok-flux.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # renovate: datasource=github-releases depName=kubernetes-sigs/kwok
+  KWOK_VERSION: 'v0.8.0'
+  # renovate: datasource=github-releases depName=getsops/sops
+  SOPS_VERSION: 'v3.13.3'
+  # renovate: datasource=github-releases depName=hashicorp/terraform
+  TF_VERSION: '1.16.6'
+  # renovate: datasource=github-releases depName=cloudposse/atmos
+  ATMOS_VERSION: 'v1.232.0'
+
+jobs:
+  lint:
+    name: Render and lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@v2.9.6
+        with:
+          version: '2.9.6'
+
+      - name: Render every Kustomization
+        run: |
+          for c in clusters/cluster*/; do make -s -C "$c" render >/dev/null; echo "rendered $c"; done
+          find clusters -name kustomization.yaml -print0 | xargs -0 -n1 dirname | xargs -I{} kustomize build {} -o /dev/null
+
+      - name: Render the FluxInstance template strictly
+        run: |
+          FLUX_VERSION=0 GIT_URL=x GIT_REF=x CLUSTER_PATH=x flux envsubst --strict \
+            < clusters/common/bootstrap/flux-instance.yaml >/dev/null
+
+      - name: Terraform defaults match versions.env
+        run: |
+          . clusters/common/bootstrap/versions.env
+          vars=terraform/components/terraform/modules/flux-bootstrap/variables.tf
+          for pair in "flux_version:$FLUX_VERSION" "flux_operator_version:$FLUX_OPERATOR_VERSION"; do
+            name=${pair%%:*} want=${pair#*:}
+            got=$(awk -v v="variable \"$name\"" '$0 ~ v {f=1} f && /default/ {gsub(/[" ]/, "", $3); print $3; exit}' "$vars")
+            [ "$got" = "$want" ] || { echo "::error::$name default is '$got', versions.env has '$want'"; exit 1; }
+          done
+
+      - name: Shellcheck
+        run: shellcheck test/kwok/run.sh test/kwok/lib/*.sh test/atmos/validate.sh
+
+  kwok:
+    name: KWOK ${{ matrix.cluster }} (${{ matrix.bootstrap }})
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { cluster: cluster0-kind, bootstrap: make }
+          - { cluster: cluster1, bootstrap: terraform }
+          - { cluster: cluster2, bootstrap: terraform }
+          - { cluster: cluster3, bootstrap: terraform }
+          - { cluster: cluster4, bootstrap: terraform }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@v2.9.6
+        with:
+          version: '2.9.6'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Install kwokctl and sops
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSLo "$HOME/.local/bin/kwokctl" "https://github.com/kubernetes-sigs/kwok/releases/download/${KWOK_VERSION}/kwokctl-linux-amd64"
+          curl -fsSLo "$HOME/.local/bin/sops" "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.amd64"
+          chmod +x "$HOME/.local/bin/kwokctl" "$HOME/.local/bin/sops"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Cache controller and Kubernetes binaries
+        uses: actions/cache@v5
+        with:
+          path: |
+            .cache/kwok
+            ~/.kwok/cache
+          key: kwok-${{ env.KWOK_VERSION }}-${{ hashFiles('clusters/common/bootstrap/versions.env') }}
+
+      - name: Reconcile ${{ matrix.cluster }}
+        env:
+          KWOK_BOOTSTRAP: ${{ matrix.bootstrap }}
+        run: test/kwok/run.sh ${{ matrix.cluster }}
+
+  atmos:
+    name: Atmos stacks and workflows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Install Atmos
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSLo "$HOME/.local/bin/atmos" "https://github.com/cloudposse/atmos/releases/download/${ATMOS_VERSION}/atmos_${ATMOS_VERSION#v}_linux_amd64"
+          chmod +x "$HOME/.local/bin/atmos"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate Atmos configuration and workflows
+        run: test/atmos/validate.sh
