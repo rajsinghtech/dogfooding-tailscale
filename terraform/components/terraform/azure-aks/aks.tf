@@ -47,8 +47,15 @@ resource "azurerm_kubernetes_cluster" "main" {
     load_balancer_sku = "standard"
   }
 
-  private_cluster_enabled = true
+  private_cluster_enabled = var.private_cluster_enabled
   oidc_issuer_enabled     = true
+
+  dynamic "api_server_access_profile" {
+    for_each = length(var.api_server_authorized_ip_ranges) > 0 ? [1] : []
+    content {
+      authorized_ip_ranges = var.api_server_authorized_ip_ranges
+    }
+  }
 
   identity {
     type = "SystemAssigned"
