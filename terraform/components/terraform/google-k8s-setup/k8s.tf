@@ -1,64 +1,4 @@
-################################################################################
-# Flux CD Operator Setup
-################################################################################
-resource "helm_release" "flux" {
-  name             = "flux"
-  repository       = "oci://ghcr.io/fluxcd-community/charts"
-  chart            = "flux2"
-  version          = "2.14.1"
-  namespace        = "flux-system"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-}
 
-################################################################################
-# Tailscale Kubernetes Operator Setup
-################################################################################
-resource "helm_release" "tailscale_operator" {
-  name             = format("tailscale-operator-%s-%s", local.environment, local.stage)
-  chart            = "tailscale-operator"
-  repository       = "https://pkgs.tailscale.com/helmcharts"
-  namespace        = "tailscale"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-  values = [
-    yamlencode({
-      oauth = {
-        clientId     = local.oauth_client_id
-        clientSecret = local.oauth_client_secret
-      }
-      apiServerProxyConfig = {
-        mode = "true"
-      }
-      operatorConfig = {
-        hostname = format("%s-%s-%s-operator", local.tenant, local.environment, local.stage)
-        image = {
-          tag = var.tailscale_operator_image_tag
-        }
-      }
-      proxyConfig = {
-        image = {
-          tag = var.tailscale_proxy_image_tag
-        }
-      }
-    })
-  ]
-}
-
-######################################################################
-# Apply manifests and CRs                                            #
-######################################################################
-data "kubectl_path_documents" "docs" {
-  pattern = "${path.module}/manifests/*.yaml"
-}
-
-# Deploy all manifests into the cluster
-resource "kubectl_manifest" "app_manifests" {
-  for_each  = data.kubectl_path_documents.docs.manifests
-  yaml_body = each.value
-}
 
 # Rewrite the domain for unique ones for split-DNS across clusters
 resource "kubectl_manifest" "coredns" {
@@ -106,4 +46,21 @@ data "kubernetes_service_v1" "kubedns" {
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
   nameservers = [data.kubernetes_service_v1.kubedns.spec[0].cluster_ip]
+}
+
+################################################################################
+# Flux Operator + FluxInstance. Flux installs the Tailscale operator and every
+# workload from var.flux_cluster_path.
+################################################################################
+module "flux_bootstrap" {
+  source = "../modules/flux-bootstrap"
+
+  cluster_path                  = var.flux_cluster_path
+  git_url                       = var.flux_git_url
+  git_ref                       = var.flux_git_ref
+  sops_gpg_private_key          = file(var.sops_gpg_private_key_file)
+  tailscale_oauth_client_id     = local.oauth_client_id
+  tailscale_oauth_client_secret = local.oauth_client_secret
+
+  depends_on = [kubectl_manifest.coredns]
 }

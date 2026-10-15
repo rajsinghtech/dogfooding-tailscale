@@ -1,7 +1,7 @@
 module "vpc" {
   # https://registry.terraform.io/modules/terraform-google-modules/network/google/latest
   source  = "terraform-google-modules/network/google"
-  version = "~> 10.0"
+  version = "~> 18.3"
 
   project_id   = var.project_id
   network_name = var.name
@@ -22,12 +22,12 @@ module "vpc" {
 module "cloud_router" {
   # https://registry.terraform.io/modules/terraform-google-modules/cloud-router/google/latest
   source  = "terraform-google-modules/cloud-router/google"
-  version = "~> 7.0"
+  version = "~> 9.1"
 
   count = var.create_router ? 1 : 0
 
-  project = var.project_id
-  region  = var.region
+  project_id = var.project_id
+  region     = var.region
 
   name    = coalesce(var.router_name, "${var.name}-router")
   network = module.vpc.network_name
@@ -35,8 +35,9 @@ module "cloud_router" {
   depends_on = [module.vpc]
 
   nats = var.create_nat ? [{
-    name                               = "${var.name}-nat"
-    source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+    name                                = "${var.name}-nat"
+    source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+    enable_endpoint_independent_mapping = var.enable_endpoint_independent_mapping
 
     subnetworks = [
       for subnet in var.subnets : {

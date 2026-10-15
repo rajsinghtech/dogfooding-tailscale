@@ -82,7 +82,7 @@ output "sr_ec2_public_ips" {
   sensitive   = true
 }
 
-output "Message" {
+output "message" {
   description = "Instructions for configuring your environment after Terraform apply"
   value = join("\n", compact([
     "Next Steps:",

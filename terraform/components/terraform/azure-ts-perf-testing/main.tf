@@ -127,18 +127,18 @@ resource "azurerm_network_security_group" "main" {
   }
 
   dynamic "security_rule" {
-    for_each = var.tailscale_relay_server_port != null ? [1] : []
+    for_each = var.tailscale_peer_relay_port != null ? [1] : []
     content {
-      name                       = "TailscaleRelay"
+      name                       = "TailscalePeerRelay"
       priority                   = 140
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
-      destination_port_range     = tostring(var.tailscale_relay_server_port)
+      destination_port_range     = tostring(var.tailscale_peer_relay_port)
       source_address_prefix      = "0.0.0.0/0"
       destination_address_prefix = "*"
-      description                = "Allow Tailscale relay server traffic"
+      description                = "Allow Tailscale peer relay traffic"
     }
   }
 }
@@ -203,14 +203,14 @@ module "cloudinit_ts" {
     tailscale = tailscale
   }
 
-  hostname          = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
-  accept_routes     = true
-  enable_ssh        = true
-  primary_tag       = "infra"
-  reusable          = true
-  ephemeral         = false
-  track             = var.tailscale_track
-  relay_server_port = var.tailscale_relay_server_port
+  hostname        = format("%s-%s-%s-vm%d", var.tenant, var.environment, var.stage, count.index + 1)
+  accept_routes   = true
+  enable_ssh      = true
+  primary_tag     = "infra"
+  reusable        = true
+  ephemeral       = false
+  track           = var.tailscale_track
+  peer_relay_port = var.tailscale_peer_relay_port
 
   additional_parts = [
     {

@@ -1,4 +1,4 @@
-output "Message" {
+output "message" {
   description = "Instructions for configuring your environment after Terraform apply."
   value       = <<-EOT
 Next Steps:
@@ -6,7 +6,7 @@ Next Steps:
    az aks get-credentials --resource-group ${local.resource_group_name} --name ${local.cluster_name} --overwrite-existing
 
 2. Configure your kubeconfig for Tailscale Operator APIserver proxy access by running:
-   tailscale configure kubeconfig ${local.tenant}-${local.environment}-${local.stage}-operator
+   tailscale configure kubeconfig ${local.operator_hostname}
 
 Happy deploying <3
 EOT

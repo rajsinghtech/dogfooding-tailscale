@@ -12,9 +12,7 @@ components:
           "managed_by": "Atmos/Terraform"
     google-k8s-setup:
       vars:
-        tailscale_operator_image_tag: "stable"
-        tailscale_proxy_image_tag: "stable"
-      settings:
-        depends_on:
-          1:
-            component: "google-gke-dpv2"
+        sops_gpg_private_key_file: "/secure/path/flux-sops-private-key.asc"
+      dependencies:
+        components:
+          - name: google-gke-dpv2

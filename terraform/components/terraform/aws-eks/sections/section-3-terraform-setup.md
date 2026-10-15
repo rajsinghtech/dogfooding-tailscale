@@ -34,7 +34,7 @@
     - Reusing previous version of hashicorp/null from the dependency lock file
     - Reusing previous version of hashicorp/cloudinit from the dependency lock file
     - Reusing previous version of tailscale/tailscale from the dependency lock file
-    - Reusing previous version of gavinbunney/kubectl from the dependency lock file
+    - Reusing previous version of alekc/kubectl from the dependency lock file
     - Reusing previous version of hashicorp/helm from the dependency lock file
     - Reusing previous version of hashicorp/time from the dependency lock file
     - Reusing previous version of hashicorp/tls from the dependency lock file
@@ -44,7 +44,7 @@
     - Using previously-installed hashicorp/aws v5.84.0
     - Using previously-installed hashicorp/cloudinit v2.3.5
     - Using previously-installed tailscale/tailscale v0.17.2
-    - Using previously-installed gavinbunney/kubectl v1.19.0
+    - Using previously-installed alekc/kubectl v2.4.1
     - Using previously-installed hashicorp/kubernetes v2.35.1
     - Using previously-installed hashicorp/null v3.2.3
     - Using previously-installed hashicorp/time v0.12.1
@@ -94,7 +94,7 @@
 
    Outputs:
 
-   Message = <<EOT
+   message = <<EOT
    Next Steps:
    1. Configure your kubeconfig for kubectl by running:
       aws eks --region hell-on-earth-1 update-kubeconfig --name my-cluster-name --alias my-cluster-name

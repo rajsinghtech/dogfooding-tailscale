@@ -25,3 +25,8 @@ locals {
   eks_ebs_csi_iam_role_arn       = data.terraform_remote_state.aws_tfstate.outputs.ebs_csi_iam_role_arn
   aws_lb_controller_iam_role_arn = data.terraform_remote_state.aws_tfstate.outputs.aws_lb_controller_iam_role_arn
 }
+
+locals {
+  # The operator hostname is set per cluster in Git, next to the other Flux variables.
+  operator_hostname = yamldecode(file("${path.module}/../../../../${var.flux_cluster_path}/vars/cluster-settings.yaml")).data.OPERATOR_HOSTNAME
+}

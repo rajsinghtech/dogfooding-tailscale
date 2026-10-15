@@ -31,7 +31,7 @@ Google Kubernetes Engine (GKE) with Dataplane V2 and Tailscale subnet router.
 | `tags` | map(string) | A map of tags to add to all resources | - |
 | `kubelet_config` | object | Kubelet configuration options | `{}` |
 | `tailscale_track` | string | Tailscale client version: `stable` or `unstable` | `stable` |
-| `tailscale_relay_server_port` | number | Port for Tailscale peer relay server (1024-65535, unstable track only) | `null` |
+| `tailscale_peer_relay_port` | number | UDP port for the Tailscale peer relay on the subnet routers (1024-65535) | `null` |
 
 ### Authorized Networks Object
 

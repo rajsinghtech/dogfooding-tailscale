@@ -2,20 +2,20 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 4.47.0"
+      version = ">= 8.0, < 9.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = ">= 4.47.0"
+      version = ">= 8.0, < 9.0"
     }
     tailscale = {
       source  = "tailscale/tailscale"
-      version = "~> 0.22"
+      version = ">= 0.29.0, < 0.30.0"
     }
     external = {
       source  = "hashicorp/external"
-      version = "~> 2.3"
+      version = ">= 2.4.0, < 3.0.0"
     }
   }
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.9.0, < 2.0.0"
 }

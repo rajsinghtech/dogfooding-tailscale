@@ -28,4 +28,4 @@ Azure Kubernetes Service (AKS) deployment with Tailscale integration.
 | `hostname` | string | Tailscale Machine hostname of the VM instance | - |
 | `advertise_routes` | list(string) | CIDR blocks to advertise via Tailscale in addition to AKS private subnets | `[]` |
 | `tailscale_track` | string | Tailscale client version: `stable` or `unstable` | `stable` |
-| `tailscale_relay_server_port` | number | Port for Tailscale peer relay server (1024-65535, unstable track only) | `null` |
+| `tailscale_peer_relay_port` | number | UDP port for the Tailscale peer relay on the subnet routers (1024-65535) | `null` |

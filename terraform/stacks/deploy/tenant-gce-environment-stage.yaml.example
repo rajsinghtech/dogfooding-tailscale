@@ -1,7 +1,7 @@
 vars:
   region: us-central1
   tenant: my-gke
-  environment: gce-uc1  
+  environment: gce-uc1
   stage: test
 
 import:

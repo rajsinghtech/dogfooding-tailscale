@@ -1,30 +1,30 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.9.0, < 2.0.0"
 
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 6.15"
+      version = ">= 8.0, < 9.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "~> 6.15"
+      version = ">= 8.0, < 9.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.35"
+      version = ">= 3.0, < 4.0"
     }
     kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "~> 1.19"
+      source  = "alekc/kubectl"
+      version = ">= 2.4.0, < 3.0"
     }
     tailscale = {
       source  = "tailscale/tailscale"
-      version = "~> 0.22"
+      version = ">= 0.29.0, < 0.30.0"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.17"
+      version = ">= 3.0, < 4.0"
     }
   }
 }

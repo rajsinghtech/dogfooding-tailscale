@@ -15,7 +15,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   kubernetes_version  = local.aks_version
   sku_tier            = "Standard"
 
-  automatic_upgrade_channel = "patch"
+  automatic_upgrade_channel         = "patch"
+  role_based_access_control_enabled = true
+
+  node_provisioning_profile {
+    default_node_pools = "None"
+    mode               = "Manual"
+  }
 
   default_node_pool {
     name            = "np1"

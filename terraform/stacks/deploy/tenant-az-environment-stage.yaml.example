@@ -17,7 +17,9 @@ components:
         aks_service_ipv4_cidr: "10.42.0.0/16"
         cluster_outbound_type: "loadBalancer"
     azure-k8s-setup:
-      settings:
-        depends_on:
-          1:
-            component: "azure-aks"
+      vars:
+        flux_cluster_path: "clusters/cluster1/flux"
+        sops_gpg_private_key_file: "/secure/path/flux-sops-private-key.asc"
+      dependencies:
+        components:
+          - name: azure-aks

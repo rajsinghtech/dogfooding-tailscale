@@ -1,0 +1,75 @@
+name: Workflows for Tailscale-GKE-Dataplane-V2
+description: Atmos workflows for managing Tailscale-GKE-Dataplane-V2
+# Example stack: kb-gkedpv2-uc1-test (from stacks/deploy/*.yaml.example). Add a step per stack you deploy.
+
+workflows:
+  validate-phase1:
+    description: |
+      Run 'terraform validate' on google-gke-dpv2
+    steps:
+      - command: terraform validate google-gke-dpv2 -s kb-gkedpv2-uc1-test
+
+  plan-phase1:
+    description: |
+      Run 'terraform plan' on google-gke-dpv2
+    steps:
+      - command: terraform plan google-gke-dpv2 -s kb-gkedpv2-uc1-test
+
+  apply-phase1:
+    description: |
+      Run 'terraform apply' on google-gke-dpv2
+    steps:
+      - command: terraform apply google-gke-dpv2 -auto-approve -s kb-gkedpv2-uc1-test
+
+  validate-phase2:
+    description: |
+      Run 'terraform validate' on google-k8s-setup
+    steps:
+      - command: terraform validate google-k8s-setup -s kb-gkedpv2-uc1-test
+
+  plan-phase2:
+    description: |
+      Run 'terraform plan' on google-k8s-setup
+    steps:
+      - command: terraform plan google-k8s-setup -s kb-gkedpv2-uc1-test
+
+  apply-phase2:
+    description: |
+      Run 'terraform apply' on google-k8s-setup
+    steps:
+      - command: terraform apply google-k8s-setup -auto-approve -s kb-gkedpv2-uc1-test
+
+  validate-all:
+    description: |
+      Run 'terraform validate' on every component
+    steps:
+      - command: terraform validate google-gke-dpv2 -s kb-gkedpv2-uc1-test
+      - command: terraform validate google-k8s-setup -s kb-gkedpv2-uc1-test
+
+  plan-all:
+    description: |
+      Run 'terraform plan' on every component (later phases need earlier phases applied)
+    steps:
+      - command: terraform plan google-gke-dpv2 -s kb-gkedpv2-uc1-test
+      - command: terraform plan google-k8s-setup -s kb-gkedpv2-uc1-test
+
+  apply-all:
+    description: |
+      Run 'terraform apply' on every component in order
+    steps:
+      - command: terraform apply google-gke-dpv2 -auto-approve -s kb-gkedpv2-uc1-test
+      - command: terraform apply google-k8s-setup -auto-approve -s kb-gkedpv2-uc1-test
+
+  destroy-all:
+    description: |
+      Run 'terraform destroy' on every component in reverse order
+    steps:
+      - command: terraform destroy google-k8s-setup -auto-approve -s kb-gkedpv2-uc1-test
+      - command: terraform destroy google-gke-dpv2 -auto-approve -s kb-gkedpv2-uc1-test
+
+  clean-all:
+    description: |
+      Run 'terraform clean' on every component
+    steps:
+      - command: terraform clean google-k8s-setup --force -s kb-gkedpv2-uc1-test
+      - command: terraform clean google-gke-dpv2 --force -s kb-gkedpv2-uc1-test

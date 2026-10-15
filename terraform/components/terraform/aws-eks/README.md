@@ -108,7 +108,7 @@ This repo is organized in sequential sections. Each step will build on top of th
 [Terraform AWS EKS Module](https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest)  
 [Terraform AWS VPC Module](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest)  
 [Terraform-CloudInit-Tailscale Module](https://github.com/lbrlabs/terraform-cloudinit-tailscale)  
-[Terraform Kubectl Provider](https://registry.terraform.io/providers/gavinbunney/kubectl/latest)  
+[Terraform Kubectl Provider](https://registry.terraform.io/providers/alekc/kubectl/latest)  
 [Terraform Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
 
 ## Final Words

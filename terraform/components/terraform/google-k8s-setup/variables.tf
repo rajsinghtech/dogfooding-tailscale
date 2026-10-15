@@ -18,14 +18,24 @@ variable "region" {
   type        = string
 }
 
-variable "tailscale_operator_image_tag" {
-  description = "Image tag for the Tailscale operator (e.g., 'stable', 'unstable', or a specific version)"
+variable "flux_cluster_path" {
+  description = "Path in the Git repository that Flux syncs for this cluster, e.g. clusters/cluster2/flux"
   type        = string
-  default     = "stable"
 }
 
-variable "tailscale_proxy_image_tag" {
-  description = "Image tag for the Tailscale proxy (e.g., 'stable', 'unstable', or a specific version)"
+variable "flux_git_url" {
+  description = "Git repository Flux syncs from"
   type        = string
-  default     = "stable"
+  default     = "https://github.com/rajsinghtech/dogfooding-tailscale"
+}
+
+variable "flux_git_ref" {
+  description = "Git reference Flux syncs, e.g. refs/heads/main"
+  type        = string
+  default     = "refs/heads/main"
+}
+
+variable "sops_gpg_private_key_file" {
+  description = "Path to the ASCII-armored private PGP key for clusters/.sops.yaml (read at apply time, never commit it)"
+  type        = string
 }

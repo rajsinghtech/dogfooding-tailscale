@@ -31,62 +31,6 @@ data "aws_eks_cluster_auth" "this" {
 }
 
 ################################################################################
-# Flux CD Operator Setup
-################################################################################
-resource "helm_release" "flux" {
-  name             = "flux"
-  repository       = "oci://ghcr.io/fluxcd-community/charts"
-  chart            = "flux2"
-  version          = "2.14.1"
-  namespace        = "flux-system"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-
-  depends_on = [
-    helm_release.aws_lb_controller
-  ]
-}
-
-################################################################################
-# Tailscale Kubernetes Operator Setup
-################################################################################
-resource "helm_release" "tailscale_operator" {
-  name             = "tailscale-operator-${local.environment}-${local.stage}"
-  chart            = "tailscale-operator"
-  repository       = "https://pkgs.tailscale.com/helmcharts"
-  namespace        = "tailscale"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-  values = [
-    yamlencode({
-      oauth = {
-        clientId     = local.oauth_client_id
-        clientSecret = local.oauth_client_secret
-      }
-      apiServerProxyConfig = {
-        mode = "true"
-      }
-      operatorConfig = {
-        hostname = "${local.tenant}-${local.environment}-${local.stage}-operator"
-        image = {
-          tag = var.tailscale_operator_image_tag
-        }
-      }
-      proxyConfig = {
-        image = {
-          tag = var.tailscale_proxy_image_tag
-        }
-      }
-    })
-  ]
-  depends_on = [
-    kubectl_manifest.coredns
-  ]
-}
-
-################################################################################
 # AWS EBS CSI Driver Setup
 ################################################################################
 resource "helm_release" "ebs_csi_driver" {
@@ -95,7 +39,7 @@ resource "helm_release" "ebs_csi_driver" {
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   chart      = "aws-ebs-csi-driver"
   namespace  = "kube-system"
-  version    = "2.30.0"
+  version    = "2.67.0"
 
   values = [
     yamlencode({
@@ -120,7 +64,7 @@ resource "helm_release" "aws_lb_controller" {
   repository       = "https://aws.github.io/eks-charts"
   chart            = "aws-load-balancer-controller"
   namespace        = "kube-system"
-  version          = "1.7.1"
+  version          = "3.6.0"
   create_namespace = false
 
   values = [
@@ -139,17 +83,24 @@ resource "helm_release" "aws_lb_controller" {
   ]
 }
 
-######################################################################
-# Apply manifests and CRs                                            #
-######################################################################
-data "kubectl_path_documents" "docs" {
-  pattern = "manifests/*.yaml"
-}
+# Default StorageClass backed by the EBS CSI driver (Prometheus PVCs use it).
+resource "kubectl_manifest" "storageclass_gp3" {
+  yaml_body = <<YAML
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+YAML
 
-# Deploy all manifests into the cluster
-resource "kubectl_manifest" "app_manifests" {
-  for_each  = data.kubectl_path_documents.docs.manifests
-  yaml_body = each.value
+  depends_on = [helm_release.ebs_csi_driver]
 }
 
 # Rewrite the domain for unique ones for split-DNS across clusters
@@ -184,7 +135,6 @@ data:
 YAML
 }
 
-
 ###################################################################
 # TS Split-DNS setup for K8s service FQDN resolution from tailnet #
 ###################################################################
@@ -199,4 +149,21 @@ data "kubernetes_service_v1" "kubedns" {
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
   nameservers = [data.kubernetes_service_v1.kubedns.spec[0].cluster_ip]
+}
+
+################################################################################
+# Flux Operator + FluxInstance. Flux installs the Tailscale operator and every
+# workload from var.flux_cluster_path.
+################################################################################
+module "flux_bootstrap" {
+  source = "../modules/flux-bootstrap"
+
+  cluster_path                  = var.flux_cluster_path
+  git_url                       = var.flux_git_url
+  git_ref                       = var.flux_git_ref
+  sops_gpg_private_key          = file(var.sops_gpg_private_key_file)
+  tailscale_oauth_client_id     = local.oauth_client_id
+  tailscale_oauth_client_secret = local.oauth_client_secret
+
+  depends_on = [helm_release.aws_lb_controller, kubectl_manifest.storageclass_gp3, kubectl_manifest.coredns]
 }

@@ -10,7 +10,7 @@ provider "google-beta" {
   zone    = local.zone
 }
 
-// VPC with GKE subnets and NAT configuration
+# VPC with GKE subnets and NAT configuration
 module "vpc" {
   source = "../modules/google-vpc"
 

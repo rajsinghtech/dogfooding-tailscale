@@ -1,7 +1,7 @@
 vars:
   region: us-west-2
   tenant: my
-  environment: aws-uw2  
+  environment: aws-uw2
   stage: test
 
 import:
@@ -20,12 +20,11 @@ components:
         cluster_service_ipv4_cidr: "10.41.0.0/16"
         advertise_routes: ["10.1.0.0/16"]
         tailscale_track: "unstable"
-        tailscale_relay_server_port: 45641
+        tailscale_peer_relay_port: 45641
     aws-k8s-setup:
       vars:
-        tailscale_operator_image_tag: "unstable"
-        tailscale_proxy_image_tag: "unstable"
-      settings:
-        depends_on:
-          1:
-            component: "aws-eks"
+        flux_cluster_path: "clusters/cluster2/flux"
+        sops_gpg_private_key_file: "/secure/path/flux-sops-private-key.asc"
+      dependencies:
+        components:
+          - name: aws-eks

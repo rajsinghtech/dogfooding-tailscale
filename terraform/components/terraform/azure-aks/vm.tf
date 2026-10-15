@@ -1,16 +1,16 @@
 # Use the same cloudinit-ts module as AWS for Tailscale setup
-module "ubuntu-tailscale-client" {
-  count             = local.enable_sr ? local.sr_vmss_desired_size : 0
-  source            = "../modules/cloudinit-ts"
-  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
-  accept_routes     = var.sr_accept_routes
-  enable_ssh        = var.sr_enable_ssh
-  ephemeral         = var.sr_ephemeral
-  reusable          = var.sr_reusable
-  advertise_routes  = local.advertise_routes
-  primary_tag       = var.sr_primary_tag
-  track             = var.tailscale_track
-  relay_server_port = var.tailscale_relay_server_port
+module "ubuntu_tailscale_client" {
+  count            = local.enable_sr ? local.sr_vmss_desired_size : 0
+  source           = "../modules/cloudinit-ts"
+  hostname         = "${local.sr_instance_hostname}-${count.index + 1}"
+  accept_routes    = var.sr_accept_routes
+  enable_ssh       = var.sr_enable_ssh
+  ephemeral        = var.sr_ephemeral
+  reusable         = var.sr_reusable
+  advertise_routes = local.advertise_routes
+  primary_tag      = var.sr_primary_tag
+  track            = var.tailscale_track
+  peer_relay_port  = var.tailscale_peer_relay_port
 }
 
 resource "azurerm_network_security_group" "vmss" {
@@ -59,18 +59,18 @@ resource "azurerm_network_security_group" "vmss" {
   }
 
   dynamic "security_rule" {
-    for_each = var.tailscale_relay_server_port != null ? [1] : []
+    for_each = var.tailscale_peer_relay_port != null ? [1] : []
     content {
-      name                       = "TailscaleRelay"
+      name                       = "TailscalePeerRelay"
       priority                   = 1004
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Udp"
       source_port_range          = "*"
-      destination_port_range     = tostring(var.tailscale_relay_server_port)
+      destination_port_range     = tostring(var.tailscale_peer_relay_port)
       source_address_prefix      = "0.0.0.0/0"
       destination_address_prefix = "*"
-      description                = "Allow Tailscale relay server traffic"
+      description                = "Allow Tailscale peer relay traffic"
     }
   }
 
@@ -87,7 +87,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "sr" {
   instances                       = local.sr_vmss_desired_size
   admin_username                  = "ubuntu"
   disable_password_authentication = true
-  custom_data                     = element(module.ubuntu-tailscale-client[*].rendered, 0)
+  custom_data                     = element(module.ubuntu_tailscale_client[*].rendered, 0)
 
   admin_ssh_key {
     username   = "ubuntu"
@@ -109,7 +109,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "sr" {
   network_interface {
     name                      = "sr-nic"
     primary                   = true
-    enable_ip_forwarding      = true
+    ip_forwarding_enabled     = true
     network_security_group_id = azurerm_network_security_group.vmss[0].id
 
     ip_configuration {
@@ -135,4 +135,9 @@ data "external" "vmss_ips" {
   program = ["bash", "-c", "ips=$(az vmss list-instance-public-ips --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_linux_virtual_machine_scale_set.sr[0].name} --query '[].ipAddress' -o tsv 2>/dev/null | tr '\\n' ',' | sed 's/,$//'); echo \"{\\\"ips\\\": \\\"$ips\\\"}\""]
 
   depends_on = [azurerm_linux_virtual_machine_scale_set.sr]
+}
+
+moved {
+  from = module.ubuntu-tailscale-client
+  to   = module.ubuntu_tailscale_client
 }

@@ -6,9 +6,6 @@ locals {
 
   tailscale_tags = concat([local.prefixed_primary_tag], local.prefixed_additional_tags)
 
-  # Validate that relay_server_port is only set when track is "unstable"
-  relay_server_validation = var.relay_server_port != null && var.track != "unstable" ? tobool("ERROR: The peer relay feature is only available in the unstable track. Please set track = \"unstable\" to use relay_server_port.") : true
-
 }
 
 data "cloudinit_config" "main" {
@@ -66,7 +63,7 @@ data "cloudinit_config" "main" {
       MAX_RETRIES                = var.max_retries
       RETRY_DELAY                = var.retry_delay
       TRACK                      = var.track
-      RELAY_SERVER_PORT          = var.relay_server_port != null ? var.relay_server_port : ""
+      PEER_RELAY_PORT            = var.peer_relay_port != null ? var.peer_relay_port : ""
     })
   }
 

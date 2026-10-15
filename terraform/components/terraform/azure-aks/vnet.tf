@@ -33,7 +33,7 @@ resource "azurerm_subnet" "private" {
 }
 
 # Create the inbound DNS subnet
-resource "azurerm_subnet" "dns-inbound" {
+resource "azurerm_subnet" "dns_inbound" {
   name                 = format("%s-%s-%s-dns-inbound", local.tenant, local.environment, local.stage)
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
@@ -63,7 +63,7 @@ resource "azurerm_private_dns_resolver_inbound_endpoint" "main" {
   tags                    = local.tags
   ip_configurations {
     private_ip_allocation_method = "Dynamic"
-    subnet_id                    = azurerm_subnet.dns-inbound.id
+    subnet_id                    = azurerm_subnet.dns_inbound.id
   }
 }
 
@@ -98,4 +98,9 @@ resource "azurerm_public_ip" "nat" {
 resource "azurerm_nat_gateway_public_ip_association" "main" {
   nat_gateway_id       = azurerm_nat_gateway.main.id
   public_ip_address_id = azurerm_public_ip.nat.id
+}
+
+moved {
+  from = azurerm_subnet.dns-inbound
+  to   = azurerm_subnet.dns_inbound
 }

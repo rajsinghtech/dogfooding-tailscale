@@ -6,18 +6,18 @@ provider "tailscale" {
 
 # Generate cloud-init configuration for Tailscale subnet router
 module "cloudinit_config" {
-  count             = local.enable_sr ? local.sr_mig_desired_size : 0
-  source            = "../modules/cloudinit-ts"
-  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
-  accept_routes     = var.sr_accept_routes
-  enable_ssh        = var.sr_enable_ssh
-  ephemeral         = var.sr_ephemeral
-  reusable          = var.sr_reusable
-  advertise_routes  = local.all_advertised_routes
-  primary_tag       = var.sr_primary_tag
-  additional_tags   = ["infra"]
-  track             = var.tailscale_track
-  relay_server_port = var.tailscale_relay_server_port
+  count            = local.enable_sr ? local.sr_mig_desired_size : 0
+  source           = "../modules/cloudinit-ts"
+  hostname         = "${local.sr_instance_hostname}-${count.index + 1}"
+  accept_routes    = var.sr_accept_routes
+  enable_ssh       = var.sr_enable_ssh
+  ephemeral        = var.sr_ephemeral
+  reusable         = var.sr_reusable
+  advertise_routes = local.all_advertised_routes
+  primary_tag      = var.sr_primary_tag
+  additional_tags  = ["infra"]
+  track            = var.tailscale_track
+  peer_relay_port  = var.tailscale_peer_relay_port
 }
 
 # Instance template for subnet router MIG
@@ -29,7 +29,7 @@ resource "google_compute_instance_template" "sr" {
   can_ip_forward = true
 
   disk {
-    source_image = "projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250312"
+    source_image = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2404-lts-amd64"
     disk_size_gb = 10
     disk_type    = "pd-balanced"
     auto_delete  = true
@@ -40,7 +40,7 @@ resource "google_compute_instance_template" "sr" {
     subnetwork = module.vpc.subnets["${local.region}/${local.name}-gke-subnet"].self_link
 
     access_config {
-      // Ephemeral public IP
+      # Ephemeral public IP
     }
   }
 
@@ -134,58 +134,122 @@ resource "google_compute_firewall" "subnet_router_ingress_ipv6" {
   target_tags   = ["gce-sr"]
 }
 
-resource "google_compute_firewall" "tailscale_relay_ipv4" {
-  count   = local.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
-  name    = format("%s-tailscale-relay-ipv4", local.name)
+resource "google_compute_firewall" "tailscale_peer_relay_ipv4" {
+  count   = local.enable_sr && var.tailscale_peer_relay_port != null ? 1 : 0
+  name    = format("%s-tailscale-peer-relay-ipv4", local.name)
   network = module.vpc.vpc_id
 
   allow {
     protocol = "udp"
-    ports    = [tostring(var.tailscale_relay_server_port)]
+    ports    = [tostring(var.tailscale_peer_relay_port)]
   }
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["gce-sr"]
 }
 
-resource "google_compute_firewall" "tailscale_relay_ipv6" {
-  count   = local.enable_sr && var.tailscale_relay_server_port != null ? 1 : 0
-  name    = format("%s-tailscale-relay-ipv6", local.name)
+resource "google_compute_firewall" "tailscale_peer_relay_ipv6" {
+  count   = local.enable_sr && var.tailscale_peer_relay_port != null ? 1 : 0
+  name    = format("%s-tailscale-peer-relay-ipv6", local.name)
   network = module.vpc.vpc_id
 
   allow {
     protocol = "udp"
-    ports    = [tostring(var.tailscale_relay_server_port)]
+    ports    = [tostring(var.tailscale_peer_relay_port)]
   }
 
   source_ranges = ["::/0"]
   target_tags   = ["gce-sr"]
 }
 
-# Ops Agent configuration
-module "ops_agent_policy" {
-  count         = local.enable_sr ? 1 : 0
-  source        = "terraform-google-modules/cloud-operations/google//modules/ops-agent-policy"
-  version       = "~> 0.6"
-  project       = local.project_id
-  zone          = local.zone
-  assignment_id = format("%s-ops-agent-policy", local.name)
+moved {
+  from = google_compute_firewall.tailscale_relay_ipv4
+  to   = google_compute_firewall.tailscale_peer_relay_ipv4
+}
 
-  agents_rule = {
-    package_state = "installed"
-    version       = "latest"
+moved {
+  from = google_compute_firewall.tailscale_relay_ipv6
+  to   = google_compute_firewall.tailscale_peer_relay_ipv6
+}
+
+# Ops Agent on the subnet routers (the policy the cloud-operations
+# ops-agent-policy module generated for Ubuntu 24.04, without its Google < 8 cap).
+resource "google_os_config_os_policy_assignment" "ops_agent" {
+  count    = local.enable_sr ? 1 : 0
+  project  = local.project_id
+  location = local.zone
+  name     = format("%s-ops-agent-policy", local.name)
+
+  instance_filter {
+    all = false
+    inclusion_labels {
+      labels = {
+        purpose = "gce-sr-instance"
+      }
+    }
   }
 
-  instance_filter = {
-    all = false
-    inclusion_labels = [
-      {
-        labels = {
-          purpose = "gce-sr-instance"
+  os_policies {
+    id                            = "ops-agent-policy"
+    mode                          = "ENFORCEMENT"
+    allow_no_resource_group_match = false
+
+    resource_groups {
+      inventory_filters {
+        os_short_name = "ubuntu"
+        os_version    = "24.04"
+      }
+
+      resources {
+        id = "wait-for-cloud-init"
+        exec {
+          validate {
+            interpreter = "SHELL"
+            script      = "cloud-init status --wait; exit 100;"
+          }
+          enforce {
+            interpreter = "SHELL"
+            script      = "echo hello"
+          }
         }
       }
-    ]
+
+      resources {
+        id = "add-repo"
+        repository {
+          apt {
+            archive_type = "DEB"
+            uri          = "https://packages.cloud.google.com/apt"
+            distribution = "google-cloud-ops-agent-noble-all"
+            components   = ["main"]
+            gpg_key      = "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+          }
+        }
+      }
+
+      resources {
+        id = "install-pkg"
+        pkg {
+          desired_state = "INSTALLED"
+          apt {
+            name = "google-cloud-ops-agent"
+          }
+        }
+      }
+    }
+  }
+
+  rollout {
+    disruption_budget {
+      percent = 100
+    }
+    min_wait_duration = "0s"
   }
 
   depends_on = [google_compute_instance_group_manager.sr]
+}
+
+moved {
+  from = module.ops_agent_policy[0].google_os_config_os_policy_assignment.ops_agent_policy
+  to   = google_os_config_os_policy_assignment.ops_agent[0]
 }

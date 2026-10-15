@@ -6,28 +6,28 @@ config {
 # AWS Provider Rules
 plugin "aws" {
   enabled = true
-  version = "0.32.0"
+  version = "0.49.0"
   source  = "github.com/terraform-linters/tflint-ruleset-aws"
 }
 
 # Azure Provider Rules
 plugin "azurerm" {
   enabled = true
-  version = "0.27.0"
+  version = "0.32.0"
   source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
 }
 
 # GCP Provider Rules
 plugin "google" {
   enabled = true
-  version = "0.30.0"
+  version = "0.40.0"
   source  = "github.com/terraform-linters/tflint-ruleset-google"
 }
 
 # Terraform Standard Rules
 plugin "terraform" {
   enabled = true
-  version = "0.9.1"
+  version = "0.11.0"
   source  = "github.com/terraform-linters/tflint-ruleset-terraform"
   preset  = "recommended"
 }
