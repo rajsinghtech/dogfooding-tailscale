@@ -1,4 +1,8 @@
 # Use tfstate values from phase-1 for the providers defined in locals.tf
+provider "aws" {
+  region = local.region
+}
+
 provider "tailscale" {
   oauth_client_id     = local.oauth_client_id
   oauth_client_secret = local.oauth_client_secret
@@ -66,6 +70,13 @@ resource "helm_release" "aws_lb_controller" {
   namespace        = "kube-system"
   version          = "3.6.0"
   create_namespace = false
+  # The chart emits IngressClassParams and IngressClass as one v1 List so Helm
+  # applies them in order. A List has no OpenAPI v3 schema, so the Helm client
+  # validates it against protobuf /openapi/v2, and the EKS 1.36 API server
+  # answers that with an empty 503 (JSON /openapi/v2 and each object on its own
+  # both succeed). Skip the client-side check; the API server still admits the
+  # objects.
+  disable_openapi_validation = true
 
   values = [
     yamlencode({
