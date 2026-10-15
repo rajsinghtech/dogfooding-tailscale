@@ -45,7 +45,7 @@ done
 log() { printf '\n==> %s\n' "$*"; }
 port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'; }
 
-# shellcheck disable=SC2329 # invoked by the EXIT trap
+# shellcheck disable=SC2317,SC2329 # invoked by the EXIT trap
 cleanup() {
   status=$?
   if [ "${KWOK_KEEP:-0}" = 1 ]; then
@@ -77,8 +77,10 @@ done < <(python3 "$LIB/flux_images.py" "$FLUX_VERSION")
 # The operator image also vendors the Flux distribution manifests under /data.
 BIN[flux-operator]=$CACHE/bin/flux-operator-v$FLUX_OPERATOR_VERSION
 OPERATOR_DATA=$CACHE/flux-operator-data-v$FLUX_OPERATOR_VERSION
-[ -x "${BIN[flux-operator]}" ] && [ -d "$OPERATOR_DATA" ] || python3 "$LIB/image_binary.py" \
-  "ghcr.io/controlplaneio-fluxcd/flux-operator:v$FLUX_OPERATOR_VERSION" "${BIN[flux-operator]}" --dir /data "$OPERATOR_DATA"
+if [ ! -x "${BIN[flux-operator]}" ] || [ ! -d "$OPERATOR_DATA" ]; then
+  python3 "$LIB/image_binary.py" "ghcr.io/controlplaneio-fluxcd/flux-operator:v$FLUX_OPERATOR_VERSION" \
+    "${BIN[flux-operator]}" --dir /data "$OPERATOR_DATA"
+fi
 
 log "Creating KWOK cluster $NAME"
 kwokctl create cluster --name "$NAME" --runtime binary --kubeconfig "$KUBECONFIG" --wait 5m
