@@ -15,9 +15,11 @@ module "cloudinit_config" {
   reusable         = var.sr_reusable
   advertise_routes = local.all_advertised_routes
   primary_tag      = var.sr_primary_tag
-  additional_tags  = ["infra"]
-  track            = var.tailscale_track
-  peer_relay_port  = var.tailscale_peer_relay_port
+  # AWS and Azure tag the subnet router with sr_primary_tag only. tag:infra is
+  # not granted to the dogfood OAuth client, so an auth key that requests it is
+  # rejected.
+  track           = var.tailscale_track
+  peer_relay_port = var.tailscale_peer_relay_port
 }
 
 # Instance template for subnet router MIG
