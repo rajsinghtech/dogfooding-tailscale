@@ -1,0 +1,31 @@
+---
+# Rendered by Terraform templatefile() and by `flux envsubst --strict`
+# (cluster.mk, KWOK harness): every placeholder must be a variable that both
+# callers set, and no other dollar-brace sequences may appear in this file.
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  distribution:
+    version: "${FLUX_VERSION}"
+    registry: ghcr.io/fluxcd
+    artifact: oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: false
+    domain: cluster.local
+  sync:
+    kind: GitRepository
+    name: dogfooding-tailscale
+    url: "${GIT_URL}"
+    ref: "${GIT_REF}"
+    path: "${CLUSTER_PATH}"
+    interval: 5m

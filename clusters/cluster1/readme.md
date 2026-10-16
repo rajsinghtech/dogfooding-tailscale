@@ -1,11 +1,16 @@
-# Builds yamls
+# Cluster 1
 
-- `kustomize build clusters/templates/argo-cd --enable-helm | kubectl apply -f -`  
-- `kubectl apply -f clusters/cluster1/argocd/applications.yaml`  
+Terraform (`*-k8s-setup`) installs Flux Operator, the `FluxInstance` and the
+bootstrap Secrets; Flux then reconciles `clusters/cluster1/flux`.
 
-# Init cluster
+```sh
+make -C clusters/cluster1 check
+make -C clusters/cluster1 reconcile
+make -C clusters/cluster1 render
+```
 
-- `cd terraform/aws-eks/`   
-- `terraform init`  
-- `terraform plan --var-file=../../clusters/cluster1/terraform.tfvars`
-- `terraform apply --auto-approve --var-file=../../clusters/cluster1/terraform.tfvars`
+To bootstrap without Terraform:
+
+```sh
+CLIENT_ID=... CLIENT_SECRET=... make -C clusters/cluster1 bootstrap SOPS_GPG_KEY_FILE=/secure/path/private-key.asc
+```

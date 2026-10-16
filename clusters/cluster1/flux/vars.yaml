@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-vars
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/cluster1/flux/vars
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg

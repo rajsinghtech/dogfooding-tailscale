@@ -1,7 +1,10 @@
 ---
-kind: Namespace
 apiVersion: v1
+kind: Namespace
 metadata:
   name: tailscale
   labels:
     pod-security.kubernetes.io/enforce: privileged
+  annotations:
+    # Bootstrap stores the operator OAuth Secret here; never let Flux delete it.
+    kustomize.toolkit.fluxcd.io/prune: disabled

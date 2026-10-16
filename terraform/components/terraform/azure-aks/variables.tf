@@ -123,16 +123,16 @@ variable "tailscale_track" {
   }
 }
 
-variable "tailscale_relay_server_port" {
-  description = "Port for the Tailscale peer relay server (only available in unstable track)"
+variable "tailscale_peer_relay_port" {
+  description = "UDP port for the Tailscale peer relay on the subnet routers (null disables the peer relay)"
   type        = number
   default     = null
   validation {
     condition = (
-      var.tailscale_relay_server_port == null ||
-      (var.tailscale_relay_server_port >= 1024 && var.tailscale_relay_server_port <= 65535)
+      var.tailscale_peer_relay_port == null ||
+      (var.tailscale_peer_relay_port >= 1024 && var.tailscale_peer_relay_port <= 65535)
     )
-    error_message = "tailscale_relay_server_port must be between 1024 and 65535 if set."
+    error_message = "tailscale_peer_relay_port must be between 1024 and 65535 if set."
   }
 }
 
@@ -176,4 +176,16 @@ variable "sr_primary_tag" {
   description = "Primary tag for the subnet router"
   type        = string
   default     = "subnet-router"
+}
+
+variable "private_cluster_enabled" {
+  description = "Expose the AKS API server only on a private endpoint (reached over the tailnet through the subnet router)"
+  type        = bool
+  default     = true
+}
+
+variable "api_server_authorized_ip_ranges" {
+  description = "Public CIDRs allowed to reach the API server when private_cluster_enabled is false"
+  type        = list(string)
+  default     = []
 }

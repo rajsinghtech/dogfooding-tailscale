@@ -1,0 +1,16 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: peer-relay
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./clusters/cluster2/apps/peer-relay
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: dogfooding-tailscale
+  dependsOn:
+    - name: tailscale-crs

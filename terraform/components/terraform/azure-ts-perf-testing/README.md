@@ -25,7 +25,7 @@ Azure VMs for Tailscale performance testing.
 | `os_disk_type` | string | Type of OS disk | `StandardSSD_LRS` |
 | `source_image_reference` | object | Source image reference for the VMs | Ubuntu 24.04 LTS Server |
 | `tailscale_track` | string | Tailscale client version: `stable` or `unstable` | `stable` |
-| `tailscale_relay_server_port` | number | Port for Tailscale peer relay server (1024-65535, unstable track only) | `null` |
+| `tailscale_peer_relay_port` | number | UDP port for the Tailscale peer relay on the subnet routers (1024-65535) | `null` |
 
 ### Source Image Reference Object
 

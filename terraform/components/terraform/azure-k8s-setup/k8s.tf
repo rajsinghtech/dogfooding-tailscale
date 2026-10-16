@@ -3,97 +3,20 @@ data "azurerm_kubernetes_cluster" "credentials" {
   resource_group_name = local.resource_group_name
 }
 
-################################################################################
-# Flux CD Operator Setup
-################################################################################
-resource "helm_release" "flux" {
-  name             = "flux"
-  repository       = "oci://ghcr.io/fluxcd-community/charts"
-  chart            = "flux2"
-  version          = "2.14.1"
-  namespace        = "flux-system"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-}
-
-################################################################################
-# Tailscale Kubernetes Operator Setup
-################################################################################
-resource "helm_release" "tailscale_operator" {
-  name             = "tailscale-operator-${local.environment}-${local.stage}"
-  chart            = "tailscale-operator"
-  repository       = "https://pkgs.tailscale.com/helmcharts"
-  namespace        = "tailscale"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-  values = [
-    yamlencode({
-      oauth = {
-        clientId     = local.oauth_client_id
-        clientSecret = local.oauth_client_secret
-      }
-      apiServerProxyConfig = {
-        mode = "true"
-      }
-      operatorConfig = {
-        hostname = "${local.tenant}-${local.environment}-${local.stage}-operator"
-        image = {
-          tag = var.tailscale_operator_image_tag
-        }
-      }
-      proxyConfig = {
-        image = {
-          tag = var.tailscale_proxy_image_tag
-        }
-      }
-    })
-  ]
-}
-
-######################################################################
-# Apply manifests and CRs                                            #
-######################################################################
-data "kubectl_path_documents" "docs" {
-  pattern = "manifests/*.yaml"
-}
-
-# Deploy all manifests into the cluster
-resource "kubectl_manifest" "app_manifests" {
-  for_each  = data.kubectl_path_documents.docs.manifests
-  yaml_body = each.value
-}
-
-# Rewrite the domain for unique ones for split-DNS across clusters
+# Rewrite the per-cluster domain used by split-DNS across clusters. AKS reconciles
+# the coredns ConfigMap itself; coredns-custom "*.override" keys are imported
+# into its default server block.
 resource "kubectl_manifest" "coredns" {
   wait      = true
   yaml_body = <<YAML
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: coredns
+  name: coredns-custom
   namespace: kube-system
 data:
-  Corefile: |
-    .:53 {
-        errors
-        health {
-            lameduck 5s
-          }
-        ready
-        rewrite name substring ${local.environment}.svc.cluster.local svc.cluster.local answer auto
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
-          pods insecure
-          fallthrough in-addr.arpa ip6.arpa
-        }
-        prometheus :9153
-        forward . /etc/resolv.conf
-        cache 30
-        loop
-        reload
-        loadbalance
-    }
+  tailscale-split-dns.override: |
+    rewrite name substring ${local.environment}.svc.cluster.local svc.cluster.local answer auto
 YAML
 }
 
@@ -111,4 +34,21 @@ data "kubernetes_service_v1" "kubedns" {
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
   nameservers = [data.kubernetes_service_v1.kubedns.spec[0].cluster_ip]
+}
+
+################################################################################
+# Flux Operator + FluxInstance. Flux installs the Tailscale operator and every
+# workload from var.flux_cluster_path.
+################################################################################
+module "flux_bootstrap" {
+  source = "../modules/flux-bootstrap"
+
+  cluster_path                  = var.flux_cluster_path
+  git_url                       = var.flux_git_url
+  git_ref                       = var.flux_git_ref
+  sops_gpg_private_key          = file(var.sops_gpg_private_key_file)
+  tailscale_oauth_client_id     = local.oauth_client_id
+  tailscale_oauth_client_secret = local.oauth_client_secret
+
+  depends_on = [kubectl_manifest.coredns]
 }

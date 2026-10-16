@@ -11,6 +11,21 @@
 - Turn on Autoapprovers for the subnet routes in the ACL file if desired - how to know what they are:
   - Both AWS and Azure stacks will create 3 private IPv4 subnets with `+4` added to the netmask and `0,16,32` for the 3rd octet based off the VPC CIDR you set. As an example, let's say you set the `vpc_cidr` variable to `10.0.0.0/16` then the subnets that get generated will be `10.0.0.0/20`, `10.0.16.0/20` and `10.0.32.0/20`
 
+- Peer relays (`tailscale_peer_relay_port` on the subnet routers, and the `PeerRelay` resource in
+  `clusters/cluster2/apps/peer-relay`) also need a grant with the `tailscale.com/cap/relay` capability in your policy file
+
+## Flux bootstrap inputs
+
+Each `*-k8s-setup` root bootstraps Flux with `modules/flux-bootstrap` and needs:
+
+- `flux_cluster_path`: the cluster directory Flux syncs, e.g. `clusters/cluster2/flux`
+- `sops_gpg_private_key_file`: path to the private PGP key for `clusters/.sops.yaml`. Terraform stores it
+  in the `flux-system/sops-gpg` Secret, so it also ends up in Terraform state: keep state local and private.
+- `flux_git_url` / `flux_git_ref` (optional): the repository and ref to sync
+
+The Tailscale OAuth client from phase 1 becomes the `tailscale/operator-oauth` Secret used by the
+Flux-managed operator.
+
 ## Atmos Steps
 
 We're using [Atmos](https://atmos.tools/faq/) to spin up multiple Terraform stacks so we can try to stay as [DRY](https://spacelift.io/blog/terraform-dynamic-blocks) as possible.
@@ -27,9 +42,9 @@ We're using [Atmos](https://atmos.tools/faq/) to spin up multiple Terraform stac
     - `atmos workflow apply-all -f aws-eks-workflow`
   - To destroy everything once testing is done:
     - `atmos workflow destroy-all -f aws-eks-workflow`
+- The other workflows are `azure-aks-workflow`, `gke-dpv2-workflow` (GKE Dataplane V2 + `google-k8s-setup`)
+  and `gce-gke-workflow` (GKE Autopilot, single phase)
 
 ## TODO
 
-- Add CSI provisioners and load-balancer controllers for AWS - **Done**
-- Add CSI provisioner for Azure  
-- Azure not tested yet! Run at your own risk. AWS code has been tested and works atm  
+- Add CSI provisioner for Azure

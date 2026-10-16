@@ -1,0 +1,19 @@
+---
+# The operator runs the relay StatefulSet and one LoadBalancer Service per
+# replica, and advertises the load balancer addresses as relay endpoints.
+# To pin public addresses, set spec.aws.elasticIPs (allocation + public subnet
+# per replica) and pin the pods to that zone through a ProxyClass.
+apiVersion: tailscale.com/v1alpha1
+kind: PeerRelay
+metadata:
+  name: kb-cluster2-aws-uw2-peer-relay
+spec:
+  hostnamePrefix: kb-cluster2-aws-uw2-peer-relay
+  replicas: 1
+  proxyClass: prod
+  service:
+    port: 7777
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing

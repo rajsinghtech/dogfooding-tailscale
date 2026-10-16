@@ -22,3 +22,8 @@ locals {
   oauth_client_id            = data.terraform_remote_state.gke_tfstate.outputs.oauth_client_id
   oauth_client_secret        = data.terraform_remote_state.gke_tfstate.outputs.oauth_client_secret
 }
+
+locals {
+  # The operator hostname is set per cluster in Git, next to the other Flux variables.
+  operator_hostname = yamldecode(file("${path.module}/../../../../${var.flux_cluster_path}/vars/cluster-settings.yaml")).data.OPERATOR_HOSTNAME
+}

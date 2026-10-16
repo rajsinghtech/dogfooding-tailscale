@@ -1,96 +1,4 @@
-################################################################################
-# Flux CD Operator Setup
-################################################################################
-resource "helm_release" "flux" {
-  name             = "flux"
-  repository       = "oci://ghcr.io/fluxcd-community/charts"
-  chart            = "flux2"
-  version          = "2.14.1"
-  namespace        = "flux-system"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-}
 
-################################################################################
-# Tailscale Kubernetes Operator Setup
-################################################################################
-resource "helm_release" "tailscale_operator" {
-  name             = format("tailscale-operator-%s-%s", local.environment, local.stage)
-  chart            = "tailscale-operator"
-  repository       = "https://pkgs.tailscale.com/helmcharts"
-  namespace        = "tailscale"
-  create_namespace = true
-  atomic           = true
-  cleanup_on_fail  = true
-  values = [
-    yamlencode({
-      oauth = {
-        clientId     = local.oauth_client_id
-        clientSecret = local.oauth_client_secret
-      }
-      apiServerProxyConfig = {
-        mode = "true"
-      }
-      operatorConfig = {
-        hostname = format("%s-%s-%s-operator", local.tenant, local.environment, local.stage)
-        image = {
-          tag = var.tailscale_operator_image_tag
-        }
-      }
-      proxyConfig = {
-        image = {
-          tag = var.tailscale_proxy_image_tag
-        }
-      }
-    })
-  ]
-}
-
-######################################################################
-# Apply manifests and CRs                                            #
-######################################################################
-data "kubectl_path_documents" "docs" {
-  pattern = "${path.module}/manifests/*.yaml"
-}
-
-# Deploy all manifests into the cluster
-resource "kubectl_manifest" "app_manifests" {
-  for_each  = data.kubectl_path_documents.docs.manifests
-  yaml_body = each.value
-}
-
-# Rewrite the domain for unique ones for split-DNS across clusters
-resource "kubectl_manifest" "coredns" {
-  wait      = true
-  yaml_body = <<YAML
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: coredns
-  namespace: kube-system
-data:
-  Corefile: |
-    .:53 {
-        errors
-        health {
-            lameduck 5s
-          }
-        ready
-        rewrite name substring ${local.environment}.svc.cluster.local svc.cluster.local answer auto
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
-          pods insecure
-          fallthrough in-addr.arpa ip6.arpa
-        }
-        prometheus :9153
-        forward . /etc/resolv.conf
-        cache 30
-        loop
-        reload
-        loadbalance
-    }
-YAML
-}
 
 ####################################################################
 # TS Split-DNS setup for K8s service FQDN resolution from GCE VM   #
@@ -103,7 +11,34 @@ data "kubernetes_service_v1" "kubedns" {
   }
 }
 
+# GKE runs kube-dns, which cannot rewrite names, so a dedicated CoreDNS answers
+# the tailnet's split-DNS queries and forwards to kube-dns. Its ClusterIP is
+# reachable through the Connector, which advertises the service range.
+module "split_dns" {
+  source = "../modules/split-dns-coredns"
+
+  environment = local.environment
+  upstream    = data.kubernetes_service_v1.kubedns.spec[0].cluster_ip
+}
+
 resource "tailscale_dns_split_nameservers" "coredns_split_nameservers" {
   domain      = "${local.environment}.svc.cluster.local"
-  nameservers = [data.kubernetes_service_v1.kubedns.spec[0].cluster_ip]
+  nameservers = [module.split_dns.cluster_ip]
+}
+
+################################################################################
+# Flux Operator + FluxInstance. Flux installs the Tailscale operator and every
+# workload from var.flux_cluster_path.
+################################################################################
+module "flux_bootstrap" {
+  source = "../modules/flux-bootstrap"
+
+  cluster_path                  = var.flux_cluster_path
+  git_url                       = var.flux_git_url
+  git_ref                       = var.flux_git_ref
+  sops_gpg_private_key          = file(var.sops_gpg_private_key_file)
+  tailscale_oauth_client_id     = local.oauth_client_id
+  tailscale_oauth_client_secret = local.oauth_client_secret
+
+  depends_on = [module.split_dns]
 }

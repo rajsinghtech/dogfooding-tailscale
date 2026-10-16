@@ -8,6 +8,7 @@ spec:
   interval: 30m
   path: ./clusters/common/flux/repositories/helm
   prune: true
+  wait: true
   sourceRef:
     kind: GitRepository
     name: dogfooding-tailscale

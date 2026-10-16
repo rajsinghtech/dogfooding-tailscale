@@ -6,5 +6,14 @@ metadata:
   namespace: flux-system
 data:
   CLUSTER_NAME: cluster4
-  CONNECTOR_CIDR: "10.21.0.0/16"
+  # Must equal gke_service_range_cidr: the split-DNS CoreDNS ClusterIP is reached through it.
+  CONNECTOR_CIDR: "10.31.0.0/20"
   CONNECTOR_HOSTNAME: kb-cluster4-gkedpv2-uc1-connector
+  OPERATOR_HOSTNAME: kb-cluster4-gkedpv2-uc1-operator
+  # Optional: pin the operator/proxy images to another tag (e.g. "unstable")
+  # instead of the chart's appVersion.
+  # TS_OPERATOR_IMAGE_TAG: unstable
+  # TS_PROXY_IMAGE_TAG: unstable
+  # Optional: goldpinger peers on other clusters, reached through the
+  # <environment>.svc.cluster.local split-DNS domain Terraform configures.
+  # GOLDPINGER_HTTP_TARGETS: "http://goldpinger-cluster4.default.gkedpv2-uc1.svc.cluster.local:8080"

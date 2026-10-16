@@ -162,16 +162,16 @@ variable "track" {
   }
 }
 
-variable "relay_server_port" {
-  description = "Port for the Tailscale peer relay server (only available in unstable track)"
+variable "peer_relay_port" {
+  description = "UDP port for the Tailscale peer relay (null disables the peer relay)"
   type        = number
   default     = null
   validation {
     condition = (
-      var.relay_server_port == null ||
-      (var.relay_server_port >= 1024 && var.relay_server_port <= 65535)
+      var.peer_relay_port == null ||
+      (var.peer_relay_port >= 1024 && var.peer_relay_port <= 65535)
     )
-    error_message = "relay_server_port must be between 1024 and 65535 if set."
+    error_message = "peer_relay_port must be between 1024 and 65535 if set."
   }
 }
 

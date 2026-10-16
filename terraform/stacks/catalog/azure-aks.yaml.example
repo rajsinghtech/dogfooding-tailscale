@@ -7,7 +7,7 @@ components:
         ssh_public_key_path: "~/.ssh/id_ed25519_me.pub"
         oauth_client_id: "redacted"
         oauth_client_secret: "redacted"
-        aks_version: "1.34"
+        aks_version: "1.36"
         cluster_vm_size: "Standard_B2s"
         vm_size: "Standard_B2s"
         node_count: "2"

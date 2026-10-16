@@ -1,18 +1,18 @@
 vars:
   region: us-central1
   tenant: kb
-  environment: gkedpv2-uc1  
+  environment: gkedpv2-uc1
   stage: test
 
 import:
-  - catalog/google-gke-dpv2.yaml
+  - catalog/google-gke-dpv2
 
 components:
   terraform:
     google-gke-dpv2:
       vars:
         cluster_name: "mycluster"
-        kubernetes_version: "1.34"
+        kubernetes_version: "1.36"
         region: "myregion"
         zone: "myzone"
         machine_type: "mymachinetype"
@@ -29,3 +29,6 @@ components:
         authorized_networks:
           - name: "subnet-router"
             cidr: "10.20.32.0/20" 
+    google-k8s-setup:
+      vars:
+        flux_cluster_path: "clusters/cluster4/flux"

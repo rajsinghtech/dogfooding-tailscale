@@ -8,3 +8,11 @@ data:
   CLUSTER_NAME: cluster3
   CONNECTOR_CIDR: "fd7a:115c:a1e0:b1a:0:3::/96"
   CONNECTOR_HOSTNAME: cluster3-connector
+  OPERATOR_HOSTNAME: cluster3-operator
+  # Optional: pin the operator/proxy images to another tag (e.g. "unstable")
+  # instead of the chart's appVersion.
+  # TS_OPERATOR_IMAGE_TAG: unstable
+  # TS_PROXY_IMAGE_TAG: unstable
+  # Optional: goldpinger peers on other clusters, reached through the
+  # <environment>.svc.cluster.local split-DNS domain Terraform configures.
+  # GOLDPINGER_HTTP_TARGETS: "http://goldpinger-cluster4.default.gkedpv2-uc1.svc.cluster.local:8080"

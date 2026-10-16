@@ -1,14 +1,14 @@
 # Use the module to add the EC2 instance into our tailnet
-module "k3s-tailscale" {
-  source            = "../modules/cloudinit-ts"
-  hostname          = local.instance_hostname
-  accept_routes     = true
-  enable_ssh        = true
-  advertise_routes  = local.advertise_routes
-  primary_tag       = "k3s"
-  additional_tags   = local.tailscale_tags
-  track             = var.tailscale_track
-  relay_server_port = var.tailscale_relay_server_port
+module "k3s_tailscale" {
+  source           = "../modules/cloudinit-ts"
+  hostname         = local.instance_hostname
+  accept_routes    = true
+  enable_ssh       = true
+  advertise_routes = local.advertise_routes
+  primary_tag      = "k3s"
+  additional_tags  = local.tailscale_tags
+  track            = var.tailscale_track
+  peer_relay_port  = var.tailscale_peer_relay_port
 }
 
 # Pick the latest Ubuntu 22.04 AMI in the region
@@ -59,15 +59,15 @@ resource "aws_security_group" "k3s" {
     description = "Allow K3s API server access"
   }
 
-  # Dynamic ingress for Tailscale relay server port (only when configured)
+  # Dynamic ingress for the Tailscale peer relay port (only when configured)
   dynamic "ingress" {
-    for_each = var.tailscale_relay_server_port != null ? [var.tailscale_relay_server_port] : []
+    for_each = var.tailscale_peer_relay_port != null ? [var.tailscale_peer_relay_port] : []
     content {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      description = "Allow Tailscale relay server access on port ${ingress.value}"
+      description = "Allow Tailscale peer relay access on port ${ingress.value}"
     }
   }
 
@@ -152,13 +152,14 @@ resource "aws_instance" "k3s" {
 
   # Combine the Tailscale cloud-init with the K3s install script
   user_data = <<-EOT
-${base64decode(module.k3s-tailscale.rendered)}
+${base64decode(module.k3s_tailscale.rendered)}
 ${local.k3s_install_script}
 EOT
 
   root_block_device {
     volume_size = local.root_volume_size
     volume_type = "gp3"
+    encrypted   = true
   }
 
   associate_public_ip_address = true
@@ -174,4 +175,9 @@ EOT
       "Name" = local.instance_hostname
     }
   )
-} 
+}
+
+moved {
+  from = module.k3s-tailscale
+  to   = module.k3s_tailscale
+}

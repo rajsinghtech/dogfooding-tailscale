@@ -13,7 +13,9 @@ spec:
     name: dogfooding-tailscale
   wait: true
   dependsOn:
-    - name: tailscale-namespace
+    - name: tailscale-operator
+    # ProxyClass "prod" requests a ServiceMonitor, whose CRD ships with kube-prometheus-stack.
+    - name: monitoring
   postBuild:
     substituteFrom:
       - kind: ConfigMap

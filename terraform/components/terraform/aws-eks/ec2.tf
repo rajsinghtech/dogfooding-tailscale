@@ -1,16 +1,16 @@
 # Use the module to add the EC2 instance into our tailnet
-module "ubuntu-tailscale-client" {
-  count             = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
-  source            = "../modules/cloudinit-ts"
-  hostname          = "${local.sr_instance_hostname}-${count.index + 1}"
-  accept_routes     = var.sr_accept_routes
-  enable_ssh        = var.sr_enable_ssh
-  ephemeral         = var.sr_ephemeral
-  reusable          = var.sr_reusable
-  advertise_routes  = local.advertise_routes
-  primary_tag       = var.sr_primary_tag
-  track             = var.tailscale_track
-  relay_server_port = var.tailscale_relay_server_port
+module "ubuntu_tailscale_client" {
+  count            = local.enable_sr ? local.sr_ec2_asg_desired_size : 0
+  source           = "../modules/cloudinit-ts"
+  hostname         = "${local.sr_instance_hostname}-${count.index + 1}"
+  accept_routes    = var.sr_accept_routes
+  enable_ssh       = var.sr_enable_ssh
+  ephemeral        = var.sr_ephemeral
+  reusable         = var.sr_reusable
+  advertise_routes = local.advertise_routes
+  primary_tag      = var.sr_primary_tag
+  track            = var.tailscale_track
+  peer_relay_port  = var.tailscale_peer_relay_port
 }
 
 # Pick the latest Ubuntu 22.04 AMI in the region for our EC2 instance
@@ -54,13 +54,13 @@ resource "aws_security_group" "main" {
   }
 
   dynamic "ingress" {
-    for_each = var.tailscale_relay_server_port != null ? [var.tailscale_relay_server_port] : []
+    for_each = var.tailscale_peer_relay_port != null ? [var.tailscale_peer_relay_port] : []
     content {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
-      description = "Allow Tailscale peer relay server access"
+      description = "Allow Tailscale peer relay access"
     }
   }
 
@@ -84,7 +84,7 @@ resource "aws_launch_template" "sr_ec2" {
   key_name      = local.key_name
 
   # User data should be dynamic per instance via cloud-init logic in the module
-  user_data = base64encode(element(module.ubuntu-tailscale-client[*].rendered, 0))
+  user_data = base64encode(element(module.ubuntu_tailscale_client[*].rendered, 0))
 
   network_interfaces {
     associate_public_ip_address = true
@@ -135,4 +135,9 @@ data "aws_instances" "sr_ec2" {
     name   = "tag:Name"
     values = [local.sr_instance_hostname]
   }
+}
+
+moved {
+  from = module.ubuntu-tailscale-client
+  to   = module.ubuntu_tailscale_client
 }

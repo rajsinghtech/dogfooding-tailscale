@@ -1,81 +1,75 @@
 name: Workflows for Tailscale-EKS
 description: Atmos workflows for managing Tailscale-EKS
+# Example stack: my-aws-uw2-test (from stacks/deploy/*.yaml.example). Add a step per stack you deploy.
 
 workflows:
   validate-phase1:
     description: |
-      Run 'terraform validate' on aws-eks component in all stacks
+      Run 'terraform validate' on aws-eks
     steps:
-      - command: terraform validate aws-eks -s tenant-aws-environment1-stage
-      - command: terraform validate aws-eks -s tenant-aws-environment2-stage
+      - command: terraform validate aws-eks -s my-aws-uw2-test
 
   plan-phase1:
     description: |
-      Run 'terraform plan' on aws-eks component in all stacks
+      Run 'terraform plan' on aws-eks
     steps:
-      - command: terraform plan aws-eks -s tenant-aws-environment1-stage
-      - command: terraform plan aws-eks -s tenant-aws-environment2-stage
+      - command: terraform plan aws-eks -s my-aws-uw2-test
 
   apply-phase1:
     description: |
-      Run 'terraform apply -auto-approve' on aws-eks component in all stacks
+      Run 'terraform apply' on aws-eks
     steps:
-      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform apply aws-eks -auto-approve -s my-aws-uw2-test
 
   validate-phase2:
     description: |
-      Run 'terraform validate' on aws-k8s-setup component in all stacks
+      Run 'terraform validate' on aws-k8s-setup
     steps:
-      - command: terraform validate aws-k8s-setup -s tenant-aws-environment1-stage
-      - command: terraform validate aws-k8s-setup -s tenant-aws-environment2-stage
+      - command: terraform validate aws-k8s-setup -s my-aws-uw2-test
 
   plan-phase2:
     description: |
-      Run 'terraform plan' on aws-k8s-setup component in all stacks
+      Run 'terraform plan' on aws-k8s-setup
     steps:
-      - command: terraform plan aws-k8s-setup -s tenant-aws-environment1-stage
-      - command: terraform plan aws-k8s-setup -s tenant-aws-environment2-stage
+      - command: terraform plan aws-k8s-setup -s my-aws-uw2-test
 
   apply-phase2:
     description: |
-      Run 'terraform apply -auto-approve' on aws-k8s-setup component in all stacks
+      Run 'terraform apply' on aws-k8s-setup
     steps:
-      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform apply aws-k8s-setup -auto-approve -s my-aws-uw2-test
+
+  validate-all:
+    description: |
+      Run 'terraform validate' on every component
+    steps:
+      - command: terraform validate aws-eks -s my-aws-uw2-test
+      - command: terraform validate aws-k8s-setup -s my-aws-uw2-test
 
   plan-all:
     description: |
-      Run 'terraform plan' on all components in all stacks
+      Run 'terraform plan' on every component (later phases need earlier phases applied)
     steps:
-      - command: terraform plan aws-eks -s tenant-aws-environment1-stage
-      - command: terraform plan aws-k8s-setup -s tenant-aws-environment1-stage 
-      - command: terraform plan aws-eks -s tenant-aws-environment2-stage
-      - command: terraform plan aws-k8s-setup -s tenant-aws-environment2-stage
+      - command: terraform plan aws-eks -s my-aws-uw2-test
+      - command: terraform plan aws-k8s-setup -s my-aws-uw2-test
 
   apply-all:
     description: |
-      Run 'terraform apply -auto-approve' on all components in all stacks
+      Run 'terraform apply' on every component in order
     steps:
-      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage 
-      - command: terraform apply aws-eks -auto-approve -s tenant-aws-environment2-stage
-      - command: terraform apply aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform apply aws-eks -auto-approve -s my-aws-uw2-test
+      - command: terraform apply aws-k8s-setup -auto-approve -s my-aws-uw2-test
 
   destroy-all:
     description: |
-      Run 'terraform destroy' on all components in all stacks
+      Run 'terraform destroy' on every component in reverse order
     steps:
-      - command: terraform destroy aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform destroy aws-eks -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform destroy aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
-      - command: terraform destroy aws-eks -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform destroy aws-k8s-setup -auto-approve -s my-aws-uw2-test
+      - command: terraform destroy aws-eks -auto-approve -s my-aws-uw2-test
 
   clean-all:
     description: |
-      Run 'terraform clean' on all components in all stacks
+      Run 'terraform clean' on every component
     steps:
-      - command: terraform clean aws-k8s-setup -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform clean aws-eks -auto-approve -s tenant-aws-environment1-stage
-      - command: terraform clean aws-k8s-setup -auto-approve -s tenant-aws-environment2-stage
-      - command: terraform clean aws-eks -auto-approve -s tenant-aws-environment2-stage
+      - command: terraform clean aws-k8s-setup --force -s my-aws-uw2-test
+      - command: terraform clean aws-eks --force -s my-aws-uw2-test

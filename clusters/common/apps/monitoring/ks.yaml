@@ -16,3 +16,7 @@ spec:
   wait: true
   dependsOn:
     - name: monitoring-namespace
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings

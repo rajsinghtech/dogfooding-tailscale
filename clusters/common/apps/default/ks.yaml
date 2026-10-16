@@ -12,6 +12,8 @@ spec:
     kind: GitRepository
     name: dogfooding-tailscale
   wait: true
+  dependsOn:
+    - name: tailscale-operator
   postBuild:
     substituteFrom:
       - kind: ConfigMap

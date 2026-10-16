@@ -19,7 +19,7 @@ provider "kubectl" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = "https://${google_container_cluster.primary.endpoint}"
     cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
     token                  = data.google_client_config.default.access_token
@@ -35,6 +35,7 @@ resource "helm_release" "tailscale_operator" {
   repository       = "https://pkgs.tailscale.com/helmcharts"
   namespace        = "tailscale"
   create_namespace = true
+  version          = "1.104.1"
   atomic           = true
   cleanup_on_fail  = true
   values = [

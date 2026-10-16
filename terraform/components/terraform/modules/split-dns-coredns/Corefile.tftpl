@@ -1,0 +1,11 @@
+. {
+    errors
+    health
+    ready
+    rewrite name substring ${environment}.svc.cluster.local svc.cluster.local answer auto
+    forward . ${upstream}
+    cache 30
+    loop
+    reload
+    loadbalance
+}
