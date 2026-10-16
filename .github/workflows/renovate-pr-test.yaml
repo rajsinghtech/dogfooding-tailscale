@@ -7,6 +7,7 @@ on:
       - 'terraform/**/*.tf'
 
 env:
+  # renovate: datasource=github-releases depName=hashicorp/terraform
   TF_VERSION: '1.16.6'
 
 jobs:
@@ -61,7 +62,8 @@ jobs:
 
             echo "Testing: $COMPONENT"
 
-            if terraform -chdir="$dir" init -backend=false > /tmp/init.log 2>&1; then
+            # Same lock check as Terraform Validation. A stale .terraform.lock.hcl must fail the PR.
+            if terraform -chdir="$dir" init -backend=false -input=false -lockfile=readonly > /tmp/init.log 2>&1; then
               RESULTS="$RESULTS\n| $COMPONENT | :white_check_mark: Pass |"
               echo "  - Init: Success"
             else
@@ -80,7 +82,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           if [ "$FAILED" -gt 0 ]; then
-            echo "::warning::$FAILED component(s) failed init"
+            echo "::error::$FAILED component(s) failed init -lockfile=readonly"
+            exit 1
           fi
 
       - name: Generate Provider Report
@@ -127,14 +130,10 @@ jobs:
             ${results}
 
             ### What was tested
-            - \`terraform init -backend=false\` on all components
-            - This verifies provider downloads succeed with new version constraints
+            - \`terraform init -backend=false -lockfile=readonly\` on all components
+            - A stale or missing lock-file hash fails this check
 
-            ### What was NOT tested
-            - \`terraform plan\` (requires cloud credentials)
-            - Runtime compatibility (API changes in providers)
-
-            > **Note**: If all components pass init, the provider version is downloadable and syntactically compatible. Runtime issues may still occur.
+            Terraform Validation (fmt, validate, tflint) and KWOK Flux also run on these PRs. KWOK reconciles the Flux tree, so a chart or manifest bump is exercised there. \`terraform plan\` against a live cloud is not.
             `;
 
             github.rest.issues.createComment({
