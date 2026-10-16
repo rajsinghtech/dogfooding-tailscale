@@ -51,6 +51,11 @@
   ],
   "packageRules": [
     {
+      "description": "Pin image digests so a tag bump cannot leave a stale sha256.",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
       "description": "Move in-range Terraform constraints forward. Lock file maintenance refreshes .terraform.lock.hcl to the newest version those constraints allow, which is what init -lockfile=readonly checks.",
       "matchManagers": ["terraform"],
       "rangeStrategy": "bump"
