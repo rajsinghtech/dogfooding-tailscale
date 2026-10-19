@@ -133,7 +133,7 @@ resource "azurerm_network_security_group" "main" {
       priority                   = 140
       direction                  = "Inbound"
       access                     = "Allow"
-      protocol                   = "Tcp"
+      protocol                   = "Udp"
       source_port_range          = "*"
       destination_port_range     = tostring(var.tailscale_peer_relay_port)
       source_address_prefix      = "0.0.0.0/0"

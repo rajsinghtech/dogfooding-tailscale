@@ -65,7 +65,7 @@ resource "aws_security_group" "k3s" {
     content {
       from_port   = ingress.value
       to_port     = ingress.value
-      protocol    = "tcp"
+      protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
       description = "Allow Tailscale peer relay access on port ${ingress.value}"
     }
