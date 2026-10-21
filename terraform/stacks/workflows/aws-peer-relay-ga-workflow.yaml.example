@@ -2,7 +2,7 @@ name: Workflows for the peer relay + Global Accelerator test
 description: Apply each relay_mode in turn and measure client A -> client B. Example stack my-aws-ue1-prga.
 
 workflows:
-  validate:
+  validate-all:
     steps:
       - command: terraform validate aws-peer-relay-ga -s my-aws-ue1-prga
 

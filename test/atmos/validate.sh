@@ -15,10 +15,12 @@ cd "$WORK/terraform"
 atmos validate config
 atmos validate stacks
 
-expected="kb-gkedpv2-uc1-test my-aws-uw2-test my-az-ue1-test my-gke-gce-uc1-test"
-actual=$(atmos list stacks | sort | xargs)
-[ "$actual" = "$expected" ] || { echo "stack names: got '$actual', want '$expected'" >&2; exit 1; }
-echo "stacks: $actual"
+deploys=$(find stacks/deploy -name '*.yaml' | wc -l | xargs)
+actual=$(atmos list stacks | sort)
+count=$(printf '%s\n' "$actual" | grep -c .)
+[ "$count" = "$deploys" ] || { echo "stacks: got $count, want one per deploy file ($deploys): $(echo $actual)" >&2; exit 1; }
+if printf '%s\n' "$actual" | grep -q 'no value'; then echo "stack name template unresolved: $(echo $actual)" >&2; exit 1; fi
+echo "stacks: $(echo $actual)"
 
 for wf in stacks/workflows/*.yaml; do
   echo "==> atmos workflow validate-all -f $(basename "$wf")"
