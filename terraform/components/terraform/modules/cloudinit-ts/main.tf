@@ -39,31 +39,32 @@ data "cloudinit_config" "main" {
     filename     = "setup_tailscale.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/templates/setup_tailscale.sh.tmpl", {
-      ADVERTISE_ROUTES           = join(",", var.advertise_routes)
-      ADVERTISE_TAGS             = join(",", local.tailscale_tags)
-      ACCEPT_DNS                 = var.accept_dns
-      ACCEPT_ROUTES              = var.accept_routes
-      ADVERTISE_CONNECTOR        = var.advertise_connector
-      ADVERTISE_EXIT_NODE        = var.advertise_exit_node
-      HOSTNAME                   = var.hostname
-      TAILSCALE_SSH              = var.enable_ssh
-      AUTH_KEY                   = tailscale_tailnet_key.default.key
-      EXIT_NODE                  = var.exit_node
-      EXIT_NODE_ALLOW_LAN_ACCESS = var.exit_node_allow_lan_access
-      FORCE_REAUTH               = var.force_reauth
-      JSON                       = var.json
-      LOGIN_SERVER               = var.login_server
-      OPERATOR                   = var.operator
-      RESET                      = var.reset
-      SHIELDS_UP                 = var.shields_up
-      TIMEOUT                    = var.timeout
-      SNAT_SUBNET_ROUTES         = var.snat_subnet_routes
-      NETFILTER_MODE             = var.netfilter_mode
-      STATEFUL_FILTERING         = var.stateful_filtering
-      MAX_RETRIES                = var.max_retries
-      RETRY_DELAY                = var.retry_delay
-      TRACK                      = var.track
-      PEER_RELAY_PORT            = var.peer_relay_port != null ? var.peer_relay_port : ""
+      ADVERTISE_ROUTES            = join(",", var.advertise_routes)
+      ADVERTISE_TAGS              = join(",", local.tailscale_tags)
+      ACCEPT_DNS                  = var.accept_dns
+      ACCEPT_ROUTES               = var.accept_routes
+      ADVERTISE_CONNECTOR         = var.advertise_connector
+      ADVERTISE_EXIT_NODE         = var.advertise_exit_node
+      HOSTNAME                    = var.hostname
+      TAILSCALE_SSH               = var.enable_ssh
+      AUTH_KEY                    = tailscale_tailnet_key.default.key
+      EXIT_NODE                   = var.exit_node
+      EXIT_NODE_ALLOW_LAN_ACCESS  = var.exit_node_allow_lan_access
+      FORCE_REAUTH                = var.force_reauth
+      JSON                        = var.json
+      LOGIN_SERVER                = var.login_server
+      OPERATOR                    = var.operator
+      RESET                       = var.reset
+      SHIELDS_UP                  = var.shields_up
+      TIMEOUT                     = var.timeout
+      SNAT_SUBNET_ROUTES          = var.snat_subnet_routes
+      NETFILTER_MODE              = var.netfilter_mode
+      STATEFUL_FILTERING          = var.stateful_filtering
+      MAX_RETRIES                 = var.max_retries
+      RETRY_DELAY                 = var.retry_delay
+      TRACK                       = var.track
+      PEER_RELAY_PORT             = var.peer_relay_port != null ? var.peer_relay_port : ""
+      PEER_RELAY_STATIC_ENDPOINTS = join(",", var.peer_relay_static_endpoints)
     })
   }
 

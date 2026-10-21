@@ -1,0 +1,21 @@
+components:
+  terraform:
+    aws-peer-relay-ga:
+      vars:
+        aws_profile: "my-aws-profile"
+        gcp_project_id: "my-gcp-project"
+        tailscale_api_key: "file:/secure/path/tailscale-api.key"
+        relay_mode: "ga"
+        vpc_cidr: "10.70.0.0/16"
+        clients:
+          a:
+            region: "asia-southeast1"
+            zone: "asia-southeast1-a"
+            subnet_cidr: "10.71.0.0/24"
+          b:
+            region: "us-east4"
+            zone: "us-east4-a"
+            subnet_cidr: "10.72.0.0/24"
+        tags:
+          "Owner": "Me"
+          "ManagedBy": "Atmos"

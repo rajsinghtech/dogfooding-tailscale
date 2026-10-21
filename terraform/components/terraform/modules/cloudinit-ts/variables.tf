@@ -175,6 +175,12 @@ variable "peer_relay_port" {
   }
 }
 
+variable "peer_relay_static_endpoints" {
+  description = "Additional ip:port endpoints the peer relay advertises, such as load balancer or Global Accelerator addresses"
+  type        = list(string)
+  default     = []
+}
+
 variable "preauthorized" {
   default     = true
   type        = bool

@@ -1,0 +1,8 @@
+vars:
+  region: us-east-1
+  tenant: my
+  environment: aws-ue1
+  stage: prga
+
+import:
+  - catalog/aws-peer-relay-ga

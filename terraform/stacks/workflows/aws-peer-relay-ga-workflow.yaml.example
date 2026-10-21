@@ -1,0 +1,30 @@
+name: Workflows for the peer relay + Global Accelerator test
+description: Apply each relay_mode in turn and measure client A -> client B. Example stack my-aws-ue1-prga.
+
+workflows:
+  validate-all:
+    steps:
+      - command: terraform validate aws-peer-relay-ga -s my-aws-ue1-prga
+
+  plan:
+    steps:
+      - command: terraform plan aws-peer-relay-ga -s my-aws-ue1-prga
+
+  test-all:
+    description: |
+      DERP baseline, relay on a public IP, then relay behind Global Accelerator.
+      Results land in ./work/peer-relay-ga/<mode>/summary.txt
+    steps:
+      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=none
+      - type: shell
+        command: sleep 120 && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga none work/peer-relay-ga
+      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=public
+      - type: shell
+        command: sleep 120 && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga public work/peer-relay-ga
+      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=ga
+      - type: shell
+        command: sleep 120 && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga ga work/peer-relay-ga
+
+  destroy:
+    steps:
+      - command: terraform destroy aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve
