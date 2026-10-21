@@ -13,7 +13,7 @@ locals {
     #!/bin/bash
     set -e
     apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
+    DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3 mtr-tiny
   EOT
 
   tags = merge(
