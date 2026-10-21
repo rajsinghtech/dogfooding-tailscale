@@ -38,6 +38,7 @@ module "cloud_router" {
     name                                = "${var.name}-nat"
     source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
     enable_endpoint_independent_mapping = var.enable_endpoint_independent_mapping
+    nat_ips                             = var.nat_ips
 
     subnetworks = [
       for subnet in var.subnets : {

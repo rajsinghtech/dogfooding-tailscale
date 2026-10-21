@@ -12,18 +12,15 @@ workflows:
 
   test-all:
     description: |
-      DERP baseline, relay on a public IP, then relay behind Global Accelerator.
-      Results land in ./work/peer-relay-ga/<mode>/summary.txt
+      DERP baseline once, then 5 alternating rounds of relay-public-IP vs Global Accelerator
+      on one relay_mode=both stack. Results land in ./work/peer-relay-ga/<label>/summary.txt
     steps:
       - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=none
       - type: shell
-        command: sleep 120 && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga none work/peer-relay-ga
-      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=public
+        command: components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga none work/peer-relay-ga
+      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=both
       - type: shell
-        command: sleep 120 && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga public work/peer-relay-ga
-      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=ga
-      - type: shell
-        command: sleep 120 && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga ga work/peer-relay-ga
+        command: for i in 1 2 3 4 5; do for p in public ga; do components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga "$p-$i" work/peer-relay-ga "$p" || exit 1; done; done
 
   destroy:
     steps:

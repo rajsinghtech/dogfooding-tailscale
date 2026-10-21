@@ -1,3 +1,11 @@
+resource "google_compute_address" "client_nat" {
+  for_each = var.clients
+
+  name         = format("%s-%s-nat-ip", local.name, each.key)
+  region       = each.value.region
+  network_tier = "STANDARD"
+}
+
 module "client_vpc" {
   source   = "../modules/google-vpc"
   for_each = var.clients
@@ -9,6 +17,7 @@ module "client_vpc" {
   create_router                       = true
   create_nat                          = true
   enable_endpoint_independent_mapping = false
+  nat_ips                             = [google_compute_address.client_nat[each.key].self_link]
 
   subnets = [
     {

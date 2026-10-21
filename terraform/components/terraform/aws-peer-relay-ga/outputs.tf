@@ -7,6 +7,16 @@ output "clients" {
   }
 }
 
+output "relay_public_endpoint" {
+  description = "Relay public ip:port, empty when the relay has no public IP. Consumed by files/measure.sh"
+  value       = aws_instance.relay.public_ip != "" ? format("%s:%d", aws_instance.relay.public_ip, var.relay_port) : ""
+}
+
+output "ga_endpoints" {
+  description = "Global Accelerator ip:port pairs the relay advertises. Consumed by files/measure.sh"
+  value       = local.ga_endpoints
+}
+
 output "message" {
   description = "How to reach the test setup"
   value = format(
