@@ -79,6 +79,7 @@ module "relay_tailscale" {
 
   hostname                    = format("%s-relay", local.name)
   primary_tag                 = "pr-relay"
+  enable_ssh                  = true
   reusable                    = true
   ephemeral                   = true
   track                       = var.tailscale_track
