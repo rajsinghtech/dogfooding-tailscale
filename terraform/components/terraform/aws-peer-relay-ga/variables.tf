@@ -42,11 +42,11 @@ variable "tags" {
 }
 
 variable "relay_mode" {
-  description = "none: no relay server (DERP baseline). public: relay on a public IP. ga: relay in a private subnet behind Global Accelerator. both: relay on a public IP and behind Global Accelerator, so files/measure.sh can pick the path per round"
+  description = "none: no relay server (DERP baseline). public: relay on a public IP. ga: relay in a private subnet behind Global Accelerator"
   type        = string
   validation {
-    condition     = contains(["none", "public", "ga", "both"], var.relay_mode)
-    error_message = "relay_mode must be one of \"none\", \"public\", \"ga\", \"both\"."
+    condition     = contains(["none", "public", "ga"], var.relay_mode)
+    error_message = "relay_mode must be one of \"none\", \"public\", \"ga\"."
   }
 }
 

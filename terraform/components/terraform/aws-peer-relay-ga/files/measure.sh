@@ -1,9 +1,9 @@
 #!/bin/sh
 # Usage: measure.sh <atmos-stack> <label> <out-dir> [ga|public]
 # Runs from a machine on the same tailnet, over Tailscale SSH as root.
-# The optional path argument needs relay_mode=both: it blocks the other path's
-# relay addresses on both clients, so each client's bind can only succeed on
-# the path under test (clients bind to the first relay address that answers).
+# With a path argument, waits until both clients' PeerRelay is an address of
+# that path (GA endpoints for ga, the relay public endpoint for public) and
+# fails the round otherwise. Apply the matching relay_mode first.
 # Every remote command and its output is appended to <out-dir>/<label>/transcript.txt.
 set -eu
 
@@ -23,6 +23,7 @@ relay_host=""
 name() { case $1 in a) echo "$a_host" ;; b) echo "$b_host" ;; relay) echo "$relay_host" ;; esac; }
 on() {
   ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR \
+    -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 \
     "root@$(name "$1")" "$2"
 }
 run() {
@@ -36,22 +37,16 @@ note() { printf '\n# %s\n' "$*" >>"$tr"; }
 public_ep=$(printf '%s' "$outputs" | jq -r '.relay_public_endpoint.value')
 ga_eps=$(printf '%s' "$outputs" | jq -r '.ga_endpoints.value[]')
 case $path in
-  "") block="" expect="" ;;
-  ga) block=$public_ep expect=$ga_eps ;;
-  public) block=$ga_eps expect=$public_ep ;;
+  "") expect="" ;;
+  ga) expect=$ga_eps ;;
+  public) expect=$public_ep ;;
   *) echo "path must be ga or public" >&2; exit 2 ;;
 esac
-if [ -n "$path" ] && { [ -z "$public_ep" ] || [ -z "$ga_eps" ]; }; then
-  echo "path $path needs relay_mode=both (relay public endpoint and GA endpoints)" >&2
+if [ -n "$path" ] && [ -z "$expect" ]; then
+  echo "path $path has no relay endpoints in this stack; apply relay_mode=$path first" >&2
   exit 2
 fi
 note "label=$label path=${path:-unset} relay_public_endpoint=${public_ep:-none} ga_endpoints=$(printf '%s' "$ga_eps" | xargs) date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-rule() { printf 'iptables %s OUTPUT -p udp -d %s --dport %s -m comment --comment pr-ga-block -j DROP' "$1" "${2%:*}" "${2##*:}"; }
-unblock=""
-for ep in $public_ep $ga_eps; do
-  unblock="$unblock while $(rule -D "$ep") 2>/dev/null; do :; done;"
-done
 
 for c in a b; do
   i=0
@@ -62,26 +57,22 @@ for c in a b; do
   done
 done
 
-relay_host=$(on a 'tailscale status --json' | jq -r '[.Peer[] | select(.Online and ((.Tags // []) | index("tag:pr-relay")))][0].DNSName // "" | split(".")[0]')
-[ -n "$relay_host" ] || { echo "no online tag:pr-relay peer seen from client a" >&2; exit 1; }
+i=0
+while :; do
+  relay_host=$(on a 'tailscale status --json' | jq -r '[.Peer[] | select(.Online and ((.Tags // []) | index("tag:pr-relay")))][0].DNSName // "" | split(".")[0]')
+  [ -n "$relay_host" ] && on relay true 2>/dev/null && break
+  i=$((i + 1))
+  [ "$i" -lt 60 ] || { echo "no reachable online tag:pr-relay peer seen from client a" >&2; exit 1; }
+  sleep 10
+done
 b_ip=$(on b 'tailscale ip -4' | tr -d '\r')
 
 if [ -n "$path" ]; then
-  trap 'for c in a b; do on "$c" "$unblock true" || true; done' EXIT
-  rules=""
-  for ep in $block; do
-    rules="$rules $(rule -I "$ep");"
-  done
-  for c in a b; do
-    note "client $c: block the relay addresses not under test, then restart tailscaled so it binds again"
-    run "$c" "$unblock $rules systemctl restart tailscaled" >/dev/null
-    run "$c" 'iptables -S OUTPUT | grep pr-ga-block' >/dev/null
-  done
-
   peer_relay() { on "$1" 'tailscale status --json' | jq -r --arg h "$2" '.Peer[] | select(.HostName == $h) | .PeerRelay'; }
   i=0
   while :; do
     on a "tailscale ping --until-direct=false -c 3 $b_host" >/dev/null 2>&1 || true
+    on b "tailscale ping --until-direct=false -c 3 $a_host" >/dev/null 2>&1 || true
     ra=$(peer_relay a "$b_host")
     rb=$(peer_relay b "$a_host")
     ok=0
@@ -125,13 +116,14 @@ udp=$(run a "iperf3 -c $b_ip -t 30 -u -b 50M")
 run relay 'tailscale debug peer-relay-sessions' >/dev/null
 run relay 'tailscale metrics print | grep peer_relay' >/dev/null
 
-rate() { printf '%s\n' "$1" | awk '/\[SUM\].*receiver/ { for (i = 1; i <= NF; i++) if ($i ~ /bits\/sec$/) r = $(i - 1) " " $i } END { print (r == "" ? "n/a" : r) }'; }
+rate() { printf '%s\n' "$1" | awk '/\[SUM\].*receiver/ { for (i = 1; i <= NF; i++) if ($i ~ /bits\/sec$/) r = $(i - 1) " " $i } /^iperf3: error/ { e = $0 } END { print (r != "" ? r : (e != "" ? "failed (" e ")" : "n/a")) }'; }
 {
-  printf '%s\n' "$ping" | awk '/pong from/ { for (i = 1; i <= NF; i++) if ($i == "via") via = $(i + 1); ms = $NF; sub("ms", "", ms); print via, ms }' |
+  printf '%s\n' "$ping" | awk '/pong from/ { for (i = 1; i <= NF; i++) if ($i == "via") via = $(i + 1); ms = $NF; if (ms ~ /ms$/) sub("ms", "", ms); else if (ms ~ /s$/) { sub("s", "", ms); ms = ms * 1000 } print via, ms }' |
     sort -k2 -n | awk '{ via[NR] = $1; v[NR] = $2 } END {
       if (NR) printf "ping path=%s pongs=%d/200 min=%sms p50=%sms p95=%sms p99=%sms max=%sms\n", via[1], NR, v[1], v[int((NR + 1) * 0.50)], v[int((NR + 1) * 0.95)], v[int((NR + 1) * 0.99)], v[NR]
       else print "ping: no pongs" }'
   printf 'path a %s\npath b %s\n' "$(jq -c . "$out/path-a.json")" "$(jq -c . "$out/path-b.json")"
   printf 'iperf3 tcp x8 a->b %s, b->a %s\n' "$(rate "$tcp")" "$(rate "$tcpr")"
-  printf '%s\n' "$udp" | awk '/receiver/ { for (i = 1; i <= NF; i++) { if ($i == "ms") j = $(i - 1); if ($i ~ /^\(.*%\)$/) l = $i } } END { printf "iperf3 udp 50M a->b jitter %s ms, loss %s\n", (j == "" ? "n/a" : j), (l == "" ? "n/a" : l) }'
+  printf '%s\n' "$udp" | awk '/receiver/ { for (i = 1; i <= NF; i++) { if ($i == "ms") j = $(i - 1); if ($i ~ /^[0-9]+\/[0-9]+$/) { split($i, n, "/"); l = sprintf("%.2f%% (%s)", 100 * n[1] / n[2], $i) } } } /^iperf3: error/ { e = $0 }
+    END { if (j == "") printf "iperf3 udp 50M a->b %s\n", (e != "" ? "failed (" e ")" : "n/a"); else printf "iperf3 udp 50M a->b jitter %s ms, loss %s\n", j, l }'
 } | tee "$out/summary.txt"

@@ -12,15 +12,16 @@ workflows:
 
   test-all:
     description: |
-      DERP baseline once, then 5 alternating rounds of relay-public-IP vs Global Accelerator
-      on one relay_mode=both stack. Results land in ./work/peer-relay-ga/<label>/summary.txt
+      DERP baseline, then 5 rounds of relay-public-IP vs Global Accelerator. Each round applies
+      the matching relay_mode, so only one path to the relay exists at a time (GA and direct
+      traffic from the same client ip:port to one endpoint collide in AWS).
+      Results land in ./work/peer-relay-ga/<label>/summary.txt and transcript.txt
     steps:
       - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=none
       - type: shell
         command: components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga none work/peer-relay-ga
-      - command: terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=both
       - type: shell
-        command: for i in 1 2 3 4 5; do for p in public ga; do components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga "$p-$i" work/peer-relay-ga "$p" || exit 1; done; done
+        command: for i in 1 2 3 4 5; do for p in public ga; do atmos terraform apply aws-peer-relay-ga -s my-aws-ue1-prga -- -auto-approve -var relay_mode=$p && components/terraform/aws-peer-relay-ga/files/measure.sh my-aws-ue1-prga "$p-$i" work/peer-relay-ga "$p" || exit 1; done; done
 
   destroy:
     steps:
