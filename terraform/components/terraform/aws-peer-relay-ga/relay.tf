@@ -88,12 +88,12 @@ module "relay_tailscale" {
 }
 
 resource "aws_instance" "relay" {
-  #checkov:skip=CKV_AWS_88:Public IP required for the public and both relay_modes
+  #checkov:skip=CKV_AWS_88:Public IP required for the public relay_mode
   #checkov:skip=CKV_AWS_126:Detailed monitoring not needed for lab environment
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.relay_instance_type
-  subnet_id                   = local.relay_private ? module.vpc.private_subnets[0] : module.vpc.public_subnets[0]
-  associate_public_ip_address = !local.relay_private
+  subnet_id                   = local.ga_enabled ? module.vpc.private_subnets[0] : module.vpc.public_subnets[0]
+  associate_public_ip_address = !local.ga_enabled
   vpc_security_group_ids      = [aws_security_group.relay.id]
   ebs_optimized               = true
   user_data_base64            = module.relay_tailscale.rendered
