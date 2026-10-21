@@ -18,9 +18,10 @@ atmos validate stacks
 deploys=$(find stacks/deploy -name '*.yaml' | wc -l | xargs)
 actual=$(atmos list stacks | sort)
 count=$(printf '%s\n' "$actual" | grep -c .)
-[ "$count" = "$deploys" ] || { echo "stacks: got $count, want one per deploy file ($deploys): $(echo $actual)" >&2; exit 1; }
-if printf '%s\n' "$actual" | grep -q 'no value'; then echo "stack name template unresolved: $(echo $actual)" >&2; exit 1; fi
-echo "stacks: $(echo $actual)"
+names=$(printf '%s\n' "$actual" | xargs)
+[ "$count" = "$deploys" ] || { echo "stacks: got $count, want one per deploy file ($deploys): $names" >&2; exit 1; }
+if printf '%s\n' "$actual" | grep -q 'no value'; then echo "stack name template unresolved: $names" >&2; exit 1; fi
+echo "stacks: $names"
 
 for wf in stacks/workflows/*.yaml; do
   echo "==> atmos workflow validate-all -f $(basename "$wf")"
