@@ -50,3 +50,4 @@ secret.yaml
 # Local development notes
 CL*.md
 .cache/
+terraform/work/

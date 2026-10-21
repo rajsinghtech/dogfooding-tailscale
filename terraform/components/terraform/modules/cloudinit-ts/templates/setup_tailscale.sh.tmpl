@@ -50,7 +50,7 @@ do
     
     if [ -n "${PEER_RELAY_PORT}" ]; then
       echo "Configuring peer relay on port ${PEER_RELAY_PORT}"
-      tailscale set --relay-server-port="${PEER_RELAY_PORT}"
+      tailscale set --relay-server-port="${PEER_RELAY_PORT}" --relay-server-static-endpoints="${PEER_RELAY_STATIC_ENDPOINTS}"
       if [ $? -eq 0 ]; then
         echo "Peer relay configuration succeeded on port ${PEER_RELAY_PORT}"
       else
