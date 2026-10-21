@@ -53,6 +53,12 @@ variable "create_nat" {
   default     = true
 }
 
+variable "nat_ips" {
+  description = "Self-links of static external IPs for the NAT. Empty means Cloud NAT allocates them automatically"
+  type        = list(string)
+  default     = []
+}
+
 variable "enable_endpoint_independent_mapping" {
   description = "Enable endpoint independent mapping for NAT"
   type        = bool
