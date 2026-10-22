@@ -1,0 +1,7 @@
+vars:
+  tenant: kb
+  environment: kind-local
+  stage: test
+
+import:
+  - catalog/kind

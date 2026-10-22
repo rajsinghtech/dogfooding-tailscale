@@ -47,7 +47,7 @@ An opinionated Terraform + Flux GitOps playground for experimenting with Tailsca
 
 | Cluster | Platform | Terraform roots |
 |---------|----------|-----------------|
-| `cluster0-kind` | Local Kind | none (`make -C clusters/cluster0-kind init`) |
+| `cluster0-kind` | Local Kind (on a throwaway API-only tailnet) | `tailnet`, `kind`, `kind-k8s-setup`, or none (`make -C clusters/cluster0-kind init`) |
 | `cluster1` | Azure AKS | `azure-aks`, `azure-k8s-setup` |
 | `cluster2` | AWS EKS (+ PeerRelay) | `aws-eks`, `aws-k8s-setup` |
 | `cluster3` | AWS EKS | `aws-eks`, `aws-k8s-setup` |
@@ -93,6 +93,12 @@ really run, so the Tailscale data plane is not exercised. CI runs it for every c
 ```
 
 ## Available Components
+
+### Local
+
+* `tailnet` - Throwaway API-only tailnet (unreleased `tailscale_tailnet`; build it with `make tailscale-provider-pr825`)
+* `kind` - Kind cluster plus the operator's policy, HTTPS setting and OAuth client in that tailnet
+* `kind-k8s-setup` - Flux bootstrap for the Kind cluster
 
 ### AWS
 

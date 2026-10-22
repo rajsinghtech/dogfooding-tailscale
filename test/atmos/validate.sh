@@ -10,6 +10,10 @@ trap 'rm -rf "$WORK"' EXIT
 (cd "$ROOT" && git ls-files -z --cached --others --exclude-standard terraform clusters |
   while IFS= read -r -d '' f; do [ ! -e "$f" ] || cp --parents "$f" "$WORK"; done)
 find "$WORK/terraform/stacks" -name '*.yaml.example' -exec sh -c 'mv "$1" "${1%.example}"' _ {} \;
+# The tailnet component points TF_CLI_CONFIG_FILE at the unreleased provider build.
+[ -f "$ROOT/terraform/work/tailscale-pr825.tfrc" ] || make -C "$ROOT" tailscale-provider-pr825
+mkdir -p "$WORK/terraform/work"
+cp "$ROOT/terraform/work/tailscale-pr825.tfrc" "$WORK/terraform/work/"
 cd "$WORK/terraform"
 
 atmos validate config
