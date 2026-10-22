@@ -5,6 +5,8 @@ terraform.tfvars
 **/*.tfvars.json
 tf/**/alpo-*.yaml
 tf/**/kubeconfig_*
+# kubeconfig the kind provider writes next to the root module
+terraform/components/terraform/kind/*-config
 tfplan
 charts
 # Local .terraform directories

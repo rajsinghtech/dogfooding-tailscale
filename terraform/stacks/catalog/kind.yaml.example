@@ -1,0 +1,23 @@
+components:
+  terraform:
+    tailnet:
+      env:
+        # Built by `make tailscale-provider-pr825` (tailscale_tailnet is unreleased).
+        TF_CLI_CONFIG_FILE: "../../../work/tailscale-pr825.tfrc"
+      vars:
+        # OAuth client with the tailnets scope in the creating tailnet.
+        oauth_client_id: "myoauthclientid"
+        oauth_client_secret: "myoauthclientsecret"
+    kind:
+      vars:
+        node_image: "kindest/node:v1.37.0"
+      dependencies:
+        components:
+          - name: tailnet
+    kind-k8s-setup:
+      vars:
+        flux_cluster_path: "clusters/cluster0-kind/flux"
+        sops_gpg_private_key_file: "/secure/path/flux-sops-private-key.asc"
+      dependencies:
+        components:
+          - name: kind

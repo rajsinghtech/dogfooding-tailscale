@@ -177,6 +177,21 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
+      # tailscale_tailnet is unreleased; validate the tailnet root against the PR build.
+      - name: Setup Go
+        if: matrix.component == 'tailnet'
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Build tailscale provider from PR 825
+        if: matrix.component == 'tailnet'
+        working-directory: .
+        run: |
+          make tailscale-provider-pr825
+          echo "TF_CLI_CONFIG_FILE=$GITHUB_WORKSPACE/terraform/work/tailscale-pr825.tfrc" >> "$GITHUB_ENV"
+
       # -lockfile=readonly fails when .terraform.lock.hcl is missing or stale.
       - name: Terraform Init
         run: terraform init -backend=false -input=false -lockfile=readonly

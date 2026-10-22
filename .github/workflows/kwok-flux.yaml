@@ -139,5 +139,12 @@ jobs:
           chmod +x "$HOME/.local/bin/atmos"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      # validate.sh builds the tailscale provider from PR 825 for the tailnet root.
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+
       - name: Validate Atmos configuration and workflows
         run: test/atmos/validate.sh

@@ -1,0 +1,55 @@
+name: Workflows for Kind
+description: Atmos workflows for a local Kind cluster on a throwaway API-only tailnet
+# Example stack: kb-kind-local-test (from stacks/deploy/*.yaml.example). Add a step per stack you deploy.
+
+workflows:
+  validate-all:
+    description: Run 'terraform validate' on tailnet, kind and kind-k8s-setup
+    steps:
+      - command: terraform validate tailnet -s kb-kind-local-test
+      - command: terraform validate kind -s kb-kind-local-test
+      - command: terraform validate kind-k8s-setup -s kb-kind-local-test
+
+  plan-phase0:
+    description: Run 'terraform plan' on tailnet
+    steps:
+      - command: terraform plan tailnet -s kb-kind-local-test
+
+  apply-phase0:
+    description: Run 'terraform apply -auto-approve' on tailnet
+    steps:
+      - command: terraform apply tailnet -auto-approve -s kb-kind-local-test
+
+  plan-phase1:
+    description: Run 'terraform plan' on kind
+    steps:
+      - command: terraform plan kind -s kb-kind-local-test
+
+  apply-phase1:
+    description: Run 'terraform apply -auto-approve' on kind
+    steps:
+      - command: terraform apply kind -auto-approve -s kb-kind-local-test
+
+  plan-phase2:
+    description: Run 'terraform plan' on kind-k8s-setup
+    steps:
+      - command: terraform plan kind-k8s-setup -s kb-kind-local-test
+
+  apply-phase2:
+    description: Run 'terraform apply -auto-approve' on kind-k8s-setup
+    steps:
+      - command: terraform apply kind-k8s-setup -auto-approve -s kb-kind-local-test
+
+  apply-all:
+    description: Apply tailnet, kind and kind-k8s-setup in order
+    steps:
+      - command: terraform apply tailnet -auto-approve -s kb-kind-local-test
+      - command: terraform apply kind -auto-approve -s kb-kind-local-test
+      - command: terraform apply kind-k8s-setup -auto-approve -s kb-kind-local-test
+
+  destroy-all:
+    description: Destroy kind-k8s-setup, kind and the throwaway tailnet in reverse order
+    steps:
+      - command: terraform destroy kind-k8s-setup -auto-approve -s kb-kind-local-test
+      - command: terraform destroy kind -auto-approve -s kb-kind-local-test
+      - command: terraform destroy tailnet -auto-approve -s kb-kind-local-test

@@ -45,6 +45,22 @@ We're using [Atmos](https://atmos.tools/faq/) to spin up multiple Terraform stac
 - The other workflows are `azure-aks-workflow`, `gke-dpv2-workflow` (GKE Dataplane V2 + `google-k8s-setup`)
   and `gce-gke-workflow` (GKE Autopilot, single phase)
 
+## Kind on a throwaway tailnet
+
+The `kind-workflow` stack runs the `cluster0-kind` Flux tree on a new API-only tailnet that the stack creates and destroys.
+
+1. Create an OAuth client with the `tailnets` scope in an existing tailnet. It goes in `oauth_client_id`/`oauth_client_secret` for the `tailnet` component.
+2. `make tailscale-provider-pr825` from the repository root. `tailscale_tailnet` is only in
+   [terraform-provider-tailscale#825](https://github.com/tailscale/terraform-provider-tailscale/pull/825), so this builds it into
+   `terraform/work/`. The `tailnet` component points `TF_CLI_CONFIG_FILE` at it. Needs Go.
+3. Copy `stacks/catalog/kind.yaml.example`, `stacks/deploy/tenant-kind-environment-stage.yaml.example` and
+   `stacks/workflows/kind-workflow.yaml.example` without the `.example` suffix, then fill in the OAuth client and the SOPS key path.
+4. `atmos workflow apply-all -f kind-workflow`, which runs `tailnet` → `kind` → `kind-k8s-setup`.
+5. `atmos workflow destroy-all -f kind-workflow` removes the cluster and deletes the tailnet.
+
+`kind` sets up what the operator needs in the new tailnet before Flux installs it: HTTPS certificates, `tag:k8s-operator`/`tag:k8s`
+tag owners, a Tailscale Services auto-approver for `tag:k8s`, and the operator OAuth client (`auth_keys`, `devices:core`, `services`).
+
 ## TODO
 
 - Add CSI provisioner for Azure
